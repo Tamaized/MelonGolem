@@ -29,7 +29,7 @@ public class ClientProxy implements IModProxy {
 
 	@Override
 	public void openMelonSignGui(EntityMelonGolem golem) {
-		if(golem.getHead().getItem() == Items.SIGN && golem.getDistanceToEntity(Minecraft.getMinecraft().player) <= 6)
+		if(golem.getHead().getItem() == Items.SIGN && golem.getDistance(Minecraft.getMinecraft().player) <= 6)
 			Minecraft.getMinecraft().displayGuiScreen(new GuiEditGolemSign(golem));
 	}
 }

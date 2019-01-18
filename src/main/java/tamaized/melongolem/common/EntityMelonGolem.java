@@ -140,7 +140,7 @@ public class EntityMelonGolem extends EntityGolem implements IRangedAttackMob, I
 		double d2 = d0 - slice.posY;
 		double d3 = target.posZ - this.posZ;
 		float f = MathHelper.sqrt(d1 * d1 + d3 * d3) * 0.2F;
-		slice.setThrowableHeading(d1, d2 + (double) f, d3, 1.6F, 12.0F);
+		slice.shoot(d1, d2 + (double) f, d3, 1.6F, 12.0F);
 		this.playSound(SoundEvents.ENTITY_SNOWMAN_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
 		slice.setPositionAndUpdate(slice.posX, slice.posY, slice.posZ);
 		this.world.spawnEntity(slice);
@@ -235,6 +235,7 @@ public class EntityMelonGolem extends EntityGolem implements IRangedAttackMob, I
 		dataManager.set(HEAD, newstack);
 	}
 
+	@Nonnull
 	@Override
 	public List<ItemStack> onSheared(@Nonnull ItemStack item, IBlockAccess world, BlockPos pos, int fortune) {
 		List<ItemStack> list = Lists.newArrayList(MelonConfig.shear ? getHead() : ItemStack.EMPTY);
@@ -402,19 +403,19 @@ public class EntityMelonGolem extends EntityGolem implements IRangedAttackMob, I
 			if (foundMelon) {
 				// Validate
 				if (!parent.world.isBlockLoaded(pos)) {
-					parent.getNavigator().clearPathEntity();
+					parent.getNavigator().clearPath();
 					foundMelon = false;
 					return;
 				}
 				TileEntity te = parent.world.getTileEntity(pos);
 				if (te == null || !te.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.UP)) {
-					parent.getNavigator().clearPathEntity();
+					parent.getNavigator().clearPath();
 					foundMelon = false;
 					return;
 				}
 				IItemHandler cap = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.UP);
 				if (cap == null) {
-					parent.getNavigator().clearPathEntity();
+					parent.getNavigator().clearPath();
 					foundMelon = false;
 					return;
 				}
@@ -427,7 +428,7 @@ public class EntityMelonGolem extends EntityGolem implements IRangedAttackMob, I
 					}
 				}
 				if (!valid) {
-					parent.getNavigator().clearPathEntity();
+					parent.getNavigator().clearPath();
 					foundMelon = false;
 					return;
 				}

@@ -17,7 +17,7 @@ public class ServerPacketHandlerMelonSign implements IMessageHandler<ServerPacke
 
 	private static void processPacket(Packet message, EntityPlayerMP player, World world) {
 		Entity entity = world.getEntityByID(message.id);
-		if (entity instanceof EntityMelonGolem && entity.getDistanceToEntity(player) <= 6)
+		if (entity instanceof EntityMelonGolem && entity.getDistance(player) <= 6)
 			for (int i = 0; i < message.lines.length; ++i) {
 				String text = TextFormatting.getTextWithoutFormattingCodes(message.lines[i]);
 				((EntityMelonGolem) entity).setSignText(i, new TextComponentString(text == null ? "" : text));

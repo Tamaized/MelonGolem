@@ -21,7 +21,7 @@ public class ClientPacketHandlerMelonTTS implements IMessageHandler<ClientPacket
 	@SideOnly(Side.CLIENT)
 	private static void processPacket(Packet message, EntityPlayer player, World world) {
 		Entity entity = world.getEntityByID(message.id);
-		if (entity instanceof EntityMelonGolem && entity.getDistanceSqToEntity(player) <= 225) {
+		if (entity instanceof EntityMelonGolem && entity.getDistanceSq(player) <= 225) {
 			if (narrator == null)
 				narrator = Narrator.getNarrator();
 			if (!narrator.active())

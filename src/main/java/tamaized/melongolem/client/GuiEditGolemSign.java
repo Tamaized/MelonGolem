@@ -42,7 +42,7 @@ public class GuiEditGolemSign extends GuiScreen {
 	@Override
 	public void updateScreen() {
 		++this.updateCounter;
-		if (golem.getDistanceToEntity(Minecraft.getMinecraft().player) > 6) {
+		if (golem.getDistance(Minecraft.getMinecraft().player) > 6) {
 			canSend = false;
 			Minecraft.getMinecraft().player.closeScreen();
 		}
@@ -91,7 +91,7 @@ public class GuiEditGolemSign extends GuiScreen {
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		GlStateManager.pushMatrix();
 		GlStateManager.translate((float) (this.width / 2), 0.0F, 50.0F);
-		float f = 93.75F;
+		//		float f = 93.75F;
 		GlStateManager.scale(-93.75F, -93.75F, -93.75F);
 		GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
 		/*Block block = golem.getBlockType();

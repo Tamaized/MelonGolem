@@ -2,7 +2,6 @@ package tamaized.melongolem;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -15,11 +14,11 @@ import tamaized.melongolem.common.EntityMelonGolem;
 public class ModEventListener {
 
 	@SubscribeEvent
-	public static void onBlockRightClick(PlayerInteractEvent.RightClickBlock e) {
+	public static void onRightClick(PlayerInteractEvent.RightClickBlock e) {
 		EntityPlayer player = e.getEntityPlayer();
 		World world = e.getWorld();
 		BlockPos pos = e.getPos();
-		if (!world.isRemote && world.getBlockState(pos).getBlock() == Blocks.MELON_BLOCK && player.getHeldItem(EnumHand.MAIN_HAND).getItem() == Items.STICK && player.getHeldItem(EnumHand.OFF_HAND).getItem() == Items.STICK) {
+		if (!world.isRemote && world.getBlockState(pos).getBlock() == Blocks.MELON_BLOCK && MelonConfig.compareStabbyItem(player.getHeldItem(EnumHand.MAIN_HAND)) && MelonConfig.compareStabbyItem(player.getHeldItem(EnumHand.OFF_HAND))) {
 			if (world.getBlockState(pos.down()).getBlock() == Blocks.MELON_BLOCK && world.getBlockState(pos.up()).getBlock() == Blocks.MELON_BLOCK) {
 				if (!player.isCreative()) {
 					player.getHeldItem(EnumHand.MAIN_HAND).shrink(1);

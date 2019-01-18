@@ -1,10 +1,21 @@
 package tamaized.melongolem;
 
+import com.google.common.collect.ImmutableSet;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemAir;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
+
+import java.util.Objects;
+import java.util.Set;
 
 @Mod.EventBusSubscriber
 @Config(modid = MelonMod.modid)
@@ -34,11 +45,96 @@ public class MelonConfig {
 	@Config.Name("TTS Signs")
 	public static boolean tts = true;
 
+	@Config.Name("Stabby Life Item")
+	@Config.Comment("domain:name:meta\ndomain defaults to `minecraft`\nmeta is optional\ndomain is required if meta is specified")
+	public static String stabby = Objects.requireNonNull(Items.STICK.getRegistryName()).getPath();
+
+	@Config.Ignore
+	public static ItemStackWrapper stabItem = new ItemStackWrapper(Items.STICK);
+
+	public static void setupStabby() {
+		String[] split = stabby.split(":");
+		String domain = "minecraft";
+		String regname = split[0];
+		int meta = 0;
+		boolean hasmeta = false;
+		if (split.length > 1) {
+			domain = split[0];
+			regname = split[1];
+			if (split.length > 2)
+				try {
+					meta = Integer.parseInt(split[2]);
+					hasmeta = true;
+				} catch (NumberFormatException e) {
+					hasmeta = false;
+				}
+		}
+		Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(domain, regname));
+		if (item == null || item instanceof ItemAir)
+			return;
+		stabItem = hasmeta ? new ItemStackWrapper(item, meta) : new ItemStackWrapper(item);
+	}
+
+	public static boolean compareStabbyItem(ItemStack stack) {
+		return ItemStackWrapper.compare(ImmutableSet.of(stabItem), stack);
+	}
+
 	@SubscribeEvent
 	public static void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
 		if (event.getModID().equals(MelonMod.modid)) {
 			ConfigManager.sync(MelonMod.modid, Config.Type.INSTANCE);
+			setupStabby();
 		}
+	}
+
+	static class ItemStackWrapper {
+
+		boolean ignoreMeta;
+		boolean ignoreNBT;
+		ItemStack stack;
+
+		public ItemStackWrapper(Item item) {
+			this(item, 0);
+			ignoreMeta = true;
+		}
+
+		public ItemStackWrapper(Item item, int meta) {
+			this(new ItemStack(item, 1, meta), false, true);
+		}
+
+		public ItemStackWrapper(NBTTagCompound tag, boolean ignoreMeta, boolean ignoreNBT) {
+			this(new ItemStack(tag), ignoreMeta, ignoreNBT);
+		}
+
+		public ItemStackWrapper(ItemStack stack, boolean ignoreMeta, boolean ignoreNBT) {
+			this.stack = stack;
+			this.ignoreMeta = ignoreMeta;
+			this.ignoreNBT = ignoreNBT;
+		}
+
+		public static boolean compare(Set<ItemStackWrapper> set, ItemStack stack) {
+			boolean flag;
+			for (ItemStackWrapper wrapper : set) {
+				if (wrapper.ignoreMeta && wrapper.ignoreNBT)
+					flag = wrapper.stack.getItem() == stack.getItem();
+				else if (wrapper.ignoreNBT)
+					flag = wrapper.stack.isItemEqual(stack);
+				else if (wrapper.ignoreMeta)
+					flag = wrapper.stack.getItem() == stack.getItem() && ItemStack.areItemStackTagsEqual(wrapper.stack, stack);
+				else
+					flag = ItemStack.areItemStacksEqual(wrapper.stack, stack);
+				if (flag)
+					return true;
+			}
+			return false;
+		}
+
+		public ItemStackWrapper attachNBT(NBTTagCompound tag) {
+			ignoreNBT = false;
+			stack.setTagCompound(tag);
+			return this;
+		}
+
 	}
 
 }

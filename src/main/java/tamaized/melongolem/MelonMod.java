@@ -27,9 +27,9 @@ public class MelonMod {
 	public static MelonMod instance = new MelonMod();
 	@SidedProxy(clientSide = "tamaized.melongolem.ClientProxy", serverSide = "tamaized.melongolem.ServerProxy")
 	public static IModProxy proxy;
+	public static SimpleNetworkWrapper network;
 	private static int entityID;
 	public Logger logger;
-	public static SimpleNetworkWrapper network;
 
 	public static String getVersion() {
 		return version;
@@ -38,13 +38,13 @@ public class MelonMod {
 	@SuppressWarnings("SameParameterValue")
 	private static void registerEntity(String name, Class<? extends Entity> entityClass, int trackingRange, int updateFrequency, boolean sendsVelocityUpdates, int eggPrimary, int eggSecondary) {
 		ResourceLocation entityName = new ResourceLocation(modid, name);
-		EntityRegistry.registerModEntity(entityName, entityClass, entityName.getResourceDomain() + "." + entityName.getResourcePath(), entityID++, instance, trackingRange, updateFrequency, sendsVelocityUpdates, eggPrimary, eggSecondary);
+		EntityRegistry.registerModEntity(entityName, entityClass, entityName.getNamespace() + "." + entityName.getPath(), entityID++, instance, trackingRange, updateFrequency, sendsVelocityUpdates, eggPrimary, eggSecondary);
 	}
 
 	@SuppressWarnings("SameParameterValue")
 	private static void registerEntity(String name, Class<? extends Entity> entityClass, int trackingRange, int updateFrequency, boolean sendsVelocityUpdates) {
 		ResourceLocation entityName = new ResourceLocation(modid, name);
-		EntityRegistry.registerModEntity(entityName, entityClass, entityName.getResourceDomain() + "." + entityName.getResourcePath(), entityID++, instance, trackingRange, updateFrequency, sendsVelocityUpdates);
+		EntityRegistry.registerModEntity(entityName, entityClass, entityName.getNamespace() + "." + entityName.getPath(), entityID++, instance, trackingRange, updateFrequency, sendsVelocityUpdates);
 	}
 
 	@EventHandler
@@ -62,6 +62,8 @@ public class MelonMod {
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
 		proxy.init();
+
+		MelonConfig.setupStabby();
 	}
 
 	@EventHandler
