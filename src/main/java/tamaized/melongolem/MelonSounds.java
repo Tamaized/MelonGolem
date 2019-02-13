@@ -6,7 +6,7 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-@Mod.EventBusSubscriber(modid = MelonMod.modid)
+@Mod.EventBusSubscriber(modid = MelonMod.MODID)
 public class MelonSounds {
 
 	public static SoundEvent daddy = null;
@@ -17,7 +17,7 @@ public class MelonSounds {
 	}
 
 	private static SoundEvent registerSound(RegistryEvent.Register<SoundEvent> event, @SuppressWarnings("SameParameterValue") String soundName) {
-		SoundEvent sound = new SoundEvent(new ResourceLocation(MelonMod.modid, soundName)).setRegistryName(soundName);
+		SoundEvent sound = new SoundEvent(new ResourceLocation(MelonMod.MODID, soundName)).setRegistryName(soundName);
 		event.getRegistry().register(sound);
 		return sound;
 	}

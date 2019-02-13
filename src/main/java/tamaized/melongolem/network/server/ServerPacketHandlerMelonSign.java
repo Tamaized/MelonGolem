@@ -11,6 +11,7 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import tamaized.melongolem.IModProxy;
 import tamaized.melongolem.common.EntityMelonGolem;
 
 public class ServerPacketHandlerMelonSign implements IMessageHandler<ServerPacketHandlerMelonSign.Packet, IMessage> {
@@ -44,7 +45,7 @@ public class ServerPacketHandlerMelonSign implements IMessageHandler<ServerPacke
 
 		}
 
-		public Packet(EntityMelonGolem golem) {
+		public Packet(IModProxy.ISignHolder golem) {
 			id = golem.getEntityId();
 			lines = new String[]{golem.getSignText(0).getUnformattedText(), golem.getSignText(1).getUnformattedText(), golem.getSignText(2).getUnformattedText(), golem.getSignText(3).getUnformattedText()};
 		}

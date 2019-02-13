@@ -54,6 +54,7 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import tamaized.melongolem.IModProxy;
 import tamaized.melongolem.MelonConfig;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.MelonSounds;
@@ -63,7 +64,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class EntityMelonGolem extends EntityGolem implements IRangedAttackMob, IShearable, IEntityAdditionalSpawnData {
+public class EntityMelonGolem extends EntityGolem implements IRangedAttackMob, IShearable, IEntityAdditionalSpawnData, IModProxy.ISignHolder {
 
 	public static final TileEntitySign te = new TileEntitySign() {
 		@Nonnull
@@ -78,7 +79,7 @@ public class EntityMelonGolem extends EntityGolem implements IRangedAttackMob, I
 		}
 	};
 	private static final DataParameter<ItemStack> HEAD = EntityDataManager.createKey(EntityMelonGolem.class, DataSerializers.ITEM_STACK);
-	private static final ResourceLocation LOOT = LootTableList.register(new ResourceLocation(MelonMod.modid, "melongolem"));
+	private static final ResourceLocation LOOT = LootTableList.register(new ResourceLocation(MelonMod.MODID, "melongolem"));
 	private static final List<DataParameter<ITextComponent>> SIGN_TEXT = Lists.newArrayList(
 
 			EntityDataManager.createKey(EntityMelonGolem.class, DataSerializers.TEXT_COMPONENT),
@@ -106,10 +107,12 @@ public class EntityMelonGolem extends EntityGolem implements IRangedAttackMob, I
 			dataManager.register(sign, new TextComponentString(""));
 	}
 
+	@Override
 	public void setSignText(int index, ITextComponent text) {
 		dataManager.set(SIGN_TEXT.get(index), text);
 	}
 
+	@Override
 	public ITextComponent getSignText(int index) {
 		return dataManager.get(SIGN_TEXT.get(index));
 	}
@@ -212,7 +215,7 @@ public class EntityMelonGolem extends EntityGolem implements IRangedAttackMob, I
 				return true;
 			}
 		} else if (!getHead().isEmpty() && getHead().getItem() == Items.SIGN) {
-			MelonMod.proxy.openMelonSignGui(this);
+			MelonMod.proxy.openSignHolderGui(this);
 			return true;
 		}
 		return false;
@@ -223,6 +226,7 @@ public class EntityMelonGolem extends EntityGolem implements IRangedAttackMob, I
 		return 1.7F;
 	}
 
+	@Override
 	public ItemStack getHead() {
 		return dataManager.get(HEAD);
 	}

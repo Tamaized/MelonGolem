@@ -18,7 +18,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @Mod.EventBusSubscriber
-@Config(modid = MelonMod.modid)
+@Config(modid = MelonMod.MODID)
 public class MelonConfig {
 
 	@Config.Name("Base Golem Health")
@@ -81,8 +81,8 @@ public class MelonConfig {
 
 	@SubscribeEvent
 	public static void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
-		if (event.getModID().equals(MelonMod.modid)) {
-			ConfigManager.sync(MelonMod.modid, Config.Type.INSTANCE);
+		if (event.getModID().equals(MelonMod.MODID)) {
+			ConfigManager.sync(MelonMod.MODID, Config.Type.INSTANCE);
 			setupStabby();
 		}
 	}

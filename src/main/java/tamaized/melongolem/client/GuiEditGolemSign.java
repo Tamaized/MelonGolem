@@ -9,19 +9,20 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.text.TextComponentString;
 import org.lwjgl.input.Keyboard;
+import tamaized.melongolem.IModProxy;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.EntityMelonGolem;
 import tamaized.melongolem.network.server.ServerPacketHandlerMelonSign;
 
 public class GuiEditGolemSign extends GuiScreen {
 
-	private final EntityMelonGolem golem;
+	private final IModProxy.ISignHolder golem;
 	private int updateCounter;
 	private int editLine;
 	private GuiButton doneBtn;
 	private boolean canSend = true;
 
-	public GuiEditGolemSign(EntityMelonGolem golem) {
+	public GuiEditGolemSign(IModProxy.ISignHolder golem) {
 		this.golem = golem;
 	}
 

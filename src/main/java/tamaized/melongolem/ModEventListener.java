@@ -10,7 +10,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import tamaized.melongolem.common.EntityMelonGolem;
 
-@Mod.EventBusSubscriber(modid = MelonMod.modid)
+@Mod.EventBusSubscriber(modid = MelonMod.MODID)
 public class ModEventListener {
 
 	@SubscribeEvent

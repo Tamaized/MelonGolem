@@ -1,0 +1,18 @@
+{
+  "result": {
+	"item": "melongolem:melonstick"
+  },
+  "pattern": [
+	" M",
+	"S "
+  ],
+  "type": "minecraft:crafting_shaped",
+  "key": {
+	"M": {
+	  "item": "minecraft:speckled_melon"
+	},
+	"S": {
+	  "item": "minecraft:stick"
+	}
+  }
+}

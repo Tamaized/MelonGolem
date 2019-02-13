@@ -6,14 +6,16 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntitySign;
+import tamaized.melongolem.IModProxy;
 import tamaized.melongolem.common.EntityMelonGolem;
 
 import javax.annotation.Nonnull;
 
-public class LayerMelonHead implements LayerRenderer<EntityMelonGolem> {
+public class LayerMelonHead<T extends EntityLiving & IModProxy.ISignHolder> implements LayerRenderer<T> {
 	private final RenderMelonGolem renderer;
 
 	public LayerMelonHead(RenderMelonGolem render) {
@@ -21,14 +23,16 @@ public class LayerMelonHead implements LayerRenderer<EntityMelonGolem> {
 	}
 
 	@Override
-	public void doRenderLayer(@Nonnull EntityMelonGolem entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+	@SuppressWarnings("unchecked")
+	public void doRenderLayer(@Nonnull T entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
 		ItemStack stack = entity.getHead();
 		if (!entity.isInvisible() || !stack.isEmpty()) {
 			GlStateManager.pushMatrix();
-			((ModelSnowMan) renderer.getMainModel()).head.postRender(0.0625F);
-			GlStateManager.translate(0.0F, -0.34375F, 0.0F);
+			((ModelSnowMan) renderer.getMainModel()).head.postRender(scale);
+			GlStateManager.translate(0.0F, /*-0.34375F*/-scale / (2F / 11F), 0.0F);
 			GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
-			GlStateManager.scale(0.625F, -0.625F, -0.625F);
+			final float s = scale * 10F;
+			GlStateManager.scale(s, -s, -s);
 			if (stack.getItem() == Items.SIGN) {
 				for (int index = 0; index < 4; index++)
 					EntityMelonGolem.te.signText[index] = entity.getSignText(index);

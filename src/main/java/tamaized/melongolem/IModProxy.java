@@ -1,6 +1,8 @@
 package tamaized.melongolem;
 
-import tamaized.melongolem.common.EntityMelonGolem;
+import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.ITextComponent;
 
 public interface IModProxy {
 
@@ -10,6 +12,19 @@ public interface IModProxy {
 
 	void postInit();
 
-	void openMelonSignGui(EntityMelonGolem golem);
+	void openSignHolderGui(ISignHolder golem);
+
+	interface ISignHolder {
+
+		ItemStack getHead();
+
+		float getDistance(Entity entityIn);
+
+		ITextComponent getSignText(int index);
+
+		void setSignText(int index, ITextComponent text);
+
+		int getEntityId();
+	}
 
 }
