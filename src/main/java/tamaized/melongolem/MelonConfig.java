@@ -91,14 +91,17 @@ public class MelonConfig {
 		if (event.getModID().equals(MelonMod.MODID)) {
 			ConfigManager.sync(MelonMod.MODID, Config.Type.INSTANCE);
 			setupStabby();
-			try {
-				donatorSettings.colorint = Color.decode(donatorSettings.color).getRGB();
-			} catch (Throwable e) {
-				donatorSettings.color = "0xFFFFFF";
-				donatorSettings.colorint = 0xFFFFFF;
-			}
-			dirty = true;
 		}
+	}
+
+	public static void setupColor() {
+		try {
+			donatorSettings.colorint = Color.decode(donatorSettings.color).getRGB();
+		} catch (Throwable e) {
+			donatorSettings.color = "0xFFFFFF";
+			donatorSettings.colorint = 0xFFFFFF;
+		}
+		dirty = true;
 	}
 
 	public static class DonatorSettings {

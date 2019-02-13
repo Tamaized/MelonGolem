@@ -124,6 +124,7 @@ public class MelonMod {
 		proxy.init();
 
 		MelonConfig.setupStabby();
+		MelonConfig.setupColor();
 	}
 
 	@EventHandler
