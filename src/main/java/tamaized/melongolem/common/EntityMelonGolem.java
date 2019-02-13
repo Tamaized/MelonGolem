@@ -196,7 +196,8 @@ public class EntityMelonGolem extends EntityGolem implements IRangedAttackMob, I
 	@Override
 	public void playLivingSound() {
 		if (MelonConfig.tts && getHead().getItem() == Items.SIGN) {
-			MelonMod.network.sendToAllAround(new ClientPacketHandlerMelonTTS.Packet(this), new NetworkRegistry.TargetPoint(world.provider.getDimension(), posX, posY, posZ, 15));
+			if (world != null && !world.isRemote)
+				MelonMod.network.sendToAllAround(new ClientPacketHandlerMelonTTS.Packet(this), new NetworkRegistry.TargetPoint(world.provider.getDimension(), posX, posY, posZ, 15));
 		} else
 			super.playLivingSound();
 	}
