@@ -14,12 +14,19 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
+import java.awt.*;
 import java.util.Objects;
 import java.util.Set;
 
 @Mod.EventBusSubscriber
 @Config(modid = MelonMod.MODID)
 public class MelonConfig {
+
+	@Config.Ignore
+	public static boolean dirty = true;
+
+	@Config.Name("Donator Settings")
+	public static DonatorSettings donatorSettings = new DonatorSettings();
 
 	@Config.Name("Base Golem Health")
 	public static double health = 8.0D;
@@ -84,7 +91,26 @@ public class MelonConfig {
 		if (event.getModID().equals(MelonMod.MODID)) {
 			ConfigManager.sync(MelonMod.MODID, Config.Type.INSTANCE);
 			setupStabby();
+			try {
+				donatorSettings.colorint = Color.decode(donatorSettings.color).getRGB();
+			} catch (Throwable e) {
+				donatorSettings.color = "0xFFFFFF";
+				donatorSettings.colorint = 0xFFFFFF;
+			}
+			dirty = true;
 		}
+	}
+
+	public static class DonatorSettings {
+
+		@Config.Name("Enabled")
+		public boolean enable = true;
+
+		@Config.Name("Color (0xRRGGBB)")
+		public String color = "0xFFFFFF";
+
+		@Config.Ignore
+		public int colorint = 0xFFFFFF;
 	}
 
 	static class ItemStackWrapper {

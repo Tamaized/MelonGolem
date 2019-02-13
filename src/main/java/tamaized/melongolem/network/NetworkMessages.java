@@ -6,6 +6,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 import tamaized.melongolem.network.client.ClientPacketHandlerMelonTTS;
 import tamaized.melongolem.network.client.ClientPacketHandlerParticle;
+import tamaized.melongolem.network.server.ServerPacketHandlerDonatorSettings;
 import tamaized.melongolem.network.server.ServerPacketHandlerMelonSign;
 
 public class NetworkMessages {
@@ -14,6 +15,7 @@ public class NetworkMessages {
 
 	public static void register(SimpleNetworkWrapper network) {
 		registerMessage(network, ServerPacketHandlerMelonSign.class, ServerPacketHandlerMelonSign.Packet.class, Side.SERVER);
+		registerMessage(network, ServerPacketHandlerDonatorSettings.class, ServerPacketHandlerDonatorSettings.Packet.class, Side.SERVER);
 
 		registerMessage(network, ClientPacketHandlerMelonTTS.class, ClientPacketHandlerMelonTTS.Packet.class, Side.CLIENT);
 		registerMessage(network, ClientPacketHandlerParticle.class, ClientPacketHandlerParticle.Packet.class, Side.CLIENT);

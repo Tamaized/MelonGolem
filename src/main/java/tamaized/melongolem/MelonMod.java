@@ -30,6 +30,7 @@ import tamaized.melongolem.common.ItemMelonStick;
 import tamaized.melongolem.common.capability.ITinyGolemCapability;
 import tamaized.melongolem.common.capability.TinyGolemCapabilityHandler;
 import tamaized.melongolem.common.capability.TinyGolemCapabilityStorage;
+import tamaized.melongolem.network.DonatorHandler;
 import tamaized.melongolem.network.NetworkMessages;
 
 @Mod.EventBusSubscriber
@@ -104,6 +105,8 @@ public class MelonMod {
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		logger = LogManager.getLogger(MODID);
+
+		DonatorHandler.start();
 
 		CapabilityManager.INSTANCE.register(ITinyGolemCapability.class, new TinyGolemCapabilityStorage(), TinyGolemCapabilityHandler::new);
 

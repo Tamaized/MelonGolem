@@ -44,6 +44,7 @@ import tamaized.melongolem.MelonConfig;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.capability.CapabilityList;
 import tamaized.melongolem.common.capability.ITinyGolemCapability;
+import tamaized.melongolem.network.DonatorHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -64,6 +65,8 @@ public class EntityTinyMelonGolem extends EntityTameable implements IShearable, 
 		}
 	};
 	private static final DataParameter<ItemStack> HEAD = EntityDataManager.createKey(EntityTinyMelonGolem.class, DataSerializers.ITEM_STACK);
+	private static final DataParameter<Boolean> ENABLED = EntityDataManager.createKey(EntityTinyMelonGolem.class, DataSerializers.BOOLEAN);
+	private static final DataParameter<Integer> COLOR = EntityDataManager.createKey(EntityTinyMelonGolem.class, DataSerializers.VARINT);
 	private static final List<DataParameter<ITextComponent>> SIGN_TEXT = Lists.newArrayList(
 
 			EntityDataManager.createKey(EntityTinyMelonGolem.class, DataSerializers.TEXT_COMPONENT),
@@ -91,6 +94,8 @@ public class EntityTinyMelonGolem extends EntityTameable implements IShearable, 
 	protected void entityInit() {
 		super.entityInit();
 		dataManager.register(HEAD, ItemStack.EMPTY);
+		dataManager.register(ENABLED, false);
+		dataManager.register(COLOR, 0xFFFFFF);
 		for (DataParameter<ITextComponent> sign : SIGN_TEXT)
 			dataManager.register(sign, new TextComponentString(""));
 	}
@@ -100,6 +105,13 @@ public class EntityTinyMelonGolem extends EntityTameable implements IShearable, 
 		super.onLivingUpdate();
 		if (world.isRemote || !isEntityAlive())
 			return;
+		if (getOwner() != null && getOwner().isEntityAlive() && DonatorHandler.donators.contains(getOwnerId())) {
+			DonatorHandler.DonatorSettings settings = DonatorHandler.settings.get(getOwnerId());
+			if (settings != null) {
+				dataManager.set(ENABLED, settings.enabled);
+				dataManager.set(COLOR, settings.color);
+			}
+		}
 		ITinyGolemCapability cap = CapabilityList.getCap(getOwner(), CapabilityList.TINY_GOLEM, null);
 		if (cap != null && getOwner() instanceof EntityPlayer) {
 			if (cap.getPet() != this) {
@@ -114,6 +126,14 @@ public class EntityTinyMelonGolem extends EntityTameable implements IShearable, 
 					this.attackEntityFrom(DamageSource.OUT_OF_WORLD, Float.MAX_VALUE);
 			}
 		}
+	}
+
+	public boolean isEnabled() {
+		return dataManager.get(ENABLED);
+	}
+
+	public int getColor() {
+		return dataManager.get(COLOR);
 	}
 
 	@Override
@@ -234,6 +254,8 @@ public class EntityTinyMelonGolem extends EntityTameable implements IShearable, 
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
 		Block block = Block.getBlockFromItem(getHead().getItem());
 		compound.setInteger("state", getHead().getItem() == Items.SIGN ? -100 : Block.getStateId(block.getStateFromMeta(getHead().getMetadata())));
+		compound.setBoolean("donator_enabled", isEnabled());
+		compound.setInteger("donator_color", getColor());
 		for (int i = 0; i < 4; ++i) {
 			String s = ITextComponent.Serializer.componentToJson(getSignText(i));
 			compound.setString("Text" + (i + 1), s);
@@ -243,6 +265,10 @@ public class EntityTinyMelonGolem extends EntityTameable implements IShearable, 
 
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
+		if (compound.hasKey("donator_enabled"))
+			dataManager.set(ENABLED, compound.getBoolean("donator_enabled"));
+		if (compound.hasKey("donator_color"))
+			dataManager.set(COLOR, compound.getInteger("donator_color"));
 		int stateid = compound.getInteger("state");
 		if (stateid != -100) {
 			IBlockState state = Block.getStateById(stateid);

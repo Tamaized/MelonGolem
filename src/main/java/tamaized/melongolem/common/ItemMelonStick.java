@@ -29,7 +29,7 @@ import javax.annotation.Nonnull;
 
 public class ItemMelonStick extends Item {
 
-	public ItemMelonStick(){
+	public ItemMelonStick() {
 		setMaxDamage(25);
 	}
 
