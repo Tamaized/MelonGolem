@@ -13,13 +13,13 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle.forge'
 
 repositories {
-	maven {
-		url = "http://dvs1.progwml6.com/files/maven"
-	}
+    maven {
+        url = "http://dvs1.progwml6.com/files/maven"
+    }
 }
 
 version = "1.12-${modVersion}${modVersionValue}"
-group= "tamaized.melongolem"
+group = "tamaized.melongolem"
 archivesBaseName = "MelonMod"
 
 sourceCompatibility = targetCompatibility = '1.8'
@@ -32,27 +32,27 @@ minecraft {
     runDir = "run"
     mappings = "${project.forgeMapping}"
     makeObfSourceJar = false
-	useDepAts = true
-	replaceIn 'MelonMod.java'
-	replace '${version}', "${modVersion}${modVersionValue}"
+    useDepAts = true
+    replaceIn 'MelonMod.java'
+    replace '${version}', "${modVersion}${modVersionValue}"
 }
 
 dependencies {
-	deobfCompile "mezz.jei:${project.jeiVersion}:api"
-	runtime "mezz.jei:${project.jeiVersion}"
+    deobfCompile "mezz.jei:${project.jeiVersion}:api"
+    runtime "mezz.jei:${project.jeiVersion}"
 }
 
 processResources
-{
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraftVersion
+        {
+            inputs.property "version", project.version
+            inputs.property "mcversion", project.minecraftVersion
 
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-        expand 'version':project.modVersion+""+project.modVersionValue, 'mcversion':project.minecraftVersion
-    }
-        
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
-}
+            from(sourceSets.main.resources.srcDirs) {
+                include 'mcmod.info'
+                expand 'version': project.modVersion + "" + project.modVersionValue, 'mcversion': project.minecraftVersion
+            }
+
+            from(sourceSets.main.resources.srcDirs) {
+                exclude 'mcmod.info'
+            }
+        }

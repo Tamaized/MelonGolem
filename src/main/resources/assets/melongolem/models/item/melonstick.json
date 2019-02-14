@@ -1,6 +1,6 @@
 {
-    "parent": "item/handheld",
-    "textures": {
-        "layer0": "melongolem:items/melonstick"
-    }
+  "parent": "item/handheld",
+  "textures": {
+	"layer0": "melongolem:items/melonstick"
+  }
 }

@@ -91,6 +91,7 @@ public class MelonConfig {
 		if (event.getModID().equals(MelonMod.MODID)) {
 			ConfigManager.sync(MelonMod.MODID, Config.Type.INSTANCE);
 			setupStabby();
+			setupColor();
 		}
 	}
 
