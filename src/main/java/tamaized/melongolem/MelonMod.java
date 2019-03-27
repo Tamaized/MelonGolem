@@ -1,28 +1,34 @@
 package tamaized.melongolem;
 
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemSpawnEgg;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.model.ModelLoader;
+import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.Mod.Instance;
-import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import net.minecraftforge.fml.common.registry.EntityRegistry;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.network.NetworkRegistry;
+import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraftforge.registries.ObjectHolder;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tamaized.melongolem.client.RenderMelonGolem;
+import tamaized.melongolem.client.RenderMelonSlice;
 import tamaized.melongolem.common.EntityMelonGolem;
 import tamaized.melongolem.common.EntityMelonSlice;
 import tamaized.melongolem.common.EntityTinyMelonGolem;
@@ -33,103 +39,120 @@ import tamaized.melongolem.common.capability.TinyGolemCapabilityStorage;
 import tamaized.melongolem.network.DonatorHandler;
 import tamaized.melongolem.network.NetworkMessages;
 
-@Mod.EventBusSubscriber
-@Mod(modid = MelonMod.MODID, name = "EntityMelonGolem", version = MelonMod.version, acceptedMinecraftVersions = "[1.12,)")
+import java.lang.reflect.InvocationTargetException;
+import java.util.Objects;
+import java.util.function.Supplier;
+
+@Mod(MelonMod.MODID)
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class MelonMod {
 
-	@GameRegistry.ObjectHolder(MelonMod.MODID + ":melonstick")
+	public static final String MODID = "melongolem";
+
+	public static final IModProxy proxy = DistExecutor.runForDist(() -> ClientProxy::new, () -> ServerProxy::new);
+
+	public static final MelonConfig config = ((Supplier<MelonConfig>) () -> {
+		final Pair<MelonConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(MelonConfig::new);
+		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, specPair.getRight());
+		return specPair.getLeft();
+	}).get();
+
+	public static final SimpleChannel network = NetworkRegistry.ChannelBuilder.
+			named(new ResourceLocation(MODID, MODID)).
+			clientAcceptedVersions(s -> true).
+			serverAcceptedVersions(s -> true).
+			networkProtocolVersion(() -> "1").
+			simpleChannel();
+
+	public static final Logger logger = LogManager.getLogger(MODID);
+
+	@ObjectHolder(MelonMod.MODID + ":melonstick")
 	public static final Item melonStick = Items.AIR;
 
-	public final static String version = "${version}";
-	public static final String MODID = "melongolem";
-	@Instance(MODID)
-	public static MelonMod instance = new MelonMod();
-	@SidedProxy(clientSide = "tamaized.melongolem.ClientProxy", serverSide = "tamaized.melongolem.ServerProxy")
-	public static IModProxy proxy;
-	public static SimpleNetworkWrapper network;
-	private static int entityID;
-	public Logger logger;
+	public static final EntityType entityTypeMelonGolem = assign(EntityMelonGolem.class, 128, 1, true);
 
-	public static String getVersion() {
-		return version;
+	@ObjectHolder(MelonMod.MODID + ":entitymelonslice")
+	public static final EntityType entityTypeMelonSlice = getNull();
+
+	@ObjectHolder(MelonMod.MODID + ":entitytinymelongolem")
+	public static final EntityType entityTypeTinyMelonGolem = getNull();
+
+	public MelonMod() {
+		DonatorHandler.start();
+	}
+
+	@SubscribeEvent
+	public static void registerEntities(RegistryEvent.Register<EntityType<?>> e) {
+		e.getRegistry().registerAll(
+
+				entityTypeMelonGolem,
+
+				assign(EntityMelonSlice.class, 128, 1, true),
+
+				assign(EntityTinyMelonGolem.class, 128, 1, true)
+
+		);
+	}
+
+	@SubscribeEvent
+	public static void registerRenders(FMLClientSetupEvent e) {
+		RenderingRegistry.registerEntityRenderingHandler(EntityMelonGolem.class, RenderMelonGolem.Factory::normal);
+		RenderingRegistry.registerEntityRenderingHandler(EntityMelonSlice.class, RenderMelonSlice::new);
+		RenderingRegistry.registerEntityRenderingHandler(EntityTinyMelonGolem.class, RenderMelonGolem.Factory::tiny);
 	}
 
 	@SubscribeEvent
 	public static void registerItems(RegistryEvent.Register<Item> e) {
-		e.getRegistry().register(assign(new ItemMelonStick(), "melonstick"));
-	}
+		e.getRegistry().registerAll(
 
-	private static void registerEntity(String name, Class<? extends Entity> entityClass, int trackingRange, int updateFrequency, boolean sendsVelocityUpdates, int eggPrimary, int eggSecondary) {
-		ResourceLocation entityName = new ResourceLocation(MODID, name);
-		EntityRegistry.registerModEntity(entityName, entityClass, entityName.getNamespace() + "." + entityName.getPath(), entityID++, instance, trackingRange, updateFrequency, sendsVelocityUpdates, eggPrimary, eggSecondary);
-	}
+				assign(new ItemMelonStick(new Item.Properties().group(ItemGroup.MISC)), "melonstick"),
 
-	private static void registerEntity(String name, Class<? extends Entity> entityClass, int trackingRange, int updateFrequency, boolean sendsVelocityUpdates) {
-		ResourceLocation entityName = new ResourceLocation(MODID, name);
-		EntityRegistry.registerModEntity(entityName, entityClass, entityName.getNamespace() + "." + entityName.getPath(), entityID++, instance, trackingRange, updateFrequency, sendsVelocityUpdates);
-	}
+				assign(new ItemSpawnEgg(entityTypeMelonGolem, 0xFF00, 0x0, new Item.Properties().group(ItemGroup.MISC)), "melongolemspawnegg")
 
-	@SubscribeEvent
-	public static void registerModels(ModelRegistryEvent event) {
-		registerModel(melonStick, 0, "");
+		);
 	}
 
 	private static Item assign(Item item, String name) {
 		return item
 
-				.setRegistryName(MODID, name)
-
-				.setTranslationKey(MODID + "." + name);
+				.setRegistryName(MODID, name);
 	}
 
-	private static void registerModel(Item item, int meta, String path) {
-		if (item.getRegistryName() == null)
-			return;
-		ModelLoader.setCustomModelResourceLocation(
-
-				item,
-
-				meta,
-
-				new ModelResourceLocation(
-
-						new ResourceLocation(item.getRegistryName().getNamespace(), path + item.getRegistryName().getPath()),
-
-						"inventory"
-
-				)
-
-		);
+	private static <T extends Entity> EntityType<T> assign(Class<T> entity, int range, int freq, boolean updates) {
+		final String name = entity.getSimpleName().toLowerCase();
+		EntityType<T> type = EntityType.Builder.create(entity, world -> {
+			try {
+				return entity.getConstructor(World.class).newInstance(world);
+			} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}).
+				tracker(range, freq, updates).
+				build(name);
+		type.setRegistryName(MODID, name);
+		return type;
 	}
 
-	@EventHandler
-	public void preInit(FMLPreInitializationEvent event) {
-		logger = LogManager.getLogger(MODID);
-
-		DonatorHandler.start();
-
+	@SubscribeEvent
+	public static void init(FMLCommonSetupEvent event) {
 		CapabilityManager.INSTANCE.register(ITinyGolemCapability.class, new TinyGolemCapabilityStorage(), TinyGolemCapabilityHandler::new);
 
-		NetworkMessages.register(network = NetworkRegistry.INSTANCE.newSimpleChannel(MODID));
+		NetworkMessages.register(network);
 
-		registerEntity("melon_golem", EntityMelonGolem.class, 128, 1, true, 0xFF00, 0x0);
-		registerEntity("melon_slice", EntityMelonSlice.class, 128, 1, true);
-		registerEntity("tiny_melon_golem", EntityTinyMelonGolem.class, 128, 1, true);
-
-		proxy.preinit();
+		proxy.init();
 	}
 
-	@EventHandler
-	public void init(FMLInitializationEvent event) {
-		proxy.init();
-
+	@SubscribeEvent
+	public static void init(FMLLoadCompleteEvent event) {
 		MelonConfig.setupStabby();
 		MelonConfig.setupColor();
+
+		proxy.finish();
 	}
 
-	@EventHandler
-	public void postInit(FMLPostInitializationEvent event) {
-		proxy.postInit();
+	private static <T> T getNull() {
+		return null;
 	}
 
 }

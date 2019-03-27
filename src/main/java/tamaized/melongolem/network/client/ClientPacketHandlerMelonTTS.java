@@ -1,26 +1,26 @@
 package tamaized.melongolem.network.client;
 
 import com.mojang.text2speech.Narrator;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import tamaized.melongolem.common.EntityMelonGolem;
+import tamaized.melongolem.network.NetworkMessages;
 
-public class ClientPacketHandlerMelonTTS implements IMessageHandler<ClientPacketHandlerMelonTTS.Packet, IMessage> {
+public class ClientPacketHandlerMelonTTS implements NetworkMessages.IMessage<ClientPacketHandlerMelonTTS> {
 
 	private static Narrator narrator;
 
-	@SideOnly(Side.CLIENT)
-	private static void processPacket(Packet message, EntityPlayer player, World world) {
-		Entity entity = world.getEntityByID(message.id);
+	private int id;
+
+	public ClientPacketHandlerMelonTTS(EntityMelonGolem golem) {
+		id = golem.getEntityId();
+	}
+
+	@Override
+	public void handle(EntityPlayer player) {
+		Entity entity = player.world.getEntityByID(id);
 		if (entity instanceof EntityMelonGolem && entity.getDistanceSq(player) <= 225) {
 			if (narrator == null)
 				narrator = Narrator.getNarrator();
@@ -30,39 +30,19 @@ public class ClientPacketHandlerMelonTTS implements IMessageHandler<ClientPacket
 			EntityMelonGolem golem = (EntityMelonGolem) entity;
 			StringBuilder string = new StringBuilder();
 			for (int i = 0; i < 4; ++i)
-				string.append(TextFormatting.getTextWithoutFormattingCodes(golem.getSignText(i).getUnformattedText())).append(" ");
+				string.append(TextFormatting.getTextWithoutFormattingCodes(golem.getSignText(i).getString())).append(" ");
 			narrator.say(string.toString());
 		}
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public IMessage onMessage(Packet message, MessageContext ctx) {
-		Minecraft.getMinecraft().addScheduledTask(() -> processPacket(message, Minecraft.getMinecraft().player, Minecraft.getMinecraft().world));
-		return null;
+	public void toBytes(PacketBuffer packet) {
+		packet.writeInt(id);
 	}
 
-	public static class Packet implements IMessage {
-
-		private int id;
-
-		@SuppressWarnings("unused")
-		public Packet() {
-
-		}
-
-		public Packet(EntityMelonGolem golem) {
-			id = golem.getEntityId();
-		}
-
-		@Override
-		public void fromBytes(ByteBuf buf) {
-			id = buf.readInt();
-		}
-
-		@Override
-		public void toBytes(ByteBuf buf) {
-			buf.writeInt(id);
-		}
+	@Override
+	public ClientPacketHandlerMelonTTS fromBytes(PacketBuffer packet) {
+		id = packet.readInt();
+		return this;
 	}
 }

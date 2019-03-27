@@ -1,69 +1,49 @@
 package tamaized.melongolem.network.server;
 
-import io.netty.buffer.ByteBuf;
+
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import tamaized.melongolem.IModProxy;
 import tamaized.melongolem.common.EntityMelonGolem;
+import tamaized.melongolem.network.NetworkMessages;
 
-public class ServerPacketHandlerMelonSign implements IMessageHandler<ServerPacketHandlerMelonSign.Packet, IMessage> {
+public class ServerPacketHandlerMelonSign implements NetworkMessages.IMessage<ServerPacketHandlerMelonSign> {
 
-	private static void processPacket(Packet message, EntityPlayerMP player, World world) {
-		Entity entity = world.getEntityByID(message.id);
-		if (entity instanceof EntityMelonGolem && entity.getDistance(player) <= 6)
-			for (int i = 0; i < message.lines.length; ++i) {
-				String text = TextFormatting.getTextWithoutFormattingCodes(message.lines[i]);
-				((EntityMelonGolem) entity).setSignText(i, new TextComponentString(text == null ? "" : text));
-			}
+	private int id;
+	private String[] lines;
 
+	public ServerPacketHandlerMelonSign(IModProxy.ISignHolder golem) {
+		id = golem.getEntityId();
+		lines = new String[]{golem.getSignText(0).getString(), golem.getSignText(1).getString(), golem.getSignText(2).getString(), golem.getSignText(3).getString()};
 	}
 
 	@Override
-	public IMessage onMessage(Packet message, MessageContext ctx) {
-		EntityPlayerMP player = ctx.getServerHandler().player;
-		MinecraftServer server = player.getServer();
-		if (server != null)
-			server.addScheduledTask(() -> processPacket(message, player, player.world));
-		return null;
+	public void handle(EntityPlayer player) {
+		Entity entity = player.world.getEntityByID(id);
+		if (entity instanceof EntityMelonGolem && entity.getDistance(player) <= 6)
+			for (int i = 0; i < lines.length; ++i) {
+				String text = TextFormatting.getTextWithoutFormattingCodes(lines[i]);
+				((EntityMelonGolem) entity).setSignText(i, new TextComponentString(text == null ? "" : text));
+			}
 	}
 
-	public static class Packet implements IMessage {
-
-		private int id;
-		private String[] lines = new String[4];
-
-		@SuppressWarnings("unused")
-		public Packet() {
-
-		}
-
-		public Packet(IModProxy.ISignHolder golem) {
-			id = golem.getEntityId();
-			lines = new String[]{golem.getSignText(0).getUnformattedText(), golem.getSignText(1).getUnformattedText(), golem.getSignText(2).getUnformattedText(), golem.getSignText(3).getUnformattedText()};
-		}
-
-		@Override
-		public void fromBytes(ByteBuf buf) {
-			id = buf.readInt();
-			for (int i = 0; i < 4; ++i) {
-				this.lines[i] = ByteBufUtils.readUTF8String(buf);
-			}
-		}
-
-		@Override
-		public void toBytes(ByteBuf buf) {
-			buf.writeInt(id);
-			for (int i = 0; i < 4; ++i) {
-				ByteBufUtils.writeUTF8String(buf, lines[i]);
-			}
-		}
+	@Override
+	public void toBytes(PacketBuffer packet) {
+		packet.writeInt(id);
+		for (int i = 0; i < 4; ++i)
+			packet.writeString(lines[i]);
 	}
+
+	@Override
+	public ServerPacketHandlerMelonSign fromBytes(PacketBuffer packet) {
+		id = packet.readInt();
+		for (int i = 0; i < 4; ++i) {
+			this.lines[i] = packet.readString(Short.MAX_VALUE);
+		}
+		return this;
+	}
+
 }

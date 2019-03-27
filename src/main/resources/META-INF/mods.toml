@@ -1,0 +1,12 @@
+modLoader="javafml"
+loaderVersion="[25,)"
+issueTrackerURL="https://github.com/Tamaized/MelonGolem/issues"
+[[mods]]
+modId="melongolem"
+version="${version}"
+displayName="Melon Golem"
+credits=""
+authors="Tamaized"
+description='''
+Adds a Melon Golem
+'''

@@ -1,5 +1,6 @@
 package tamaized.melongolem.common.capability;
 
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -8,10 +9,11 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import tamaized.melongolem.MelonMod;
 
 import javax.annotation.Nonnull;
@@ -34,14 +36,10 @@ public class CapabilityList {
 
 				ITinyGolemCapability inst = TINY_GOLEM.getDefaultInstance();
 
+				@Nonnull
 				@Override
-				public boolean hasCapability(@Nonnull Capability<?> capability, EnumFacing facing) {
-					return capability == TINY_GOLEM;
-				}
-
-				@Override
-				public <T> T getCapability(@Nonnull Capability<T> capability, EnumFacing facing) {
-					return capability == TINY_GOLEM ? TINY_GOLEM.<T>cast(inst) : null;
+				public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, EnumFacing facing) {
+					return TINY_GOLEM.orEmpty(capability, LazyOptional.of(() -> inst)).cast();
 				}
 
 				@Override
@@ -66,8 +64,13 @@ public class CapabilityList {
 			newcap.copyFrom(oldcap);
 	}
 
+	public static <T> T getCap(@Nullable ICapabilityProvider provider, Capability<T> cap) {
+		return getCap(provider, cap, null);
+	}
+
 	public static <T> T getCap(@Nullable ICapabilityProvider provider, Capability<T> cap, @Nullable EnumFacing face) {
-		return provider != null && provider.hasCapability(cap, face) ? provider.getCapability(cap, face) : null;
+		LazyOptional<T> data = provider != null ? provider.getCapability(cap, face) : null;
+		return data != null && data.isPresent() ? data.orElseThrow(IllegalStateException::new) : null;
 	}
 
 }

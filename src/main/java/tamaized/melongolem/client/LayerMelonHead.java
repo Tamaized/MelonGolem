@@ -1,10 +1,10 @@
 package tamaized.melongolem.client;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.ModelSnowMan;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
+import net.minecraft.client.renderer.entity.model.ModelSnowMan;
+import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.init.Items;
@@ -24,24 +24,24 @@ public class LayerMelonHead<T extends EntityLiving & IModProxy.ISignHolder> impl
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void doRenderLayer(@Nonnull T entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+	public void render(@Nonnull T entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
 		ItemStack stack = entity.getHead();
 		if (!entity.isInvisible() || !stack.isEmpty()) {
 			GlStateManager.pushMatrix();
 			((ModelSnowMan) renderer.getMainModel()).head.postRender(scale);
-			GlStateManager.translate(0.0F, /*-0.34375F*/-scale / (2F / 11F), 0.0F);
-			GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
+			GlStateManager.translatef(0.0F, /*-0.34375F*/-scale / (2F / 11F), 0.0F);
+			GlStateManager.rotatef(180.0F, 0.0F, 1.0F, 0.0F);
 			final float s = scale * 10F;
-			GlStateManager.scale(s, -s, -s);
+			GlStateManager.scalef(s, -s, -s);
 			if (stack.getItem() == Items.SIGN) {
 				for (int index = 0; index < 4; index++)
 					EntityMelonGolem.te.signText[index] = entity.getSignText(index);
 				GlStateManager.pushMatrix();
-				GlStateManager.rotate(180, 0, 1, 0);
-				TileEntityRendererDispatcher.instance.getRenderer(TileEntitySign.class).render(EntityMelonGolem.te, -0.5F, -0.5F, 0.325F, 1, -1, 1);
+				GlStateManager.rotatef(180, 0, 1, 0);
+				TileEntityRendererDispatcher.instance.getRenderer(TileEntitySign.class).render(EntityMelonGolem.te, -0.5F, -0.5F, 0.325F, 1, -1);
 				GlStateManager.popMatrix();
 			} else
-				Minecraft.getMinecraft().getItemRenderer().renderItem(entity, stack, ItemCameraTransforms.TransformType.HEAD);
+				Minecraft.getInstance().getItemRenderer().renderItem(stack, ItemCameraTransforms.TransformType.HEAD);
 			GlStateManager.popMatrix();
 		}
 	}

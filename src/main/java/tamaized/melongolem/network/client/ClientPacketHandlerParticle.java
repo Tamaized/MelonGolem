@@ -1,67 +1,61 @@
 package tamaized.melongolem.network.client;
 
-import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.particles.IParticleData;
+import net.minecraft.particles.ParticleType;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.registry.IRegistry;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import tamaized.melongolem.network.NetworkMessages;
 
-public class ClientPacketHandlerParticle implements IMessageHandler<ClientPacketHandlerParticle.Packet, IMessage> {
+public class ClientPacketHandlerParticle implements NetworkMessages.IMessage<ClientPacketHandlerParticle> {
 
-	@SideOnly(Side.CLIENT)
-	private static void processPacket(Packet message, EntityPlayer player, World world) {
-		spawnParticle(world, EnumParticleTypes.getParticleFromId(message.id), message.vec, message.vel);
+	private ResourceLocation id;
+	private Vec3d vec;
+	private Vec3d vel;
+
+	public ClientPacketHandlerParticle(ResourceLocation particle, Vec3d pos, Vec3d vel) {
+		id = particle;
+		vec = pos;
+		this.vel = vel;
 	}
 
-	public static void spawnParticle(World world, EnumParticleTypes particle, Vec3d pos, Vec3d vel) {
+	public static void spawnParticle(World world, IParticleData particle, Vec3d pos, Vec3d vel) {
 		world.spawnParticle(particle, pos.x, pos.y, pos.z, vel.x, vel.y, vel.z);
 	}
 
-	@Override
-	@SideOnly(Side.CLIENT)
-	public IMessage onMessage(Packet message, MessageContext ctx) {
-		Minecraft.getMinecraft().addScheduledTask(() -> processPacket(message, Minecraft.getMinecraft().player, Minecraft.getMinecraft().world));
-		return null;
+	private static IParticleData getRegisteredParticleTypes(ResourceLocation p_197589_0_) {
+		ParticleType<?> t = IRegistry.field_212632_u.func_212608_b(p_197589_0_);
+		if (!(t instanceof IParticleData)) {
+			throw new IllegalStateException("Invalid or unknown particle type: " + p_197589_0_);
+		} else {
+			return (IParticleData) t;
+		}
 	}
 
-	public static class Packet implements IMessage {
+	@Override
+	public void handle(EntityPlayer player) {
+		spawnParticle(player.world, getRegisteredParticleTypes(id), vec, vel);
+	}
 
-		private int id;
-		private Vec3d vec;
-		private Vec3d vel;
+	@Override
+	public void toBytes(PacketBuffer packet) {
+		packet.writeResourceLocation(id);
+		packet.writeDouble(vec.x);
+		packet.writeDouble(vec.y);
+		packet.writeDouble(vec.z);
+		packet.writeDouble(vel.x);
+		packet.writeDouble(vel.y);
+		packet.writeDouble(vel.z);
+	}
 
-		public Packet() {
-
-		}
-
-		public Packet(int particle, Vec3d pos, Vec3d vel) {
-			id = particle;
-			vec = pos;
-			this.vel = vel;
-		}
-
-		@Override
-		public void fromBytes(ByteBuf buf) {
-			id = buf.readInt();
-			vec = new Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble());
-			vel = new Vec3d(buf.readDouble(), buf.readDouble(), buf.readDouble());
-		}
-
-		@Override
-		public void toBytes(ByteBuf buf) {
-			buf.writeInt(id);
-			buf.writeDouble(vec.x);
-			buf.writeDouble(vec.y);
-			buf.writeDouble(vec.z);
-			buf.writeDouble(vel.x);
-			buf.writeDouble(vel.y);
-			buf.writeDouble(vel.z);
-		}
+	@Override
+	public ClientPacketHandlerParticle fromBytes(PacketBuffer packet) {
+		id = packet.readResourceLocation();
+		vec = new Vec3d(packet.readDouble(), packet.readDouble(), packet.readDouble());
+		vel = new Vec3d(packet.readDouble(), packet.readDouble(), packet.readDouble());
+		return this;
 	}
 }

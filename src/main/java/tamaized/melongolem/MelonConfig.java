@@ -1,170 +1,137 @@
 package tamaized.melongolem;
 
-import com.google.common.collect.ImmutableSet;
+
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemAir;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.config.Config;
-import net.minecraftforge.common.config.ConfigManager;
-import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.registries.ForgeRegistries;
 
-import java.awt.*;
 import java.util.Objects;
-import java.util.Set;
 
-@Mod.EventBusSubscriber
-@Config(modid = MelonMod.MODID)
+@Mod.EventBusSubscriber(modid = MelonMod.MODID)
 public class MelonConfig {
 
-	@Config.Ignore
+	public ForgeConfigSpec.DoubleValue health;
 	public static boolean dirty = true;
+	public static Item stabItem = Items.STICK;
+	public final DonatorSettings DONATOR_SETTINGS = new DonatorSettings();
+	public ForgeConfigSpec.DoubleValue damage;
+	public ForgeConfigSpec.BooleanValue hats;
+	public ForgeConfigSpec.BooleanValue shear;
+	public ForgeConfigSpec.BooleanValue eats;
+	public ForgeConfigSpec.DoubleValue heal;
+	public ForgeConfigSpec.BooleanValue tehnutMode;
+	public ForgeConfigSpec.BooleanValue tts;
+	public ForgeConfigSpec.ConfigValue<String> stabby;
 
-	@Config.Name("Donator Settings")
-	public static DonatorSettings donatorSettings = new DonatorSettings();
+	public MelonConfig(ForgeConfigSpec.Builder builder) {
+		builder.
+				comment("Donator Settings").
+				push("Donator Settings");
+		{
+			DONATOR_SETTINGS.enable = builder.
+					translation("Enable").
+					comment("Enables donator settings for yourself").
+					define("enable", true);
 
-	@Config.Name("Base Golem Health")
-	public static double health = 8.0D;
+			DONATOR_SETTINGS.color = builder.
+					translation("Color").
+					comment("Sets the mini-golem color for yourself (0xRRGGBB)").
+					define("color", "0xFFFFFF");
 
-	@Config.Name("Melon Slice Damage")
-	public static float damage = 4.0F;
+		}
 
-	@Config.Name("Enable Golem Block Heads")
-	public static boolean hats = true;
+		health = builder.
+				translation("Base Golem Health").
+				comment("").
+				defineInRange("health", 8.0F, 0.5F, Float.MAX_VALUE);
 
-	@Config.Name("Shears Spawn Block")
-	public static boolean shear = true;
+		damage = builder.
+				translation("Melon Slice Damage").
+				comment("").
+				defineInRange("damage", 4.0F, 0.5F, Float.MAX_VALUE);
 
-	@Config.Name("Golem Eats Melons")
-	public static boolean eats = true;
+		hats = builder.
+				translation("Enable Golem Block Heads").
+				comment("Enables the placement of blocks on golems' heads").
+				define("hats", true);
 
-	@Config.Name("Melon Heal Amount")
-	public static float heal = 1.0F;
+		shear = builder.
+				translation("Shears Spawn Block").
+				comment("If disabled, shearing a golem destroys the block").
+				define("shear", true);
 
-	@Config.Name("TehNut Mode")
-	public static boolean tehnutMode = false;
+		eats = builder.
+				translation("Golem Eats Melons").
+				comment("If enabled, golems will hunt for nearby melon slices to replensih health").
+				define("eats", true);
 
-	@Config.Name("TTS Signs")
-	public static boolean tts = true;
+		heal = builder.
+				translation("Melon Heal Amount").
+				comment("The amount a golem will heal for after consuming a melon slice").
+				defineInRange("heal", 1.0F, 0.5F, Float.MAX_VALUE);
 
-	@Config.Name("Stabby Life Item")
-	@Config.Comment("domain:name:meta\ndomain defaults to `minecraft`\nmeta is optional\ndomain is required if meta is specified")
-	public static String stabby = Objects.requireNonNull(Items.STICK.getRegistryName()).getPath();
+		tehnutMode = builder.
+				translation("TehNut Mode").
+				comment(":^)").
+				define("tehnutMode", false);
 
-	@Config.Ignore
-	public static ItemStackWrapper stabItem = new ItemStackWrapper(Items.STICK);
+		tts = builder.
+				translation("TTS Signs").
+				comment("When enabled, written signs on a golem's head will play text to speech audio").
+				define("tts", true);
+
+		stabby = builder.
+				translation("Stabby Life Item").
+				comment("The item used to spawn a melon golem\n\n[domain:name] domain will default to `minecraft`").
+				define("stabby", Objects.requireNonNull(Items.STICK.getRegistryName()).getPath());
+	}
 
 	public static void setupStabby() {
-		String[] split = stabby.split(":");
+		String[] split = MelonMod.config.stabby.get().split(":");
 		String domain = "minecraft";
 		String regname = split[0];
-		int meta = 0;
-		boolean hasmeta = false;
 		if (split.length > 1) {
 			domain = split[0];
 			regname = split[1];
-			if (split.length > 2)
-				try {
-					meta = Integer.parseInt(split[2]);
-					hasmeta = true;
-				} catch (NumberFormatException e) {
-					hasmeta = false;
-				}
 		}
 		Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(domain, regname));
 		if (item == null || item instanceof ItemAir)
 			return;
-		stabItem = hasmeta ? new ItemStackWrapper(item, meta) : new ItemStackWrapper(item);
+		stabItem = item;
 	}
 
-	public static boolean compareStabbyItem(ItemStack stack) {
-		return ItemStackWrapper.compare(ImmutableSet.of(stabItem), stack);
+	public static boolean compareStabbyItem(ItemStack stack){
+		return stack.getItem() == stabItem;
 	}
 
-	@SubscribeEvent
+	/*@SubscribeEvent TODO
 	public static void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
 		if (event.getModID().equals(MelonMod.MODID)) {
 			ConfigManager.sync(MelonMod.MODID, Config.Type.INSTANCE);
 			setupStabby();
 			setupColor();
 		}
-	}
+	}*/
 
 	public static void setupColor() {
 		try {
-			donatorSettings.colorint = Color.decode(donatorSettings.color).getRGB();
+			MelonMod.config.DONATOR_SETTINGS.colorint = Integer.decode(MelonMod.config.DONATOR_SETTINGS.color.get());
 		} catch (Throwable e) {
-			donatorSettings.color = "0xFFFFFF";
-			donatorSettings.colorint = 0xFFFFFF;
+			//			MelonMod.config.DONATOR_SETTINGS.color = "0xFFFFFF"; TODO
+			MelonMod.config.DONATOR_SETTINGS.colorint = 0xFFFFFF;
 		}
 		dirty = true;
 	}
 
 	public static class DonatorSettings {
-
-		@Config.Name("Enabled")
-		public boolean enable = true;
-
-		@Config.Name("Color (0xRRGGBB)")
-		public String color = "0xFFFFFF";
-
-		@Config.Ignore
+		public ForgeConfigSpec.BooleanValue enable;
+		public ForgeConfigSpec.ConfigValue<String> color;
 		public int colorint = 0xFFFFFF;
-	}
-
-	static class ItemStackWrapper {
-
-		boolean ignoreMeta;
-		boolean ignoreNBT;
-		ItemStack stack;
-
-		public ItemStackWrapper(Item item) {
-			this(item, 0);
-			ignoreMeta = true;
-		}
-
-		public ItemStackWrapper(Item item, int meta) {
-			this(new ItemStack(item, 1, meta), false, true);
-		}
-
-		public ItemStackWrapper(NBTTagCompound tag, boolean ignoreMeta, boolean ignoreNBT) {
-			this(new ItemStack(tag), ignoreMeta, ignoreNBT);
-		}
-
-		public ItemStackWrapper(ItemStack stack, boolean ignoreMeta, boolean ignoreNBT) {
-			this.stack = stack;
-			this.ignoreMeta = ignoreMeta;
-			this.ignoreNBT = ignoreNBT;
-		}
-
-		public static boolean compare(Set<ItemStackWrapper> set, ItemStack stack) {
-			boolean flag;
-			for (ItemStackWrapper wrapper : set) {
-				if (wrapper.ignoreMeta && wrapper.ignoreNBT)
-					flag = wrapper.stack.getItem() == stack.getItem();
-				else if (wrapper.ignoreNBT)
-					flag = wrapper.stack.isItemEqual(stack);
-				else if (wrapper.ignoreMeta)
-					flag = wrapper.stack.getItem() == stack.getItem() && ItemStack.areItemStackTagsEqual(wrapper.stack, stack);
-				else
-					flag = ItemStack.areItemStacksEqual(wrapper.stack, stack);
-				if (flag)
-					return true;
-			}
-			return false;
-		}
-
-		public ItemStackWrapper attachNBT(NBTTagCompound tag) {
-			ignoreNBT = false;
-			stack.setTagCompound(tag);
-			return this;
-		}
-
 	}
 
 }

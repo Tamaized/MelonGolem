@@ -6,11 +6,9 @@ import net.minecraft.util.text.ITextComponent;
 
 public interface IModProxy {
 
-	void preinit();
-
 	void init();
 
-	void postInit();
+	void finish();
 
 	void openSignHolderGui(ISignHolder golem);
 

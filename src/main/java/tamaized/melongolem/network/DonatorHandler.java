@@ -21,7 +21,7 @@ public class DonatorHandler {
 
 	public static void start() {
 		if (!started) {
-			MelonMod.instance.logger.info("Starting Donator Handler");
+			MelonMod.logger.info("Starting Donator Handler");
 			started = true;
 			new ThreadDonators();
 		}
@@ -55,7 +55,7 @@ public class DonatorHandler {
 		public void run() {
 			try {
 				{
-					MelonMod.instance.logger.info("Loading Data");
+					MelonMod.logger.info("Loading Data");
 					URL url = new URL(URL_DONATORS);
 					Properties props = new Properties();
 					InputStreamReader reader = new InputStreamReader(url.openStream());
@@ -63,7 +63,7 @@ public class DonatorHandler {
 					loadData(props);
 				}
 			} catch (IOException e) {
-				MelonMod.instance.logger.error("Could not load data");
+				MelonMod.logger.error("Could not load data");
 			}
 		}
 

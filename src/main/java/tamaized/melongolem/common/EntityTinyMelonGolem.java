@@ -1,11 +1,10 @@
 package tamaized.melongolem.common;
 
 import com.google.common.collect.Lists;
-import io.netty.buffer.ByteBuf;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIFollowOwner;
@@ -21,26 +20,24 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemShears;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentUtils;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IWorld;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IShearable;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import tamaized.melongolem.IModProxy;
-import tamaized.melongolem.MelonConfig;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.capability.CapabilityList;
 import tamaized.melongolem.common.capability.ITinyGolemCapability;
@@ -49,19 +46,15 @@ import tamaized.melongolem.network.DonatorHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 
 public class EntityTinyMelonGolem extends EntityTameable implements IShearable, IEntityAdditionalSpawnData, IModProxy.ISignHolder {
 
 	public static final TileEntitySign te = new TileEntitySign() {
 		@Nonnull
 		@Override
-		public Block getBlockType() {
-			return Blocks.WALL_SIGN;
-		}
-
-		@Override
-		public int getBlockMetadata() {
-			return 0;
+		public IBlockState getBlockState() {
+			return Blocks.WALL_SIGN.getDefaultState();
 		}
 	};
 	private static final DataParameter<ItemStack> HEAD = EntityDataManager.createKey(EntityTinyMelonGolem.class, DataSerializers.ITEM_STACK);
@@ -80,7 +73,7 @@ public class EntityTinyMelonGolem extends EntityTameable implements IShearable, 
 	);
 
 	public EntityTinyMelonGolem(World worldIn) {
-		super(worldIn);
+		super(Objects.requireNonNull(MelonMod.entityTypeTinyMelonGolem), worldIn);
 		this.setSize(0.175F, 0.475F);
 	}
 
@@ -91,8 +84,8 @@ public class EntityTinyMelonGolem extends EntityTameable implements IShearable, 
 	}
 
 	@Override
-	protected void entityInit() {
-		super.entityInit();
+	protected void registerData() {
+		super.registerData();
 		dataManager.register(HEAD, ItemStack.EMPTY);
 		dataManager.register(ENABLED, false);
 		dataManager.register(COLOR, 0xFFFFFF);
@@ -101,11 +94,11 @@ public class EntityTinyMelonGolem extends EntityTameable implements IShearable, 
 	}
 
 	@Override
-	public void onLivingUpdate() {
-		super.onLivingUpdate();
-		if (world.isRemote || !isEntityAlive())
+	public void livingTick() {
+		super.livingTick();
+		if (world.isRemote || !isAlive())
 			return;
-		if (getOwner() != null && getOwner().isEntityAlive() && DonatorHandler.donators.contains(getOwnerId())) {
+		if (getOwner() != null && getOwner().isAlive() && DonatorHandler.donators.contains(getOwnerId())) {
 			DonatorHandler.DonatorSettings settings = DonatorHandler.settings.get(getOwnerId());
 			if (settings != null) {
 				dataManager.set(ENABLED, settings.enabled);
@@ -115,8 +108,8 @@ public class EntityTinyMelonGolem extends EntityTameable implements IShearable, 
 		ITinyGolemCapability cap = CapabilityList.getCap(getOwner(), CapabilityList.TINY_GOLEM, null);
 		if (cap != null && getOwner() instanceof EntityPlayer) {
 			if (cap.getPet() != this) {
-				if (cap.getPet() != null && cap.getPet().getPersistentID().equals(this.getPersistentID())) {
-					setDead();
+				if (cap.getPet() != null && cap.getPet().getUniqueID().equals(this.getUniqueID())) {
+					remove();
 					return;
 				}
 				ItemMelonStick.summonPet(world, (EntityPlayer) getOwner(), this);
@@ -155,14 +148,14 @@ public class EntityTinyMelonGolem extends EntityTameable implements IShearable, 
 	}
 
 	@Override
-	protected void applyEntityAttributes() {
-		super.applyEntityAttributes();
-		this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(MelonConfig.health);
-		this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.20000000298023224D);
+	protected void registerAttributes() {
+		super.registerAttributes();
+		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(MelonMod.config.health.get().floatValue());
+		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.20000000298023224D);
 	}
 
 	@Override
-	public boolean isShearable(@Nonnull ItemStack item, IBlockAccess world, BlockPos pos) {
+	public boolean isShearable(@Nonnull ItemStack item, IWorldReader world, BlockPos pos) {
 		return !getHead().isEmpty();
 	}
 
@@ -174,7 +167,7 @@ public class EntityTinyMelonGolem extends EntityTameable implements IShearable, 
 	@Nullable
 	@Override
 	protected SoundEvent getAmbientSound() {
-		return SoundEvents.ENTITY_SMALL_SLIME_SQUISH;
+		return SoundEvents.ENTITY_SLIME_SQUISH_SMALL;
 	}
 
 	@Nullable
@@ -229,8 +222,8 @@ public class EntityTinyMelonGolem extends EntityTameable implements IShearable, 
 
 	@Nonnull
 	@Override
-	public List<ItemStack> onSheared(@Nonnull ItemStack item, IBlockAccess world, BlockPos pos, int fortune) {
-		List<ItemStack> list = Lists.newArrayList(MelonConfig.shear ? getHead() : ItemStack.EMPTY);
+	public List<ItemStack> onSheared(@Nonnull ItemStack item, IWorld world, BlockPos pos, int fortune) {
+		List<ItemStack> list = Lists.newArrayList(MelonMod.config.shear.get() ? getHead() : ItemStack.EMPTY);
 		setHead(ItemStack.EMPTY);
 		return list;
 	}
@@ -251,85 +244,47 @@ public class EntityTinyMelonGolem extends EntityTameable implements IShearable, 
 	@Nonnull
 	@Override
 	@SuppressWarnings("deprecation")
-	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-		Block block = Block.getBlockFromItem(getHead().getItem());
-		compound.setInteger("state", getHead().getItem() == Items.SIGN ? -100 : Block.getStateId(block.getStateFromMeta(getHead().getMetadata())));
+	public NBTTagCompound writeWithoutTypeId(NBTTagCompound compound) {
+		compound.setTag("head", getHead().serializeNBT());
 		compound.setBoolean("donator_enabled", isEnabled());
-		compound.setInteger("donator_color", getColor());
+		compound.setInt("donator_color", getColor());
 		for (int i = 0; i < 4; ++i) {
-			String s = ITextComponent.Serializer.componentToJson(getSignText(i));
+			String s = ITextComponent.Serializer.toJson(getSignText(i));
 			compound.setString("Text" + (i + 1), s);
 		}
-		return super.writeToNBT(compound);
+		return super.writeWithoutTypeId(compound);
 	}
 
 	@Override
-	public void readFromNBT(NBTTagCompound compound) {
+	public void read(NBTTagCompound compound) {
 		if (compound.hasKey("donator_enabled"))
 			dataManager.set(ENABLED, compound.getBoolean("donator_enabled"));
 		if (compound.hasKey("donator_color"))
-			dataManager.set(COLOR, compound.getInteger("donator_color"));
-		int stateid = compound.getInteger("state");
-		if (stateid != -100) {
-			IBlockState state = Block.getStateById(stateid);
-			setHead(state.getBlock().getPickBlock(state, null, world, BlockPos.ORIGIN, null));
-		} else
-			setHead(new ItemStack(Items.SIGN));
+			dataManager.set(COLOR, compound.getInt("donator_color"));
+		setHead(ItemStack.read(compound.getCompound("head")));
 
-		ICommandSender icommandsender = new ICommandSender() {
-			@Override
-			public String getName() {
-				return "Sign";
-			}
-
-			@Override
-			public boolean canUseCommand(int permLevel, @Nonnull String commandName) {
-				return permLevel <= 2;
-			}
-
-			@Override
-			public BlockPos getPosition() {
-				return te.getPos();
-			}
-
-			@Override
-			public Vec3d getPositionVector() {
-				return new Vec3d((double) te.getPos().getX() + 0.5D, te.getPos().getY() + 0.5D, (double) te.getPos().getZ() + 0.5D);
-			}
-
-			@Nonnull
-			@Override
-			public World getEntityWorld() {
-				return world;
-			}
-
-			@Override
-			public MinecraftServer getServer() {
-				return world.getMinecraftServer();
-			}
-		};
 		for (int i = 0; i < 4; ++i) {
 			String s = compound.getString("Text" + (i + 1));
-			ITextComponent itextcomponent = ITextComponent.Serializer.jsonToComponent(s);
+			ITextComponent itextcomponent = ITextComponent.Serializer.fromJson(s);
 
 			try {
 				//noinspection ConstantConditions
-				setSignText(i, itextcomponent == null ? new TextComponentString("") : TextComponentUtils.processComponent(icommandsender, itextcomponent, null));
-			} catch (CommandException var7) {
+				setSignText(i, itextcomponent == null ? new TextComponentString("") : TextComponentUtils.updateForEntity(getCommandSource(), itextcomponent, null));
+			} catch (CommandException | CommandSyntaxException var7) {
 				setSignText(i, itextcomponent);
 			}
 		}
-		super.readFromNBT(compound);
+		super.read(compound);
 	}
 
 	@Override
-	public void writeSpawnData(ByteBuf buffer) {
-		ByteBufUtils.writeItemStack(buffer, getHead());
+	public void writeSpawnData(PacketBuffer buffer) {
+		buffer.writeItemStack(getHead());
 	}
 
 	@Override
-	public void readSpawnData(ByteBuf additionalData) {
-		setHead(ByteBufUtils.readItemStack(additionalData));
+	public void readSpawnData(PacketBuffer additionalData) {
+		setHead(additionalData.readItemStack());
 	}
 
 }

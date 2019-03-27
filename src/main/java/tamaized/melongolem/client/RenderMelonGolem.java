@@ -1,20 +1,20 @@
 package tamaized.melongolem.client;
 
-import net.minecraft.client.model.ModelSnowMan;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.entity.model.ModelSnowMan;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import tamaized.melongolem.IModProxy;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.EntityTinyMelonGolem;
 
 import javax.annotation.Nonnull;
 
-@SideOnly(Side.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class RenderMelonGolem<T extends EntityLiving & IModProxy.ISignHolder> extends RenderLiving<T> {
 	private static final ResourceLocation TEXTURES = new ResourceLocation(MelonMod.MODID, "textures/entity/golem.png");
 	private static final ResourceLocation TEXTURES_GREY = new ResourceLocation(MelonMod.MODID, "textures/entity/greygolem.png");
@@ -32,18 +32,18 @@ public class RenderMelonGolem<T extends EntityLiving & IModProxy.ISignHolder> ex
 	public void doRender(@Nonnull T entity, double x, double y, double z, float entityYaw, float partialTicks) {
 		GlStateManager.pushMatrix();
 		if (tiny) {
-			GlStateManager.translate(0, -1.11F, 0);
+			GlStateManager.translatef(0, -1.11F, 0);
 			EntityTinyMelonGolem golem = (EntityTinyMelonGolem) entity;
 			if (golem.isEnabled()) {
 				int color = golem.getColor();
 				float r = ((color >> 16) & 0xFF) / 255F;
 				float g = ((color >> 8) & 0xFF) / 255F;
 				float b = ((color) & 0xFF) / 255F;
-				GlStateManager.color(r, g, b, 1F);
+				GlStateManager.color4f(r, g, b, 1F);
 			}
 		}
 		super.doRender(entity, x, y, z, entityYaw, partialTicks);
-		GlStateManager.color(1F, 1F, 1F, 1F);
+		GlStateManager.color4f(1F, 1F, 1F, 1F);
 		GlStateManager.popMatrix();
 	}
 
