@@ -35,10 +35,9 @@ public class LayerMelonHead<T extends EntityLiving & IModProxy.ISignHolder> impl
 			GlStateManager.scalef(s, -s, -s);
 			if (stack.getItem() == Items.SIGN) {
 				for (int index = 0; index < 4; index++)
-					EntityMelonGolem.te.signText[index] = entity.getSignText(index);
+					EntityMelonGolem.te.func_212365_a(index, entity.getSignText(index));
 				GlStateManager.pushMatrix();
-				GlStateManager.rotatef(180, 0, 1, 0);
-				TileEntityRendererDispatcher.instance.getRenderer(TileEntitySign.class).render(EntityMelonGolem.te, -0.5F, -0.5F, 0.325F, 1, -1);
+				TileEntityRendererDispatcher.instance.getRenderer(TileEntitySign.class).render(EntityMelonGolem.te, -0.5F, -0.5F, -1.325F, 1, -1);
 				GlStateManager.popMatrix();
 			} else
 				Minecraft.getInstance().getItemRenderer().renderItem(stack, ItemCameraTransforms.TransformType.HEAD);

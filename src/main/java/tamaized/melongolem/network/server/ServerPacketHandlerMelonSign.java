@@ -40,6 +40,7 @@ public class ServerPacketHandlerMelonSign implements NetworkMessages.IMessage<Se
 	@Override
 	public ServerPacketHandlerMelonSign fromBytes(PacketBuffer packet) {
 		id = packet.readInt();
+		lines = new String[4];
 		for (int i = 0; i < 4; ++i) {
 			this.lines[i] = packet.readString(Short.MAX_VALUE);
 		}
