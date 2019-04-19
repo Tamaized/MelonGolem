@@ -9,7 +9,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
 	"M": {
-	  "item": "minecraft:speckled_melon"
+	  "item": "minecraft:glistering_melon_slice"
 	},
 	"S": {
 	  "item": "minecraft:stick"
