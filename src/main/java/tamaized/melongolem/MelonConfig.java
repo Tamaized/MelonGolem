@@ -44,6 +44,7 @@ public class MelonConfig {
 					define("color", "0xFFFFFF");
 
 		}
+		builder.pop();
 
 		health = builder.
 				translation("Base Golem Health").

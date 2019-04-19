@@ -7,6 +7,7 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.SharedConstants;
 import net.minecraft.util.text.TextComponentString;
 import tamaized.melongolem.IModProxy;
@@ -101,7 +102,6 @@ public class GuiEditGolemSign extends GuiScreen {
 		GlStateManager.translatef((float) (this.width / 2), 0.0F, 50.0F);
 		//		float f = 93.75F;
 		GlStateManager.scalef(-93.75F, -93.75F, -93.75F);
-		GlStateManager.rotatef(180.0F, 0.0F, 1.0F, 0.0F);
 		/*Block block = golem.getBlockType();
 
 		if (block == Blocks.STANDING_SIGN) {
@@ -133,8 +133,8 @@ public class GuiEditGolemSign extends GuiScreen {
 		}
 
 		for (int index = 0; index < 4; index++)
-			EntityMelonGolem.te.signText[index] = golem.getSignText(index);
-		TileEntityRendererDispatcher.instance.render(EntityMelonGolem.te, -0.5D, -0.75D, -0.5D, 0.0F);
+			EntityMelonGolem.te.func_212365_a(index, golem.getSignText(index));
+		TileEntityRendererDispatcher.instance.getRenderer(TileEntitySign.class).render(EntityMelonGolem.te, -0.5D, -0.75D, -0.5D, 0.0F, -1);
 		EntityMelonGolem.te.lineBeingEdited = -1;
 		GlStateManager.popMatrix();
 		super.render(mouseX, mouseY, partialTicks);
