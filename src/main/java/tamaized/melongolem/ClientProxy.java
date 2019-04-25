@@ -2,6 +2,8 @@ package tamaized.melongolem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.init.Items;
 import net.minecraft.util.ResourceLocation;
 import tamaized.melongolem.client.GuiEditGolemSign;
@@ -9,6 +11,8 @@ import tamaized.melongolem.client.GuiEditGolemSign;
 import java.util.function.Function;
 
 public class ClientProxy implements IModProxy {
+
+	public static final VertexFormat ITEM_FORMAT_WITH_LIGHTMAP = new VertexFormat(DefaultVertexFormats.ITEM).addElement(DefaultVertexFormats.TEX_2S);
 
 	@Override
 	public void init() {

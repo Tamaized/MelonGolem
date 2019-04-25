@@ -20,6 +20,7 @@ public class MelonConfig {
 	public static Item stabItem = Items.STICK;
 	public final DonatorSettings DONATOR_SETTINGS = new DonatorSettings();
 	public ForgeConfigSpec.DoubleValue damage;
+	public ForgeConfigSpec.DoubleValue glisterDamageAmp;
 	public ForgeConfigSpec.BooleanValue hats;
 	public ForgeConfigSpec.BooleanValue shear;
 	public ForgeConfigSpec.BooleanValue eats;
@@ -55,6 +56,11 @@ public class MelonConfig {
 				translation("Melon Slice Damage").
 				comment("").
 				defineInRange("damage", 4.0F, 0.5F, Float.MAX_VALUE);
+
+		glisterDamageAmp = builder.
+				translation("Glistering Melon Slice Damage Amplification").
+				comment("").
+				defineInRange("damage", 1.5F, 1F, Float.MAX_VALUE);
 
 		hats = builder.
 				translation("Enable Golem Block Heads").

@@ -15,6 +15,9 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
 repositories {
+    /*maven{
+        url ="https://104.168.20.187/files/maven/"
+    }*/
     maven {
         url = "https://dvs1.progwml6.com/files/maven/" // JEI
     }
@@ -73,7 +76,7 @@ minecraft {
 dependencies {
     minecraft "net.minecraftforge:forge:${project.minecraftVersion}-${project.forgeVersion}"
 
-    deobf "mezz.jei:${project.jeiVersion}"
+    compile fg.deobf("mezz.jei:${project.jeiVersion}")
 }
 
 processResources {

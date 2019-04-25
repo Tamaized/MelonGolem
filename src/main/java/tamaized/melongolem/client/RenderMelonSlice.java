@@ -5,7 +5,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -23,6 +22,7 @@ public class RenderMelonSlice extends Render<EntityMelonSlice> {
 		super(renderManagerIn);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void doRender(@Nonnull EntityMelonSlice entity, double x, double y, double z, float entityYaw, float partialTicks) {
 		GlStateManager.pushMatrix();
@@ -38,7 +38,7 @@ public class RenderMelonSlice extends Render<EntityMelonSlice> {
 			GlStateManager.enableOutlineMode(getTeamColor(entity));
 		}
 
-		Minecraft.getInstance().getItemRenderer().renderItem(new ItemStack(Items.MELON_SLICE), ItemCameraTransforms.TransformType.GROUND);
+		Minecraft.getInstance().getItemRenderer().renderItem(new ItemStack(entity.isGlistering() ? Items.GLISTERING_MELON_SLICE : Items.MELON_SLICE), net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType.GROUND);
 
 		if (renderOutlines) {
 			GlStateManager.disableOutlineMode();

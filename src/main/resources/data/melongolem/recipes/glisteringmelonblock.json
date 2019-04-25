@@ -1,0 +1,16 @@
+{
+  "result": {
+	"item": "melongolem:glisteringmelonblock"
+  },
+  "pattern": [
+	"MMM",
+	"MMM",
+	"MMM"
+  ],
+  "type": "minecraft:crafting_shaped",
+  "key": {
+	"M": {
+	  "item": "minecraft:glistering_melon_slice"
+	}
+  }
+}

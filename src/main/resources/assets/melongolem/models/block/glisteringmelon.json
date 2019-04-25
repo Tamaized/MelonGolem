@@ -1,0 +1,9 @@
+{
+  "parent": "melongolem:block/overlay/side",
+  "textures": {
+	"end": "melongolem:blocks/glistening_melon_top",
+	"side": "melongolem:blocks/glistening_melon_side",
+	"overlay-end": "melongolem:blocks/glistening_melon_top_overlay",
+	"overlay-side": "melongolem:blocks/glistening_melon_side_overlay"
+  }
+}

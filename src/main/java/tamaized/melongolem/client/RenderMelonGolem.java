@@ -1,8 +1,10 @@
 package tamaized.melongolem.client;
 
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.ModelSnowMan;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.ResourceLocation;
@@ -18,20 +20,47 @@ import javax.annotation.Nonnull;
 public class RenderMelonGolem<T extends EntityLiving & IModProxy.ISignHolder> extends RenderLiving<T> {
 	private static final ResourceLocation TEXTURES = new ResourceLocation(MelonMod.MODID, "textures/entity/golem.png");
 	private static final ResourceLocation TEXTURES_GREY = new ResourceLocation(MelonMod.MODID, "textures/entity/greygolem.png");
+	private static final ResourceLocation TEXTURES_GLISTER = new ResourceLocation(MelonMod.MODID, "textures/entity/glistening_melon_golem.png");
+	private static final ResourceLocation TEXTURES_GLISTER_OVERLAY = new ResourceLocation(MelonMod.MODID, "textures/entity/glistening_melon_golem_overlay.png");
 
-	private final boolean tiny;
+	private final Type type;
 
 	@SuppressWarnings("unchecked")
-	public RenderMelonGolem(RenderManager renderManagerIn, boolean tiny) {
-		super(renderManagerIn, new ModelSnowMan(), tiny ? 0.125F : 0.5F);
+	public RenderMelonGolem(RenderManager renderManagerIn, Type type) {
+		super(renderManagerIn, new ModelSnowMan(), type == Type.TINY ? 0.125F : 0.5F);
 		addLayer(new LayerMelonHead(this));
-		this.tiny = tiny;
+		if(type == Type.GLISTER)
+			addLayer(new LayerMelonGlister());
+		this.type = type;
+	}
+
+	class LayerMelonGlister<E extends EntityLiving> implements LayerRenderer<E> {
+
+		@Override
+		public void render(@Nonnull E entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+			bindTexture(TEXTURES_GLISTER_OVERLAY);
+			GlStateManager.enableBlend();
+			GlStateManager.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
+			GlStateManager.pushMatrix();
+			final float s = 1.01F;
+			GlStateManager.scalef(s, s, s);
+			int i = 0xF000F0;
+			OpenGlHelper.glMultiTexCoord2f(OpenGlHelper.GL_TEXTURE1, i % 65536, i >> 16);
+			getMainModel().render(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
+			GlStateManager.popMatrix();
+			GlStateManager.disableBlend();
+		}
+
+		@Override
+		public boolean shouldCombineTextures() {
+			return true;
+		}
 	}
 
 	@Override
 	public void doRender(@Nonnull T entity, double x, double y, double z, float entityYaw, float partialTicks) {
 		GlStateManager.pushMatrix();
-		if (tiny) {
+		if (type == Type.TINY) {
 			GlStateManager.translatef(0, -1.11F, 0);
 			EntityTinyMelonGolem golem = (EntityTinyMelonGolem) entity;
 			if (golem.isEnabled()) {
@@ -42,6 +71,10 @@ public class RenderMelonGolem<T extends EntityLiving & IModProxy.ISignHolder> ex
 				GlStateManager.color4f(r, g, b, 1F);
 			}
 		}
+		if(type == Type.GLISTER){
+			int i = entity.world.getCombinedLight(entity.getPosition(), 0) | 0x100010;
+			OpenGlHelper.glMultiTexCoord2f(OpenGlHelper.GL_TEXTURE1, i % 65536, i >> 16);
+		}
 		super.doRender(entity, x, y, z, entityYaw, partialTicks);
 		GlStateManager.color4f(1F, 1F, 1F, 1F);
 		GlStateManager.popMatrix();
@@ -49,23 +82,31 @@ public class RenderMelonGolem<T extends EntityLiving & IModProxy.ISignHolder> ex
 
 	@Override
 	protected ResourceLocation getEntityTexture(@Nonnull T entity) {
-		return entity instanceof EntityTinyMelonGolem && ((EntityTinyMelonGolem) entity).isEnabled() ? TEXTURES_GREY : TEXTURES;
+		return entity instanceof EntityTinyMelonGolem && ((EntityTinyMelonGolem) entity).isEnabled() ? TEXTURES_GREY : type == Type.GLISTER ? TEXTURES_GLISTER : TEXTURES;
 	}
 
 	@Override
 	public float prepareScale(@Nonnull T entitylivingbaseIn, float partialTicks) {
-		return super.prepareScale(entitylivingbaseIn, partialTicks) * (tiny ? 0.25F : 1F);
+		return super.prepareScale(entitylivingbaseIn, partialTicks) * (type == Type.TINY ? 0.25F : 1F);
 	}
 
 	public static class Factory {
 
 		public static RenderMelonGolem normal(RenderManager renderManager) {
-			return new RenderMelonGolem(renderManager, false);
+			return new RenderMelonGolem(renderManager, Type.NORMAL);
 		}
 
 		public static RenderMelonGolem tiny(RenderManager renderManager) {
-			return new RenderMelonGolem(renderManager, true);
+			return new RenderMelonGolem(renderManager, Type.TINY);
 		}
 
+		public static RenderMelonGolem glister(RenderManager renderManager) {
+			return new RenderMelonGolem(renderManager, Type.GLISTER);
+		}
+
+	}
+
+	public enum Type {
+		NORMAL, TINY, GLISTER
 	}
 }

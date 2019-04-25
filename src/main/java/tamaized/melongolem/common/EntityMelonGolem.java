@@ -7,6 +7,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.CommandException;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIAttackRanged;
@@ -85,12 +86,14 @@ public class EntityMelonGolem extends EntityGolem implements IRangedAttackMob, I
 			EntityDataManager.createKey(EntityMelonGolem.class, DataSerializers.TEXT_COMPONENT)
 
 	);
-	private final float pitch;
+	private final float pitch = rand.nextFloat() * 3.0F;
 
 	public EntityMelonGolem(World worldIn) {
-		super(Objects.requireNonNull(MelonMod.entityTypeMelonGolem), worldIn);
+		this(Objects.requireNonNull(MelonMod.entityTypeMelonGolem), worldIn);
+	}
+	protected EntityMelonGolem(EntityType<?> p_i48569_1_, World p_i48569_2_) {
+		super(p_i48569_1_, p_i48569_2_);
 		this.setSize(0.7F, 1.9F);
-		pitch = rand.nextFloat() * 3.0F;
 	}
 
 	@Override
@@ -299,10 +302,14 @@ public class EntityMelonGolem extends EntityGolem implements IRangedAttackMob, I
 		private int cooldown;
 		private BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 		private boolean foundMelon = false;
+		private final Item melon;
+		private final Block melonblock;
 
 		EntityAISearchAndEatMelons(EntityLiving entity) {
 			parent = entity;
 			setMutexBits(3);
+			melon = entity instanceof EntityGlisteringMelonGolem ? Items.GLISTERING_MELON_SLICE : Items.MELON_SLICE;
+			melonblock = entity instanceof EntityGlisteringMelonGolem ? MelonMod.glisteringMelonBlock : Blocks.MELON;
 		}
 
 		@Override
@@ -315,6 +322,18 @@ public class EntityMelonGolem extends EntityGolem implements IRangedAttackMob, I
 			cooldown = 0;
 		}
 
+		private boolean isMelon(EntityItem item){
+			return isMelon(item.getItem());
+		}
+
+		private boolean isMelon(ItemStack item){
+			return isMelon(item.getItem());
+		}
+
+		private boolean isMelon(Item item){
+			return item == melon || item == melonblock.asItem();
+		}
+
 		@Override
 		public void tick() {
 			if (parent == null)
@@ -325,14 +344,15 @@ public class EntityMelonGolem extends EntityGolem implements IRangedAttackMob, I
 			AxisAlignedBB area = new AxisAlignedBB(parent.posX - radius, parent.posY - radius, parent.posZ - radius, parent.posX + radius, parent.posY + radius, parent.posZ + radius);
 			List<EntityItem> items = parent.world.getEntitiesWithinAABB(EntityItem.class, area);
 			for (EntityItem item : items) {
-				if (parent.getNavigator().noPath() && item.getItem().getItem() == Items.MELON_SLICE || item.getItem().getItem() == Item.getItemFromBlock(Blocks.MELON)) {
+				if (parent.getNavigator().noPath() && isMelon(item)) {
 					parent.getNavigator().tryMoveToEntityLiving(item, 1.25F);
 					parent.getLookHelper().setLookPositionWithEntity(item, 30.0F, 30.0F);
 				}
-				if (cooldown <= 0 && item.isAlive() && item.getItem().getItem() == Items.MELON_SLICE && item.getBoundingBox().intersects(parent.getBoundingBox().grow(1))) {
+				if (cooldown <= 0 && item.isAlive() && isMelon(item) && item.getBoundingBox().intersects(parent.getBoundingBox().grow(1))) {
+					boolean flag = item.getItem().getItem() == melonblock.asItem();
 					item.getItem().shrink(1);
 					parent.playSound(SoundEvents.ENTITY_PLAYER_BURP, 1F, 1F);
-					parent.heal(MelonMod.config.heal.get().floatValue());
+					parent.heal(MelonMod.config.heal.get().floatValue() * (flag ? 9 : 1));
 					cooldown = 30 + parent.getRNG().nextInt(40);
 				}
 			}
@@ -349,7 +369,7 @@ public class EntityMelonGolem extends EntityGolem implements IRangedAttackMob, I
 									IItemHandler cap = CapabilityList.getCap(te, CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.UP);
 									if (cap != null)
 										for (int i = 0; i < cap.getSlots(); i++) {
-											if (cap.getStackInSlot(i).getItem() == Items.MELON_SLICE) {
+											if (isMelon(cap.getStackInSlot(i))) {
 												foundMelon = parent.getDistance(pos.getX(), pos.getY(), pos.getZ()) < 2 || parent.getNavigator().tryMoveToXYZ(pos.getX(), pos.getY(), pos.getZ(), 1.25F);
 												if (foundMelon)
 													break search;
@@ -381,7 +401,7 @@ public class EntityMelonGolem extends EntityGolem implements IRangedAttackMob, I
 				boolean valid = false;
 				int i;
 				for (i = 0; i < cap.getSlots(); i++) {
-					if (cap.getStackInSlot(i).getItem() == Items.MELON_SLICE) {
+					if (isMelon(cap.getStackInSlot(i))) {
 						valid = true;
 						break;
 					}
@@ -393,9 +413,10 @@ public class EntityMelonGolem extends EntityGolem implements IRangedAttackMob, I
 				}
 
 				if (cooldown <= 0 && parent.getDistance(pos.getX(), pos.getY(), pos.getZ()) < 2) {
+					boolean flag = cap.getStackInSlot(i).getItem() == melonblock.asItem();
 					cap.getStackInSlot(i).shrink(1);
 					parent.playSound(SoundEvents.ENTITY_PLAYER_BURP, 1F, 1F);
-					parent.heal(MelonMod.config.heal.get().floatValue());
+					parent.heal(MelonMod.config.heal.get().floatValue() * (flag ? 9 : 1));
 					cooldown = 10 + parent.getRNG().nextInt(40);
 				}
 			}
