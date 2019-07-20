@@ -2,7 +2,7 @@ package tamaized.melongolem.network.client;
 
 import com.mojang.text2speech.Narrator;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.TextFormatting;
 import tamaized.melongolem.common.EntityMelonGolem;
@@ -19,7 +19,7 @@ public class ClientPacketHandlerMelonTTS implements NetworkMessages.IMessage<Cli
 	}
 
 	@Override
-	public void handle(EntityPlayer player) {
+	public void handle(PlayerEntity player) {
 		Entity entity = player.world.getEntityByID(id);
 		if (entity instanceof EntityMelonGolem && entity.getDistanceSq(player) <= 225) {
 			if (narrator == null)
@@ -31,7 +31,7 @@ public class ClientPacketHandlerMelonTTS implements NetworkMessages.IMessage<Cli
 			StringBuilder string = new StringBuilder();
 			for (int i = 0; i < 4; ++i)
 				string.append(TextFormatting.getTextWithoutFormattingCodes(golem.getSignText(i).getString())).append(" ");
-			narrator.say(string.toString());
+			narrator.say(string.toString(), false);
 		}
 	}
 

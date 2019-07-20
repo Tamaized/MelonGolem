@@ -1,53 +1,58 @@
 package tamaized.melongolem.client;
 
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.gui.fonts.TextInputUtil;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.network.play.client.CUpdateSignPacket;
+import net.minecraft.tileentity.SignTileEntity;
 import net.minecraft.util.SharedConstants;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import tamaized.melongolem.IModProxy;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.EntityMelonGolem;
 import tamaized.melongolem.network.server.ServerPacketHandlerMelonSign;
 
-public class GuiEditGolemSign extends GuiScreen {
+import java.util.Objects;
+
+public class GuiEditGolemSign extends Screen {
 
 	private final IModProxy.ISignHolder golem;
 	private int updateCounter;
 	private int editLine;
-	private GuiButton doneBtn;
 	private boolean canSend = true;
+	private TextInputUtil field_214267_d;
 
 	public GuiEditGolemSign(IModProxy.ISignHolder golem) {
+		super(new TranslationTextComponent("melongolemsignholder"));
 		this.golem = golem;
 	}
 
 	@Override
-	public void initGui() {
-		this.mc.keyboardListener.enableRepeatEvents(true);
-		this.doneBtn = this.addButton(new GuiButton(0, this.width / 2 - 100, this.height / 4 + 120, I18n.format("gui.done", new Object[0])) {
-			@Override
-			public void onClick(double p_194829_1_, double p_194829_3_) {
-				mc.displayGuiScreen(null);
-			}
-		});
+	protected void init() {
+		super.init();
+		Objects.requireNonNull(minecraft).keyboardListener.enableRepeatEvents(true);
+		this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120, 200, 20, I18n.format("gui.done"), (p_214266_1_) -> {
+			this.close();
+		}));
+		this.field_214267_d = new TextInputUtil(this.minecraft, () -> golem.getSignText(this.editLine).getString(), (p_214265_1_) -> golem.setSignText(this.editLine, new StringTextComponent(p_214265_1_)), 90);
 	}
 
 	@Override
-	public void onGuiClosed() {
-		this.mc.keyboardListener.enableRepeatEvents(false);
+	public void removed() {
+		Objects.requireNonNull(minecraft).keyboardListener.enableRepeatEvents(false);
 		if (canSend)
 			MelonMod.network.sendToServer(new ServerPacketHandlerMelonSign(golem));
 	}
 
-	@Override
-	public void close() {
-		onGuiClosed();
+	private void close() {
+		Objects.requireNonNull(minecraft).displayGuiScreen(null);
 	}
 
 	@Override
@@ -55,48 +60,40 @@ public class GuiEditGolemSign extends GuiScreen {
 		++this.updateCounter;
 		if (golem.getDistance(Minecraft.getInstance().player) > 6) {
 			canSend = false;
-			Minecraft.getInstance().player.closeScreen();
+			close();
 		}
 	}
 
 	@Override
 	public boolean charTyped(char typedChar, int keyCode) {
-		String lvt_3_1_ = golem.getSignText(editLine).getString();
-		if (SharedConstants.isAllowedCharacter(typedChar) && this.fontRenderer.getStringWidth(lvt_3_1_ + typedChar) <= 90) {
-			lvt_3_1_ = lvt_3_1_ + typedChar;
-		}
-
-		golem.setSignText(editLine, new TextComponentString(lvt_3_1_));
+		this.field_214267_d.func_216894_a(typedChar);
 		return true;
+	}
+
+	@Override
+	public void onClose() {
+		close();
 	}
 
 	@Override
 	public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
 		if (p_keyPressed_1_ == 265) {
 			this.editLine = this.editLine - 1 & 3;
+			this.field_214267_d.func_216899_b();
 			return true;
 		} else if (p_keyPressed_1_ != 264 && p_keyPressed_1_ != 257 && p_keyPressed_1_ != 335) {
-			if (p_keyPressed_1_ == 259) {
-				String lvt_4_1_ = golem.getSignText(editLine).getString();
-				if (!lvt_4_1_.isEmpty()) {
-					lvt_4_1_ = lvt_4_1_.substring(0, lvt_4_1_.length() - 1);
-					golem.setSignText(this.editLine, new TextComponentString(lvt_4_1_));
-				}
-
-				return true;
-			} else {
-				return super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
-			}
+			return this.field_214267_d.func_216897_a(p_keyPressed_1_) || super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
 		} else {
 			this.editLine = this.editLine + 1 & 3;
+			this.field_214267_d.func_216899_b();
 			return true;
 		}
 	}
 
 	@Override
 	public void render(int mouseX, int mouseY, float partialTicks) {
-		this.drawDefaultBackground();
-		this.drawCenteredString(this.fontRenderer, I18n.format("sign.edit"), this.width / 2, 40, 16777215);
+		this.renderBackground();
+		this.drawCenteredString(this.font, I18n.format("sign.edit"), this.width / 2, 40, 0xFFFFFF);
 		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		GlStateManager.pushMatrix();
 		GlStateManager.translatef((float) (this.width / 2), 0.0F, 50.0F);
@@ -128,14 +125,9 @@ public class GuiEditGolemSign extends GuiScreen {
 		}*/
 		GlStateManager.translatef(0.0F, -1.0625F, 0.0F);
 
-		if (this.updateCounter / 6 % 2 == 0) {
-			EntityMelonGolem.te.lineBeingEdited = this.editLine;
-		}
-
-		for (int index = 0; index < 4; index++)
-			EntityMelonGolem.te.func_212365_a(index, golem.getSignText(index));
-		TileEntityRendererDispatcher.instance.getRenderer(TileEntitySign.class).render(EntityMelonGolem.te, -0.5D, -0.75D, -0.5D, 0.0F, -1);
-		EntityMelonGolem.te.lineBeingEdited = -1;
+		EntityMelonGolem.te.func_214062_a(this.editLine, this.field_214267_d.func_216896_c(), this.field_214267_d.func_216898_d(), this.updateCounter / 6 % 2 == 0);
+		TileEntityRendererDispatcher.instance.getRenderer(SignTileEntity.class).render(EntityMelonGolem.te, -0.5D, -0.75D, -0.5D, 0.0F, -1);
+		EntityMelonGolem.te.func_214063_g();
 		GlStateManager.popMatrix();
 		super.render(mouseX, mouseY, partialTicks);
 	}

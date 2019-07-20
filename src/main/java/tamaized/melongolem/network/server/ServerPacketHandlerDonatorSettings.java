@@ -1,6 +1,6 @@
 package tamaized.melongolem.network.server;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import tamaized.melongolem.network.DonatorHandler;
 import tamaized.melongolem.network.NetworkMessages;
@@ -14,7 +14,7 @@ public class ServerPacketHandlerDonatorSettings implements NetworkMessages.IMess
 	}
 
 	@Override
-	public void handle(EntityPlayer player) {
+	public void handle(PlayerEntity player) {
 		if (DonatorHandler.donators.contains(player.getUniqueID()))
 			DonatorHandler.settings.put(player.getUniqueID(), settings);
 	}

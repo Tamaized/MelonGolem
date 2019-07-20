@@ -3,9 +3,9 @@ package tamaized.melongolem;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumHand;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.block.Blocks;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -23,7 +23,7 @@ public class ModEventListener {
 
 	@SubscribeEvent
 	public static void onRightClick(PlayerInteractEvent.RightClickBlock e) {
-		EntityPlayer player = e.getEntityPlayer();
+		PlayerEntity player = e.getEntityPlayer();
 		World world = e.getWorld();
 		BlockPos pos = e.getPos();
 		if (MELONS == null)
@@ -35,18 +35,18 @@ public class ModEventListener {
 
 			);
 		for (Block melonCheck : MELONS) {
-			if (!world.isRemote && world.getBlockState(pos).getBlock() == melonCheck && MelonConfig.compareStabbyItem(player.getHeldItem(EnumHand.MAIN_HAND)) && MelonConfig.compareStabbyItem(player.getHeldItem(EnumHand.OFF_HAND))) {
+			if (!world.isRemote && world.getBlockState(pos).getBlock() == melonCheck && MelonConfig.compareStabbyItem(player.getHeldItem(Hand.MAIN_HAND)) && MelonConfig.compareStabbyItem(player.getHeldItem(Hand.OFF_HAND))) {
 				if (world.getBlockState(pos.down()).getBlock() == melonCheck && world.getBlockState(pos.up()).getBlock() == melonCheck) {
 					if (!player.isCreative()) {
-						player.getHeldItem(EnumHand.MAIN_HAND).shrink(1);
-						player.getHeldItem(EnumHand.OFF_HAND).shrink(1);
+						player.getHeldItem(Hand.MAIN_HAND).shrink(1);
+						player.getHeldItem(Hand.OFF_HAND).shrink(1);
 					}
-					world.removeBlock(pos.down());
-					world.removeBlock(pos);
-					world.removeBlock(pos.up());
+					world.removeBlock(pos.down(), false);
+					world.removeBlock(pos, false);
+					world.removeBlock(pos.up(), false);
 					EntityMelonGolem melon = melonCheck == MelonMod.glisteringMelonBlock ? new EntityGlisteringMelonGolem(world) : new EntityMelonGolem(world);
 					melon.setPositionAndUpdate(pos.getX() + 0.5F, pos.getY() - 0.5F, pos.getZ() + 0.5F);
-					world.spawnEntity(melon);
+					world.addEntity(melon);
 					break;
 				}
 			}

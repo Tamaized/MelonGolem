@@ -1,12 +1,13 @@
 package tamaized.melongolem.client;
 
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.renderer.entity.RenderLiving;
-import net.minecraft.client.renderer.entity.RenderManager;
+import com.mojang.blaze3d.platform.GLX;
+import com.mojang.blaze3d.platform.GlStateManager;
+import net.minecraft.client.renderer.entity.IEntityRenderer;
+import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
-import net.minecraft.client.renderer.entity.model.ModelSnowMan;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.client.renderer.entity.model.SnowManModel;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -17,7 +18,7 @@ import tamaized.melongolem.common.EntityTinyMelonGolem;
 import javax.annotation.Nonnull;
 
 @OnlyIn(Dist.CLIENT)
-public class RenderMelonGolem<T extends EntityLiving & IModProxy.ISignHolder> extends RenderLiving<T> {
+public class RenderMelonGolem<T extends MobEntity & IModProxy.ISignHolder> extends MobRenderer<T, SnowManModel<T>> {
 	private static final ResourceLocation TEXTURES = new ResourceLocation(MelonMod.MODID, "textures/entity/golem.png");
 	private static final ResourceLocation TEXTURES_GREY = new ResourceLocation(MelonMod.MODID, "textures/entity/greygolem.png");
 	private static final ResourceLocation TEXTURES_GLISTER = new ResourceLocation(MelonMod.MODID, "textures/entity/glistening_melon_golem.png");
@@ -26,15 +27,19 @@ public class RenderMelonGolem<T extends EntityLiving & IModProxy.ISignHolder> ex
 	private final Type type;
 
 	@SuppressWarnings("unchecked")
-	public RenderMelonGolem(RenderManager renderManagerIn, Type type) {
-		super(renderManagerIn, new ModelSnowMan(), type == Type.TINY ? 0.125F : 0.5F);
+	public RenderMelonGolem(EntityRendererManager renderManagerIn, Type type) {
+		super(renderManagerIn, new SnowManModel(), type == Type.TINY ? 0.125F : 0.5F);
 		addLayer(new LayerMelonHead(this));
 		if(type == Type.GLISTER)
-			addLayer(new LayerMelonGlister());
+			addLayer(new LayerMelonGlister(this));
 		this.type = type;
 	}
 
-	class LayerMelonGlister<E extends EntityLiving> implements LayerRenderer<E> {
+	class LayerMelonGlister<E extends MobEntity> extends LayerRenderer<E, SnowManModel<E>> {
+
+		public LayerMelonGlister(IEntityRenderer<E, SnowManModel<E>> p_i50926_1_) {
+			super(p_i50926_1_);
+		}
 
 		@Override
 		public void render(@Nonnull E entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
@@ -45,8 +50,8 @@ public class RenderMelonGolem<T extends EntityLiving & IModProxy.ISignHolder> ex
 			final float s = 1.01F;
 			GlStateManager.scalef(s, s, s);
 			int i = 0xF000F0;
-			OpenGlHelper.glMultiTexCoord2f(OpenGlHelper.GL_TEXTURE1, i % 65536, i >> 16);
-			getMainModel().render(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
+			GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, i % 65536, i >> 16);
+			getEntityModel().render(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
 			GlStateManager.popMatrix();
 			GlStateManager.disableBlend();
 		}
@@ -73,7 +78,7 @@ public class RenderMelonGolem<T extends EntityLiving & IModProxy.ISignHolder> ex
 		}
 		if(type == Type.GLISTER){
 			int i = entity.world.getCombinedLight(entity.getPosition(), 0) | 0x100010;
-			OpenGlHelper.glMultiTexCoord2f(OpenGlHelper.GL_TEXTURE1, i % 65536, i >> 16);
+			GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, i % 65536, i >> 16);
 		}
 		super.doRender(entity, x, y, z, entityYaw, partialTicks);
 		GlStateManager.color4f(1F, 1F, 1F, 1F);
@@ -92,15 +97,15 @@ public class RenderMelonGolem<T extends EntityLiving & IModProxy.ISignHolder> ex
 
 	public static class Factory {
 
-		public static RenderMelonGolem normal(RenderManager renderManager) {
+		public static RenderMelonGolem normal(EntityRendererManager renderManager) {
 			return new RenderMelonGolem(renderManager, Type.NORMAL);
 		}
 
-		public static RenderMelonGolem tiny(RenderManager renderManager) {
+		public static RenderMelonGolem tiny(EntityRendererManager renderManager) {
 			return new RenderMelonGolem(renderManager, Type.TINY);
 		}
 
-		public static RenderMelonGolem glister(RenderManager renderManager) {
+		public static RenderMelonGolem glister(EntityRendererManager renderManager) {
 			return new RenderMelonGolem(renderManager, Type.GLISTER);
 		}
 

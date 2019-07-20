@@ -2,7 +2,7 @@ package tamaized.melongolem.client;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
@@ -36,11 +36,11 @@ public class ModelBakeListener {
 			ModelResourceLocation mrl = new ModelResourceLocation(Objects.requireNonNull(MelonMod.glisteringMelonBlock.getRegistryName()), i == 0 ? "" : "inventory");
 			final IBakedModel model = event.getModelRegistry().get(mrl);
 			event.getModelRegistry().put(mrl, new IBakedModel() {
-				private Map<EnumFacing, List<BakedQuad>> cachedQuads = Maps.newHashMap();
+				private Map<Direction, List<BakedQuad>> cachedQuads = Maps.newHashMap();
 
 				@Nonnull
 				@Override
-				public List<BakedQuad> getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, @Nonnull Random rand) {
+				public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull Random rand) {
 					return cachedQuads.computeIfAbsent(side, (face) -> {
 						List<BakedQuad> delegateQuads = model.getQuads(state, side, rand);
 						List<BakedQuad> quads = Lists.newArrayList();

@@ -2,9 +2,9 @@ package tamaized.melongolem.common.capability;
 
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -31,24 +31,24 @@ public class CapabilityList {
 
 	@SubscribeEvent
 	public static void attachCapabilityEntity(AttachCapabilitiesEvent<Entity> e) {
-		if (e.getObject() instanceof EntityPlayer) {
-			e.addCapability(ITinyGolemCapability.ID, new ICapabilitySerializable<NBTTagCompound>() {
+		if (e.getObject() instanceof PlayerEntity) {
+			e.addCapability(ITinyGolemCapability.ID, new ICapabilitySerializable<CompoundNBT>() {
 
 				ITinyGolemCapability inst = TINY_GOLEM.getDefaultInstance();
 
 				@Nonnull
 				@Override
-				public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, EnumFacing facing) {
+				public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, Direction facing) {
 					return TINY_GOLEM.orEmpty(capability, LazyOptional.of(() -> inst)).cast();
 				}
 
 				@Override
-				public NBTTagCompound serializeNBT() {
-					return (NBTTagCompound) TINY_GOLEM.getStorage().writeNBT(TINY_GOLEM, inst, null);
+				public CompoundNBT serializeNBT() {
+					return (CompoundNBT) TINY_GOLEM.getStorage().writeNBT(TINY_GOLEM, inst, null);
 				}
 
 				@Override
-				public void deserializeNBT(NBTTagCompound nbt) {
+				public void deserializeNBT(CompoundNBT nbt) {
 					TINY_GOLEM.getStorage().readNBT(TINY_GOLEM, inst, null, nbt);
 				}
 
@@ -68,7 +68,7 @@ public class CapabilityList {
 		return getCap(provider, cap, null);
 	}
 
-	public static <T> T getCap(@Nullable ICapabilityProvider provider, Capability<T> cap, @Nullable EnumFacing face) {
+	public static <T> T getCap(@Nullable ICapabilityProvider provider, Capability<T> cap, @Nullable Direction face) {
 		LazyOptional<T> data = provider != null ? provider.getCapability(cap, face) : null;
 		return data != null && data.isPresent() ? data.orElseThrow(IllegalStateException::new) : null;
 	}

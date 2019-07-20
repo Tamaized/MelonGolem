@@ -2,9 +2,9 @@ package tamaized.melongolem.network.server;
 
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import tamaized.melongolem.IModProxy;
 import tamaized.melongolem.common.EntityMelonGolem;
@@ -21,12 +21,12 @@ public class ServerPacketHandlerMelonSign implements NetworkMessages.IMessage<Se
 	}
 
 	@Override
-	public void handle(EntityPlayer player) {
+	public void handle(PlayerEntity player) {
 		Entity entity = player.world.getEntityByID(id);
 		if (entity instanceof EntityMelonGolem && entity.getDistance(player) <= 6)
 			for (int i = 0; i < lines.length; ++i) {
 				String text = TextFormatting.getTextWithoutFormattingCodes(lines[i]);
-				((EntityMelonGolem) entity).setSignText(i, new TextComponentString(text == null ? "" : text));
+				((EntityMelonGolem) entity).setSignText(i, new StringTextComponent(text == null ? "" : text));
 			}
 	}
 

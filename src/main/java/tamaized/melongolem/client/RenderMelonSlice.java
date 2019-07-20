@@ -1,12 +1,12 @@
 package tamaized.melongolem.client;
 
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.init.Items;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
+import net.minecraft.client.renderer.texture.AtlasTexture;
+import net.minecraft.item.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -16,9 +16,9 @@ import tamaized.melongolem.common.EntityMelonSlice;
 import javax.annotation.Nonnull;
 
 @OnlyIn(Dist.CLIENT)
-public class RenderMelonSlice extends Render<EntityMelonSlice> {
+public class RenderMelonSlice extends EntityRenderer<EntityMelonSlice> {
 
-	public RenderMelonSlice(RenderManager renderManagerIn) {
+	public RenderMelonSlice(EntityRendererManager renderManagerIn) {
 		super(renderManagerIn);
 	}
 
@@ -31,17 +31,17 @@ public class RenderMelonSlice extends Render<EntityMelonSlice> {
 		GlStateManager.rotatef(-renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
 		GlStateManager.rotatef((float) (renderManager.options.thirdPersonView == 2 ? -1 : 1) * renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
 		GlStateManager.rotatef(180.0F, 0.0F, 1.0F, 0.0F);
-		bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+		bindTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE);
 
 		if (renderOutlines) {
 			GlStateManager.enableColorMaterial();
-			GlStateManager.enableOutlineMode(getTeamColor(entity));
+			GlStateManager.setupSolidRenderingTextureCombine(getTeamColor(entity));
 		}
 
 		Minecraft.getInstance().getItemRenderer().renderItem(new ItemStack(entity.isGlistering() ? Items.GLISTERING_MELON_SLICE : Items.MELON_SLICE), net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType.GROUND);
 
 		if (renderOutlines) {
-			GlStateManager.disableOutlineMode();
+			GlStateManager.tearDownSolidRenderingTextureCombine();
 			GlStateManager.disableColorMaterial();
 		}
 
@@ -52,6 +52,6 @@ public class RenderMelonSlice extends Render<EntityMelonSlice> {
 
 	@Override
 	protected ResourceLocation getEntityTexture(@Nonnull EntityMelonSlice entity) {
-		return TextureMap.LOCATION_BLOCKS_TEXTURE;
+		return AtlasTexture.LOCATION_BLOCKS_TEXTURE;
 	}
 }

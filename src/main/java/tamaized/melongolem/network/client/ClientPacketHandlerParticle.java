@@ -1,13 +1,14 @@
 package tamaized.melongolem.network.client;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.particles.ParticleType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.IRegistry;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+import net.minecraftforge.registries.ForgeRegistries;
 import tamaized.melongolem.network.NetworkMessages;
 
 public class ClientPacketHandlerParticle implements NetworkMessages.IMessage<ClientPacketHandlerParticle> {
@@ -23,11 +24,11 @@ public class ClientPacketHandlerParticle implements NetworkMessages.IMessage<Cli
 	}
 
 	public static void spawnParticle(World world, IParticleData particle, Vec3d pos, Vec3d vel) {
-		world.spawnParticle(particle, pos.x, pos.y, pos.z, vel.x, vel.y, vel.z);
+		world.addParticle(particle, pos.x, pos.y, pos.z, vel.x, vel.y, vel.z);
 	}
 
 	private static IParticleData getRegisteredParticleTypes(ResourceLocation p_197589_0_) {
-		ParticleType<?> t = IRegistry.field_212632_u.func_212608_b(p_197589_0_);
+		ParticleType<?> t = ForgeRegistries.PARTICLE_TYPES.getValue(p_197589_0_);
 		if (!(t instanceof IParticleData)) {
 			throw new IllegalStateException("Invalid or unknown particle type: " + p_197589_0_);
 		} else {
@@ -36,7 +37,7 @@ public class ClientPacketHandlerParticle implements NetworkMessages.IMessage<Cli
 	}
 
 	@Override
-	public void handle(EntityPlayer player) {
+	public void handle(PlayerEntity player) {
 		spawnParticle(player.world, getRegisteredParticleTypes(id), vec, vel);
 	}
 

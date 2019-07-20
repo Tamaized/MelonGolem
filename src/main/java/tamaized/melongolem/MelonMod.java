@@ -2,18 +2,22 @@ package tamaized.melongolem;
 
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
+import net.minecraft.entity.passive.GolemEntity;
+import net.minecraft.entity.passive.TameableEntity;
+import net.minecraft.entity.projectile.ThrowableEntity;
+import net.minecraft.item.Items;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemSpawnEgg;
+import net.minecraft.item.SpawnEggItem;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.util.ResourceLocation;
@@ -85,15 +89,15 @@ public class MelonMod {
 	@ObjectHolder(MelonMod.MODID + ":glisteringmelonblock")
 	public static final Block glisteringMelonBlock = Blocks.AIR;
 
-	public static final EntityType entityTypeMelonGolem = assign(EntityMelonGolem.class, 128, 1, true);
+	public static final EntityType<? extends GolemEntity> entityTypeMelonGolem = assign(EntityMelonGolem.class, 0.7F, 1.9F, 128, 1, true, EntityClassification.CREATURE);
 
-	public static final EntityType entityTypeGlisteringMelonGolem = assign(EntityGlisteringMelonGolem.class, 128, 1, true);
+	public static final EntityType<? extends GolemEntity> entityTypeGlisteringMelonGolem = assign(EntityGlisteringMelonGolem.class, 0.7F, 1.9F, 128, 1, true, EntityClassification.CREATURE);
 
 	@ObjectHolder(MelonMod.MODID + ":entitymelonslice")
-	public static final EntityType entityTypeMelonSlice = getNull();
+	public static final EntityType<? extends ThrowableEntity> entityTypeMelonSlice = getNull();
 
 	@ObjectHolder(MelonMod.MODID + ":entitytinymelongolem")
-	public static final EntityType entityTypeTinyMelonGolem = getNull();
+	public static final EntityType<? extends TameableEntity> entityTypeTinyMelonGolem = getNull();
 
 	public MelonMod() {
 		DonatorHandler.start();
@@ -105,9 +109,9 @@ public class MelonMod {
 
 				entityTypeMelonGolem,
 
-				assign(EntityMelonSlice.class, 128, 1, true),
+				assign(EntityMelonSlice.class, 0.25F, 0.25F, 128, 1, true, EntityClassification.MISC),
 
-				assign(EntityTinyMelonGolem.class, 128, 1, true),
+				assign(EntityTinyMelonGolem.class, 0.175F, 0.475F, 128, 1, true, EntityClassification.CREATURE),
 
 				entityTypeGlisteringMelonGolem
 
@@ -127,24 +131,24 @@ public class MelonMod {
 		e.getRegistry().registerAll(
 
 				assign(new Block(Block.Properties.create(Material.GOURD, MaterialColor.LIME).hardnessAndResistance(1.0F).sound(SoundType.WOOD).lightValue(4)) {
-					@Nonnull
+					/*@Nonnull
 					@Override
-					public IItemProvider getItemDropped(IBlockState p_199769_1_, World p_199769_2_, BlockPos p_199769_3_, int p_199769_4_) {
+					public IItemProvider getItemDropped(BlockState p_199769_1_, World p_199769_2_, BlockPos p_199769_3_, int p_199769_4_) {
 						return Items.GLISTERING_MELON_SLICE;
 					}
 
 					@Override
 					@Deprecated
 					@SuppressWarnings({"deprecation", "DeprecatedIsStillUsed"})
-					public int quantityDropped(IBlockState p_196264_1_, Random p_196264_2_) {
+					public int quantityDropped(BlockState p_196264_1_, Random p_196264_2_) {
 						return 3 + p_196264_2_.nextInt(5);
 					}
 
 					@Override
 					@SuppressWarnings("deprecation")
-					public int getItemsToDropCount(@Nonnull IBlockState p_196251_1_, int p_196251_2_, World p_196251_3_, BlockPos p_196251_4_, @Nonnull Random p_196251_5_) {
+					public int getItemsToDropCount(@Nonnull BlockState p_196251_1_, int p_196251_2_, World p_196251_3_, BlockPos p_196251_4_, @Nonnull Random p_196251_5_) {
 						return Math.min(9, this.quantityDropped(p_196251_1_, p_196251_5_) + p_196251_5_.nextInt(1 + p_196251_2_));
-					}
+					}*/
 
 					@Nonnull
 					@Override
@@ -164,9 +168,9 @@ public class MelonMod {
 
 				assign(glisteringMelonBlock),
 
-				assign(new ItemSpawnEgg(entityTypeMelonGolem, 0xFF00, 0x0, new Item.Properties().group(ItemGroup.MISC)), "melongolemspawnegg"),
+				assign(new SpawnEggItem(entityTypeMelonGolem, 0xFF00, 0x0, new Item.Properties().group(ItemGroup.MISC)), "melongolemspawnegg"),
 
-				assign(new ItemSpawnEgg(entityTypeGlisteringMelonGolem, 0xAAFF00, 0xFFCC00, new Item.Properties().group(ItemGroup.MISC)), "glisteringmelongolemspawnegg")
+				assign(new SpawnEggItem(entityTypeGlisteringMelonGolem, 0xAAFF00, 0xFFCC00, new Item.Properties().group(ItemGroup.MISC)), "glisteringmelongolemspawnegg")
 
 		);
 	}
@@ -177,8 +181,8 @@ public class MelonMod {
 				.setRegistryName(MODID, name);
 	}
 
-	private static ItemBlock assign(Block block) {
-		return (ItemBlock) new ItemBlock(block,
+	private static BlockItem assign(Block block) {
+		return (BlockItem) new BlockItem(block,
 
 				new Item.Properties().setNoRepair().group(ItemGroup.MISC)
 
@@ -193,17 +197,20 @@ public class MelonMod {
 				.setRegistryName(MODID, name);
 	}
 
-	private static <T extends Entity> EntityType<T> assign(Class<T> entity, int range, int freq, boolean updates) {
+	private static <T extends Entity> EntityType<T> assign(Class<T> entity, float w, float h, int range, int freq, boolean updates, EntityClassification classification) {
 		final String name = entity.getSimpleName().toLowerCase();
-		EntityType<T> type = EntityType.Builder.create(entity, world -> {
+		EntityType<T> type = EntityType.Builder.<T>create((et, world) -> {
 			try {
 				return entity.getConstructor(World.class).newInstance(world);
 			} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 				e.printStackTrace();
 			}
 			return null;
-		}).
-				tracker(range, freq, updates).
+		}, classification).
+				setTrackingRange(range).
+				setUpdateInterval(freq).
+				setShouldReceiveVelocityUpdates(updates).
+				size(w, h).
 				build(name);
 		type.setRegistryName(MODID, name);
 		return type;

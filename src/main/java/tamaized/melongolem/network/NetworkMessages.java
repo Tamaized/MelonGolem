@@ -2,8 +2,7 @@ package tamaized.melongolem.network;
 
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
@@ -47,16 +46,16 @@ public class NetworkMessages {
 		}
 
 		@SuppressWarnings({"Convert2Lambda", "Convert2Diamond"})
-		static Supplier<EntityPlayer> getClientSidePlayer() {
-			return new Supplier<EntityPlayer>() {
+		static Supplier<PlayerEntity> getClientSidePlayer() {
+			return new Supplier<PlayerEntity>() {
 				@Override
-				public EntityPlayer get() {
+				public PlayerEntity get() {
 					return Minecraft.getInstance().player;
 				}
 			};
 		}
 
-		void handle(EntityPlayer player);
+		void handle(PlayerEntity player);
 
 		void toBytes(PacketBuffer packet);
 

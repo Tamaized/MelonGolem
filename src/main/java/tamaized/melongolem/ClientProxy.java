@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.init.Items;
+import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
 import tamaized.melongolem.client.GuiEditGolemSign;
 
@@ -26,7 +26,7 @@ public class ClientProxy implements IModProxy {
 
 	@Override
 	public void openSignHolderGui(ISignHolder golem) {
-		if (golem.getHead().getItem() == Items.SIGN && golem.getDistance(Minecraft.getInstance().player) <= 6)
+		if (golem.getHead().getItem() == Items.OAK_SIGN && golem.getDistance(Minecraft.getInstance().player) <= 6)
 			Minecraft.getInstance().displayGuiScreen(new GuiEditGolemSign(golem));
 	}
 

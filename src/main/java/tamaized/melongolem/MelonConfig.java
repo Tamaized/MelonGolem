@@ -1,9 +1,9 @@
 package tamaized.melongolem;
 
 
-import net.minecraft.init.Items;
+import net.minecraft.item.Items;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemAir;
+import net.minecraft.item.AirItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -107,7 +107,7 @@ public class MelonConfig {
 			regname = split[1];
 		}
 		Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(domain, regname));
-		if (item == null || item instanceof ItemAir)
+		if (item == null || item instanceof AirItem)
 			return;
 		stabItem = item;
 	}
