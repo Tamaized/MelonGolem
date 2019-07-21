@@ -6,12 +6,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.fonts.TextInputUtil;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.network.play.client.CUpdateSignPacket;
 import net.minecraft.tileentity.SignTileEntity;
-import net.minecraft.util.SharedConstants;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import tamaized.melongolem.IModProxy;
@@ -126,6 +123,8 @@ public class GuiEditGolemSign extends Screen {
 		GlStateManager.translatef(0.0F, -1.0625F, 0.0F);
 
 		EntityMelonGolem.te.func_214062_a(this.editLine, this.field_214267_d.func_216896_c(), this.field_214267_d.func_216898_d(), this.updateCounter / 6 % 2 == 0);
+		for (int index = 0; index < 4; index++)
+			EntityMelonGolem.te.setText(index, golem.getSignText(index));
 		TileEntityRendererDispatcher.instance.getRenderer(SignTileEntity.class).render(EntityMelonGolem.te, -0.5D, -0.75D, -0.5D, 0.0F, -1);
 		EntityMelonGolem.te.func_214063_g();
 		GlStateManager.popMatrix();
