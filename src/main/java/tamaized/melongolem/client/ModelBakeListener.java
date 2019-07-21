@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
-@Mod.EventBusSubscriber(modid = MelonMod.MODID, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = MelonMod.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ModelBakeListener {
 
 	@SubscribeEvent
