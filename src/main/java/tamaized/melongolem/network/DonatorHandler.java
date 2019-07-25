@@ -2,6 +2,8 @@ package tamaized.melongolem.network;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import tamaized.melongolem.MelonMod;
 
 import java.io.IOException;
@@ -15,7 +17,7 @@ import java.util.UUID;
 public class DonatorHandler {
 
 	public static final Map<UUID, DonatorSettings> settings = Maps.newHashMap();
-	private static final String URL_DONATORS = "https://raw.githubusercontent.com/Tamaized/MelonGolem/1.12/donator.properties";
+	private static final String URL_DONATORS = "https://raw.githubusercontent.com/Tamaized/MelonGolem/{BRANCH}/donator.properties";
 	public static volatile List<UUID> donators = Lists.newArrayList();
 	private static boolean started = false;
 
@@ -32,12 +34,14 @@ public class DonatorHandler {
 		for (String s : props.stringPropertyNames()) {
 			donators.add(UUID.fromString(s));
 		}
+		MelonMod.logger.debug(donators);
 	}
 
 	public static final class DonatorSettings {
 		public boolean enabled = true;
 		public int color = 0xFFFFFF;
-		public DonatorSettings(boolean enabled, int color){
+
+		public DonatorSettings(boolean enabled, int color) {
 			this.enabled = enabled;
 			this.color = color;
 		}
@@ -53,15 +57,16 @@ public class DonatorHandler {
 
 		@Override
 		public void run() {
-			try {
-				{
-					MelonMod.logger.info("Loading Data");
-					URL url = new URL(URL_DONATORS);
-					Properties props = new Properties();
-					InputStreamReader reader = new InputStreamReader(url.openStream());
-					props.load(reader);
-					loadData(props);
-				}
+			MelonMod.logger.info("Loading Data");
+			try (InputStreamReader json = new InputStreamReader(new URL("https://api.github.com/repos/Tamaized/MelonGolem").openConnection().getInputStream())) {
+				String branch = new Gson().fromJson(json, JsonObject.class).get("default_branch").getAsString();
+				URL url = new URL(URL_DONATORS.replace("{BRANCH}", branch));
+				MelonMod.logger.debug(url);
+				Properties props = new Properties();
+				InputStreamReader reader = new InputStreamReader(url.openStream());
+				props.load(reader);
+				loadData(props);
+				MelonMod.logger.info("Data Loaded");
 			} catch (IOException e) {
 				MelonMod.logger.error("Could not load data");
 			}
