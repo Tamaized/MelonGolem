@@ -2,7 +2,6 @@ package tamaized.melongolem;
 
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -13,15 +12,13 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.projectile.ThrowableEntity;
-import net.minecraft.item.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.item.Items;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.IItemProvider;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -29,20 +26,18 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.network.NetworkRegistry;
+import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 import net.minecraftforge.registries.ObjectHolder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import tamaized.melongolem.client.RenderMelonGolem;
-import tamaized.melongolem.client.RenderMelonSlice;
 import tamaized.melongolem.common.EntityGlisteringMelonGolem;
 import tamaized.melongolem.common.EntityMelonGolem;
 import tamaized.melongolem.common.EntityMelonSlice;
@@ -53,11 +48,11 @@ import tamaized.melongolem.common.capability.TinyGolemCapabilityHandler;
 import tamaized.melongolem.common.capability.TinyGolemCapabilityStorage;
 import tamaized.melongolem.network.DonatorHandler;
 import tamaized.melongolem.network.NetworkMessages;
+import tamaized.melongolem.network.client.ClientPacketHandlerSpawnNonLivingEntity;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
-import java.util.Random;
 import java.util.function.Supplier;
 
 @Mod(MelonMod.MODID)
@@ -119,11 +114,8 @@ public class MelonMod {
 	}
 
 	@SubscribeEvent
-	public static void registerRenders(FMLClientSetupEvent e) {
-		RenderingRegistry.registerEntityRenderingHandler(EntityMelonGolem.class, RenderMelonGolem.Factory::normal);
-		RenderingRegistry.registerEntityRenderingHandler(EntityMelonSlice.class, RenderMelonSlice::new);
-		RenderingRegistry.registerEntityRenderingHandler(EntityTinyMelonGolem.class, RenderMelonGolem.Factory::tiny);
-		RenderingRegistry.registerEntityRenderingHandler(EntityGlisteringMelonGolem.class, RenderMelonGolem.Factory::glister);
+	public static void clientSetup(FMLClientSetupEvent e) {
+		ClientProxy.registerRenders();
 	}
 
 	@SubscribeEvent
@@ -235,6 +227,17 @@ public class MelonMod {
 
 	private static <T> T getNull() {
 		return null;
+	}
+
+	public static void spawnNonLivingEntity(World world, Entity entity) {
+		world.addEntity(entity);
+		MelonMod.network.send(
+
+				PacketDistributor.TRACKING_CHUNK.with(() -> world.getChunk(entity.chunkCoordX, entity.chunkCoordZ)),
+
+				new ClientPacketHandlerSpawnNonLivingEntity(entity)
+
+		);
 	}
 
 }

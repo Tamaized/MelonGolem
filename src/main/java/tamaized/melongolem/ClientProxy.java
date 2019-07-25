@@ -1,18 +1,32 @@
 package tamaized.melongolem;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.entity.SpriteRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import tamaized.melongolem.client.GuiEditGolemSign;
+import tamaized.melongolem.client.RenderMelonGolem;
+import tamaized.melongolem.common.EntityGlisteringMelonGolem;
+import tamaized.melongolem.common.EntityMelonGolem;
+import tamaized.melongolem.common.EntityMelonSlice;
+import tamaized.melongolem.common.EntityTinyMelonGolem;
 
 import java.util.function.Function;
 
 public class ClientProxy implements IModProxy {
 
 	public static final VertexFormat ITEM_FORMAT_WITH_LIGHTMAP = new VertexFormat(DefaultVertexFormats.ITEM).addElement(DefaultVertexFormats.TEX_2S);
+
+	public static void registerRenders() {
+		RenderingRegistry.registerEntityRenderingHandler(EntityMelonGolem.class, RenderMelonGolem.Factory::normal);
+		RenderingRegistry.registerEntityRenderingHandler(EntityMelonSlice.class, manager -> new SpriteRenderer<>(manager, Minecraft.getInstance().getItemRenderer()));
+		RenderingRegistry.registerEntityRenderingHandler(EntityTinyMelonGolem.class, RenderMelonGolem.Factory::tiny);
+		RenderingRegistry.registerEntityRenderingHandler(EntityGlisteringMelonGolem.class, RenderMelonGolem.Factory::glister);
+	}
 
 	@Override
 	public void init() {

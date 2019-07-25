@@ -1,5 +1,6 @@
 package tamaized.melongolem.common;
 
+import net.minecraft.entity.IRendersAsItem;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.ThrowableEntity;
 import net.minecraft.item.ItemStack;
@@ -20,9 +21,11 @@ import tamaized.melongolem.MelonMod;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-public class EntityMelonSlice extends ThrowableEntity {
+@OnlyIn(value = Dist.CLIENT, _interface = IRendersAsItem.class)
+public class EntityMelonSlice extends ThrowableEntity implements IRendersAsItem {
 
 	private static final DataParameter<Boolean> GLIST = EntityDataManager.createKey(EntityMelonSlice.class, DataSerializers.BOOLEAN);
+	private static ItemStack cacheRenderStack = ItemStack.EMPTY;
 
 	@SuppressWarnings("unused")
 	public EntityMelonSlice(World worldIn) {
@@ -76,5 +79,11 @@ public class EntityMelonSlice extends ThrowableEntity {
 			this.world.setEntityState(this, (byte) 3);
 			this.remove();
 		}
+	}
+
+	@Nonnull
+	@Override
+	public ItemStack getItem() {
+		return cacheRenderStack.isEmpty() ? cacheRenderStack = new ItemStack(isGlistering() ? Items.GLISTERING_MELON_SLICE : Items.MELON_SLICE) : cacheRenderStack;
 	}
 }
