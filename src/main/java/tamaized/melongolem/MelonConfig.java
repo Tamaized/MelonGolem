@@ -1,10 +1,10 @@
 package tamaized.melongolem;
 
 
-import net.minecraft.item.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.AirItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.common.Mod;
@@ -15,10 +15,10 @@ import java.util.Objects;
 @Mod.EventBusSubscriber(modid = MelonMod.MODID)
 public class MelonConfig {
 
-	public ForgeConfigSpec.DoubleValue health;
 	public static boolean dirty = true;
 	public static Item stabItem = Items.STICK;
 	public final DonatorSettings DONATOR_SETTINGS = new DonatorSettings();
+	public ForgeConfigSpec.DoubleValue health;
 	public ForgeConfigSpec.DoubleValue damage;
 	public ForgeConfigSpec.DoubleValue glisterDamageAmp;
 	public ForgeConfigSpec.BooleanValue hats;
@@ -112,7 +112,7 @@ public class MelonConfig {
 		stabItem = item;
 	}
 
-	public static boolean compareStabbyItem(ItemStack stack){
+	public static boolean compareStabbyItem(ItemStack stack) {
 		return stack.getItem() == stabItem;
 	}
 
@@ -129,7 +129,8 @@ public class MelonConfig {
 		try {
 			MelonMod.config.DONATOR_SETTINGS.colorint = Integer.decode(MelonMod.config.DONATOR_SETTINGS.color.get());
 		} catch (Throwable e) {
-			//			MelonMod.config.DONATOR_SETTINGS.color = "0xFFFFFF"; TODO
+			MelonMod.config.DONATOR_SETTINGS.color.set("0xFFFFFF");
+			MelonMod.config.DONATOR_SETTINGS.color.save();
 			MelonMod.config.DONATOR_SETTINGS.colorint = 0xFFFFFF;
 		}
 		dirty = true;

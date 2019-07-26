@@ -6,6 +6,8 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
@@ -25,12 +27,15 @@ import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ExtensionPoint;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
@@ -38,6 +43,7 @@ import net.minecraftforge.registries.ObjectHolder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tamaized.melongolem.client.MelonConfigScreen;
 import tamaized.melongolem.common.EntityGlisteringMelonGolem;
 import tamaized.melongolem.common.EntityMelonGolem;
 import tamaized.melongolem.common.EntityMelonSlice;
@@ -52,8 +58,12 @@ import tamaized.melongolem.network.client.ClientPacketHandlerSpawnNonLivingEntit
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 @Mod(MelonMod.MODID)
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -96,6 +106,14 @@ public class MelonMod {
 
 	public MelonMod() {
 		DonatorHandler.start();
+		List<ModInfo> unsecure =  ModList.get().getMods();
+			unsecure.replaceAll(modInfo -> !modInfo.getModId().equalsIgnoreCase(MODID) ? modInfo : new ModInfo(modInfo.getOwningFile(), modInfo.getModConfig()){
+				@Override
+				public boolean hasConfigUI() {
+					return true;
+				}
+			});
+		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> MelonConfigScreen::new);
 	}
 
 	@SubscribeEvent
