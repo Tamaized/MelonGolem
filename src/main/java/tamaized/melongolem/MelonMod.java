@@ -6,8 +6,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
@@ -58,12 +56,8 @@ import tamaized.melongolem.network.client.ClientPacketHandlerSpawnNonLivingEntit
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 @Mod(MelonMod.MODID)
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -106,13 +100,13 @@ public class MelonMod {
 
 	public MelonMod() {
 		DonatorHandler.start();
-		List<ModInfo> unsecure =  ModList.get().getMods();
-			unsecure.replaceAll(modInfo -> !modInfo.getModId().equalsIgnoreCase(MODID) ? modInfo : new ModInfo(modInfo.getOwningFile(), modInfo.getModConfig()){
-				@Override
-				public boolean hasConfigUI() {
-					return true;
-				}
-			});
+		// Lol a non-copy modifiable list
+		ModList.get().getMods().replaceAll(modInfo -> !modInfo.getModId().equalsIgnoreCase(MODID) ? modInfo : new ModInfo(modInfo.getOwningFile(), modInfo.getModConfig()) {
+			@Override
+			public boolean hasConfigUI() {
+				return true;
+			}
+		});
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> MelonConfigScreen::new);
 	}
 

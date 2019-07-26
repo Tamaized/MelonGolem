@@ -5,7 +5,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import tamaized.melongolem.MelonConfig;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.network.DonatorHandler;
 import tamaized.melongolem.network.server.ServerPacketHandlerDonatorSettings;

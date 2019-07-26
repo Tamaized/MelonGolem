@@ -2,9 +2,9 @@ package tamaized.melongolem.client;
 
 import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.SnowManModel;
 import net.minecraft.entity.MobEntity;
@@ -30,7 +30,7 @@ public class RenderMelonGolem<T extends MobEntity & IModProxy.ISignHolder> exten
 	public RenderMelonGolem(EntityRendererManager renderManagerIn, Type type) {
 		super(renderManagerIn, new SnowManModel(), type == Type.TINY ? 0.125F : 0.5F);
 		addLayer(new LayerMelonHead(this));
-		if(type == Type.GLISTER)
+		if (type == Type.GLISTER)
 			addLayer(new LayerMelonGlister(this));
 		this.type = type;
 	}
@@ -76,7 +76,7 @@ public class RenderMelonGolem<T extends MobEntity & IModProxy.ISignHolder> exten
 				GlStateManager.color4f(r, g, b, 1F);
 			}
 		}
-		if(type == Type.GLISTER){
+		if (type == Type.GLISTER) {
 			int i = entity.world.getCombinedLight(entity.getPosition(), 0) | 0x100010;
 			GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, i % 65536, i >> 16);
 		}

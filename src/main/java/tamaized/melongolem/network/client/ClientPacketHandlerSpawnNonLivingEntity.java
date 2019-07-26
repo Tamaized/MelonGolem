@@ -1,6 +1,5 @@
 package tamaized.melongolem.network.client;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -10,8 +9,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.network.PacketDistributor;
-import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.network.NetworkMessages;
 
 import java.util.Objects;

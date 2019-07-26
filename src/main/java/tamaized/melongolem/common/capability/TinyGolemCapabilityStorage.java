@@ -24,9 +24,9 @@ public class TinyGolemCapabilityStorage implements Capability.IStorage<ITinyGole
 
 	@Override
 	public void readNBT(Capability<ITinyGolemCapability> capability, ITinyGolemCapability instance, Direction side, INBT nbt) {
-		if(nbt instanceof CompoundNBT){
+		if (nbt instanceof CompoundNBT) {
 			CompoundNBT data = (CompoundNBT) nbt;
-			if(data.contains("pos") && data.contains("dim") && data.contains("uuid")){
+			if (data.contains("pos") && data.contains("dim") && data.contains("uuid")) {
 				instance.markDirty(BlockPos.fromLong(data.getLong("pos")), data.getInt("dim"), data.getUniqueId("uuid"));
 			}
 		}

@@ -54,7 +54,7 @@ public class MelonConfigScreen extends Screen {
 		int color = 0xFFFFFFFF;
 		try {
 			color = Integer.decode(input.getText());
-		} catch (NumberFormatException e){
+		} catch (NumberFormatException e) {
 			// NO-OP
 		}
 		GlStateManager.enableBlend();
