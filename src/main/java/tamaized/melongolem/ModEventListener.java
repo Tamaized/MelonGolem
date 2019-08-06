@@ -23,7 +23,7 @@ public class ModEventListener {
 
 	@SubscribeEvent
 	public static void onRightClick(PlayerInteractEvent.RightClickBlock e) {
-		PlayerEntity player = e.getEntityPlayer();
+		PlayerEntity player = e.getPlayer();
 		World world = e.getWorld();
 		BlockPos pos = e.getPos();
 		if (MELONS == null)

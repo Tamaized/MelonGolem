@@ -67,11 +67,7 @@ public class MelonMod {
 
 	public static final IModProxy proxy = DistExecutor.runForDist(() -> ClientProxy::new, () -> ServerProxy::new);
 
-	public static final MelonConfig config = ((Supplier<MelonConfig>) () -> {
-		final Pair<MelonConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(MelonConfig::new);
-		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, specPair.getRight());
-		return specPair.getLeft();
-	}).get();
+	public static MelonConfig config;
 
 	public static final SimpleChannel network = NetworkRegistry.ChannelBuilder.
 			named(new ResourceLocation(MODID, MODID)).
@@ -99,6 +95,9 @@ public class MelonMod {
 	public static final EntityType<? extends TameableEntity> entityTypeTinyMelonGolem = getNull();
 
 	public MelonMod() {
+		final Pair<MelonConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(MelonConfig::new);
+		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, specPair.getRight());
+		config = specPair.getLeft();
 		DonatorHandler.start();
 		// Lol a non-copy modifiable list
 		ModList.get().getMods().replaceAll(modInfo -> !modInfo.getModId().equalsIgnoreCase(MODID) ? modInfo : new ModInfo(modInfo.getOwningFile(), modInfo.getModConfig()) {
