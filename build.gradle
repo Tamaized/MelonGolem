@@ -42,17 +42,24 @@ dependencies {
     runtime "mezz.jei:${project.jeiVersion}"
 }
 
-processResources
-        {
-            inputs.property "version", project.version
-            inputs.property "mcversion", project.minecraftVersion
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraftVersion
 
-            from(sourceSets.main.resources.srcDirs) {
-                include 'mcmod.info'
-                expand 'version': project.modVersion + "" + project.modVersionValue, 'mcversion': project.minecraftVersion
-            }
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+        expand 'version': project.modVersion + "" + project.modVersionValue, 'mcversion': project.minecraftVersion
+    }
 
-            from(sourceSets.main.resources.srcDirs) {
-                exclude 'mcmod.info'
-            }
-        }
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
+
+task finalize << {
+    ant.propertyfile(file: "gradle.properties") {
+        entry(key: "modVersionValue", value: Integer.parseInt(project.modVersionValue) + 1)
+    }
+}
+
+build.finalizedBy(finalize)
