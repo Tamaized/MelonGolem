@@ -143,6 +143,11 @@ public class EntityTinyMelonGolem extends EntityTameable implements IShearable, 
 	}
 
 	@Override
+	public int entityNetworkId() {
+		return getEntityId();
+	}
+
+	@Override
 	public ITextComponent getSignText(int index) {
 		return dataManager.get(SIGN_TEXT.get(index));
 	}

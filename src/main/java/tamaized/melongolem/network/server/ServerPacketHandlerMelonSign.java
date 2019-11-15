@@ -46,7 +46,7 @@ public class ServerPacketHandlerMelonSign implements IMessageHandler<ServerPacke
 		}
 
 		public Packet(IModProxy.ISignHolder golem) {
-			id = golem.getEntityId();
+			id = golem.entityNetworkId();
 			lines = new String[]{golem.getSignText(0).getUnformattedText(), golem.getSignText(1).getUnformattedText(), golem.getSignText(2).getUnformattedText(), golem.getSignText(3).getUnformattedText()};
 		}
 
