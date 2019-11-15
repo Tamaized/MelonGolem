@@ -6,6 +6,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIFollowOwner;
@@ -217,6 +218,11 @@ public class EntityTinyMelonGolem extends EntityTameable implements IShearable, 
 	@Override
 	public ItemStack getHead() {
 		return dataManager.get(HEAD);
+	}
+
+	@Override
+	public float signHolderDistance(Entity entityIn) {
+		return getDistance(entityIn);
 	}
 
 	public void setHead(ItemStack stack) {

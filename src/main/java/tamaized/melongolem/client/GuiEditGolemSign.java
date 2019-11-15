@@ -43,7 +43,7 @@ public class GuiEditGolemSign extends GuiScreen {
 	@Override
 	public void updateScreen() {
 		++this.updateCounter;
-		if (golem.getDistance(Minecraft.getMinecraft().player) > 6) {
+		if (golem.signHolderDistance(Minecraft.getMinecraft().player) > 6) {
 			canSend = false;
 			Minecraft.getMinecraft().player.closeScreen();
 		}
