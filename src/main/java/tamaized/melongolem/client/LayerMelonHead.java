@@ -1,20 +1,26 @@
 package tamaized.melongolem.client;
 
+import com.google.common.collect.ImmutableSet;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
 import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
+import net.minecraft.client.renderer.entity.model.IHasHead;
 import net.minecraft.client.renderer.entity.model.SnowManModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.WallOrFloorItem;
 import net.minecraft.tileentity.SignTileEntity;
 import tamaized.melongolem.IModProxy;
+import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.EntityMelonGolem;
 
 import javax.annotation.Nonnull;
@@ -27,23 +33,22 @@ public class LayerMelonHead<T extends LivingEntity & IModProxy.ISignHolder> exte
 	}
 
 	@Override
-	public void render(@Nonnull MatrixStack stack, @Nonnull IRenderTypeBuffer buffer, int light, @Nonnull T entity, float limbSwing, float limbSwingAmount, float partialTicks, float rotation, float yawHead, float pitch) {
+	public void render(@Nonnull MatrixStack stack, @Nonnull IRenderTypeBuffer buffer, int light, @Nonnull T entity, float limbSwing, float limbSwingAmount, float partialTicks, float age, float yawHead, float pitch) {
 		ItemStack itemStack = entity.getHead();
 		if (!entity.isInvisible() || !itemStack.isEmpty()) {
 			stack.push();
-//			getEntityModel().head.postRender(scale);
-//			GlStateManager.translatef(0.0F, /*-0.34375F*/-scale / (2F / 11F), 0.0F);
-//			GlStateManager.rotatef(180.0F, 0.0F, 1.0F, 0.0F);
-//			final float s = scale * 10F;
-//			GlStateManager.scalef(s, -s, -s);
-			if (itemStack.getItem() == Items.OAK_SIGN) {
+			getEntityModel().head.rotate(stack);
+			stack.translate(0.0D, -0.25D, 0.0D);
+			stack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(180F));
+			stack.scale(0.625F, -0.625F, -0.625F);
+			if (MelonMod.SIGNS.contains(itemStack.getItem())) {
 				for (int index = 0; index < 4; index++)
 					EntityMelonGolem.te.setText(index, entity.getSignText(index));
-				stack.push();
+				stack.translate(-0.5D, -0.5D, -1.33D);
+				EntityMelonGolem.SIGN_TILE_BLOCKSTATE = ((WallOrFloorItem)entity.getHead().getItem()).wallBlock.getDefaultState();
 				Objects.requireNonNull(TileEntityRendererDispatcher.instance.getRenderer(EntityMelonGolem.te)).render(EntityMelonGolem.te, partialTicks, stack, buffer, light, LivingRenderer.getOverlay(entity, 0F));
-				stack.pop();
 			} else
-				Minecraft.getInstance().getItemRenderer().renderItem(itemStack, ItemCameraTransforms.TransformType.HEAD, light, LivingRenderer.getOverlay(entity, 0F), stack, buffer);
+				Minecraft.getInstance().getFirstPersonRenderer().renderItem(entity, itemStack, ItemCameraTransforms.TransformType.HEAD, false, stack, buffer, light);
 			stack.pop();
 		}
 	}

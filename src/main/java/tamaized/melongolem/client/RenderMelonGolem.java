@@ -48,7 +48,6 @@ public class RenderMelonGolem<T extends MobEntity & IModProxy.ISignHolder> exten
 	public void render(T entity, float rotation, float partialTicks, @Nonnull MatrixStack stack, @Nonnull IRenderTypeBuffer buffer, int light) {
 		stack.push();
 		if (type == Type.TINY) {
-			stack.translate(0, -1.11F, 0);
 			EntityTinyMelonGolem golem = (EntityTinyMelonGolem) entity;
 			if (golem.isEnabled()) {
 				int color = golem.getColor();
@@ -56,11 +55,6 @@ public class RenderMelonGolem<T extends MobEntity & IModProxy.ISignHolder> exten
 				COLOR_STATE.green = ((color >> 8) & 0xFF) / 255F;
 				COLOR_STATE.blue = ((color) & 0xFF) / 255F;
 			}
-		}
-		if (type == Type.GLISTER) {
-			//			int i = entity.world.getCombinedLight(entity.getPosition(), 0) | 0x100010;
-			//			GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, i % 65536, i >> 16);
-//			light = 0xF000F0;
 		}
 		super.render(entity, rotation, partialTicks, stack, buffer, light);
 		stack.pop();

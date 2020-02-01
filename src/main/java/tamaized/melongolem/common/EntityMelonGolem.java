@@ -67,11 +67,12 @@ import java.util.Objects;
 
 public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, IShearable, IEntityAdditionalSpawnData, IModProxy.ISignHolder {
 
+	public static BlockState SIGN_TILE_BLOCKSTATE = Blocks.OAK_WALL_SIGN.getDefaultState();
 	public static final SignTileEntity te = new SignTileEntity() {
 		@Nonnull
 		@Override
 		public BlockState getBlockState() {
-			return Blocks.OAK_WALL_SIGN.getDefaultState();
+			return SIGN_TILE_BLOCKSTATE;
 		}
 	};
 	private static final DataParameter<ItemStack> HEAD = EntityDataManager.createKey(EntityMelonGolem.class, DataSerializers.ITEMSTACK);
@@ -188,12 +189,12 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 
 	@Override
 	public int getTalkInterval() {
-		return getHead().getItem() == Items.OAK_SIGN ? 200 : super.getTalkInterval();
+		return MelonMod.SIGNS.contains(getHead().getItem()) ? 200 : super.getTalkInterval();
 	}
 
 	@Override
 	public void playAmbientSound() {
-		if (MelonMod.config.tts.get() && getHead().getItem() == Items.OAK_SIGN) {
+		if (MelonMod.config.tts.get() && MelonMod.SIGNS.contains(getHead().getItem())) {
 			if (world != null && !world.isRemote)
 				MelonMod.network.send(PacketDistributor.TRACKING_ENTITY.with(() -> this), new ClientPacketHandlerMelonTTS(this));
 		} else
@@ -206,13 +207,13 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 			return false;
 		ItemStack stack = player.getHeldItem(hand);
 		if (!stack.isEmpty() && getHead().isEmpty()) {
-			if (Block.getBlockFromItem(stack.getItem()) != Blocks.AIR || stack.getItem() == Items.OAK_SIGN) {
+			if (Block.getBlockFromItem(stack.getItem()) != Blocks.AIR || MelonMod.SIGNS.contains(stack.getItem())) {
 				setHead(stack);
 				if (!player.isCreative())
 					player.getHeldItem(hand).shrink(1);
 				return true;
 			}
-		} else if (!getHead().isEmpty() && getHead().getItem() == Items.OAK_SIGN) {
+		} else if (!getHead().isEmpty() && MelonMod.SIGNS.contains(getHead().getItem())) {
 			MelonMod.proxy.openSignHolderGui(this);
 			return true;
 		}

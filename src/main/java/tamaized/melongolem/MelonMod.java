@@ -1,6 +1,7 @@
 package tamaized.melongolem;
 
 
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -94,6 +95,8 @@ public class MelonMod {
 
 	@ObjectHolder(MelonMod.MODID + ":entitytinymelongolem")
 	public static final EntityType<? extends TameableEntity> entityTypeTinyMelonGolem = getNull();
+
+	public static final ImmutableSet<Item> SIGNS = ImmutableSet.of(Items.ACACIA_SIGN, Items.BIRCH_SIGN, Items.DARK_OAK_SIGN, Items.JUNGLE_SIGN, Items.JUNGLE_SIGN, Items.OAK_SIGN, Items.SPRUCE_SIGN);
 
 	public MelonMod() {
 		final Pair<MelonConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(MelonConfig::new);

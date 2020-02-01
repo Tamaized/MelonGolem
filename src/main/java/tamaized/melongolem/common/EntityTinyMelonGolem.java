@@ -52,13 +52,6 @@ import java.util.Objects;
 
 public class EntityTinyMelonGolem extends TameableEntity implements IShearable, IEntityAdditionalSpawnData, IModProxy.ISignHolder {
 
-	public static final SignTileEntity te = new SignTileEntity() {
-		@Nonnull
-		@Override
-		public BlockState getBlockState() {
-			return Blocks.OAK_WALL_SIGN.getDefaultState();
-		}
-	};
 	private static final DataParameter<ItemStack> HEAD = EntityDataManager.createKey(EntityTinyMelonGolem.class, DataSerializers.ITEMSTACK);
 	private static final DataParameter<Boolean> ENABLED = EntityDataManager.createKey(EntityTinyMelonGolem.class, DataSerializers.BOOLEAN);
 	private static final DataParameter<Integer> COLOR = EntityDataManager.createKey(EntityTinyMelonGolem.class, DataSerializers.VARINT);
@@ -189,18 +182,18 @@ public class EntityTinyMelonGolem extends TameableEntity implements IShearable, 
 	}
 
 	@Override
-	public boolean processInteract(PlayerEntity player, @Nonnull Hand hand) {
-		if (player.getHeldItemMainhand().getItem() instanceof ShearsItem || player.getHeldItemOffhand().getItem() instanceof ShearsItem)
+	public boolean processInteract(PlayerEntity player, Hand hand) {
+		if (!MelonMod.config.hats.get() || player.getHeldItemMainhand().getItem() instanceof ShearsItem || player.getHeldItemOffhand().getItem() instanceof ShearsItem)
 			return false;
 		ItemStack stack = player.getHeldItem(hand);
 		if (!stack.isEmpty() && getHead().isEmpty()) {
-			if (Block.getBlockFromItem(stack.getItem()) != Blocks.AIR || stack.getItem() == Items.OAK_SIGN) {
+			if (Block.getBlockFromItem(stack.getItem()) != Blocks.AIR || MelonMod.SIGNS.contains(stack.getItem())) {
 				setHead(stack);
 				if (!player.isCreative())
 					player.getHeldItem(hand).shrink(1);
 				return true;
 			}
-		} else if (!getHead().isEmpty() && getHead().getItem() == Items.OAK_SIGN) {
+		} else if (!getHead().isEmpty() && MelonMod.SIGNS.contains(getHead().getItem())) {
 			MelonMod.proxy.openSignHolderGui(this);
 			return true;
 		}
