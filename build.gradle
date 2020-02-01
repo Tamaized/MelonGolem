@@ -30,45 +30,43 @@ archivesBaseName = "MelonMod"
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
-class DefaultRunConfig extends RunConfig {
-
-    DefaultRunConfig(Project project, SourceSet sourceSet, boolean client) {
-        super(project, client ? 'client' : 'server')
-        this.taskName "Minecraft_" + name.substring(0, 1).toUpperCase(Locale.US).concat(name.substring(1)) + "_${project.minecraftVersion}"
-        this.properties 'forge.logging.markers': 'SCAN,AXFORM'
-        this.properties 'forge.logging.console.level': 'debug'
-        this.workingDirectory project.file('run').canonicalPath
-        this.source sourceSet
-        this.environment 'TMP': './tmp/'
-        this.ideaModule project.getName()
-        this.singleInstance true
-    }
-
-    DefaultRunConfig setArgs(String... args) {
-        setArgs(new ArrayList() {
-            {
-                for (String arg : args)
-                    add(arg)
-            }
-        })
-        return this
-    }
-}
-
 minecraft {
     mappings("${project.mappingType}", "${project.mappingVersion}")
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-    getRuns().addAll(
-            new DefaultRunConfig(project, sourceSets.main, true).setArgs(
 
-                    '--username', 'Tamaized',
+    runs {
+        client {
+            workingDirectory project.file('run')
 
-                    '--uuid', '16fea09e-314e-4955-88c2-6b552ecf314a'
+            // Recommended logging data for a userdev environment
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
 
-            ),
+            // Recommended logging level for the console
+            property 'forge.logging.console.level', 'debug'
 
-            new DefaultRunConfig(project, sourceSets.main, false)
-    )
+            mods {
+                melongolem {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+
+            // Recommended logging level for the console
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                melongolem {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
 }
 
 dependencies {
