@@ -22,7 +22,7 @@ public interface IModProxy {
 
 		void setSignText(int index, ITextComponent text);
 
-		int getEntityId();
+		int networkID();
 	}
 
 }

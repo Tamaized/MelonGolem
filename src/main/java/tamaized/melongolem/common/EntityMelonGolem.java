@@ -111,6 +111,11 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 	}
 
 	@Override
+	public int networkID() {
+		return getEntityId();
+	}
+
+	@Override
 	public ITextComponent getSignText(int index) {
 		return dataManager.get(SIGN_TEXT.get(index));
 	}

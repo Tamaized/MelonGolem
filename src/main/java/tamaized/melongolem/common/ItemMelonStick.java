@@ -46,7 +46,7 @@ public class ItemMelonStick extends Item {
 		if (cap != null && cap.load(true)) {
 			DimensionType dim = DimensionType.getById(cap.getLoadDimID());
 			if (dim != null) {
-				ServerWorld loader = ServerLifecycleHooks.getCurrentServer().getWorld(dim);
+				ServerWorld loader = ServerLifecycleHooks.getCurrentServer().func_71218_a(dim);
 				loader.getBlockState(cap.getLoadPos()); // Ensure chunk is loaded
 				Entity entity = loader.getEntityByUuid(cap.getLoadPetID());
 				if (entity instanceof EntityTinyMelonGolem) {

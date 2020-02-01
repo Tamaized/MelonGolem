@@ -39,7 +39,7 @@ public class MelonConfigScreen extends Screen {
 
 	@Override
 	public void removed() {
-		MelonMod.config.DONATOR_SETTINGS.enable.set(enabled.func_212942_a());
+		MelonMod.config.DONATOR_SETTINGS.enable.set(enabled.isChecked());
 		MelonMod.config.DONATOR_SETTINGS.enable.save();
 		MelonMod.config.DONATOR_SETTINGS.color.set(input.getText());
 		MelonMod.config.DONATOR_SETTINGS.color.save();
