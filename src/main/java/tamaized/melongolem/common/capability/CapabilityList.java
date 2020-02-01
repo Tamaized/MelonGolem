@@ -58,7 +58,7 @@ public class CapabilityList {
 
 	@SubscribeEvent
 	public static void updateClone(PlayerEvent.Clone e) {
-		ITinyGolemCapability newcap = getCap(e.getEntityPlayer(), TINY_GOLEM, null);
+		ITinyGolemCapability newcap = getCap(e.getPlayer(), TINY_GOLEM, null);
 		ITinyGolemCapability oldcap = getCap(e.getOriginal(), TINY_GOLEM, null);
 		if (newcap != null && oldcap != null)
 			newcap.copyFrom(oldcap);

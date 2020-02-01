@@ -141,14 +141,14 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 	@Override
 	public void attackEntityWithRangedAttack(@Nonnull LivingEntity target, float distanceFactor) {
 		EntityMelonSlice slice = new EntityMelonSlice(this.world, this);
-		double d0 = target.posY + (double) target.getEyeHeight() - 1.100000023841858D;
-		double d1 = target.posX - this.posX;
-		double d2 = d0 - slice.posY;
-		double d3 = target.posZ - this.posZ;
+		double d0 = target.getY() + (double) target.getEyeHeight() - 1.100000023841858D;
+		double d1 = target.getX() - this.getX();
+		double d2 = d0 - slice.getY();
+		double d3 = target.getZ() - this.getZ();
 		float f = MathHelper.sqrt(d1 * d1 + d3 * d3) * 0.2F;
 		slice.shoot(d1, d2 + (double) f, d3, 1.6F, 12.0F);
 		this.playSound(SoundEvents.ENTITY_SNOW_GOLEM_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
-		slice.setPositionAndUpdate(slice.posX, slice.posY, slice.posZ);
+		slice.setPositionAndUpdate(slice.getX(), slice.getY(), slice.getZ());
 		MelonMod.spawnNonLivingEntity(world, slice);
 	}
 
@@ -201,7 +201,6 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	protected boolean processInteract(PlayerEntity player, Hand hand) {
 		if (!MelonMod.config.hats.get() || player.getHeldItemMainhand().getItem() instanceof ShearsItem || player.getHeldItemOffhand().getItem() instanceof ShearsItem)
 			return false;
@@ -251,7 +250,7 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 		super.onDeath(cause);
 		ItemStack stack = getHead();
 		if (!world.isRemote && !stack.isEmpty()) {
-			ItemEntity e = new ItemEntity(world, posX, posY, posZ, stack);
+			ItemEntity e = new ItemEntity(world, getX(), getY(), getZ(), stack);
 			e.setMotion(e.getMotion().add(
 
 					rand.nextFloat() * 0.05F,
@@ -267,7 +266,6 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 
 	@Nonnull
 	@Override
-	@SuppressWarnings("deprecation")
 	public CompoundNBT writeWithoutTypeId(CompoundNBT compound) {
 		compound.put("head", getHead().serializeNBT());
 		for (int i = 0; i < 4; ++i) {
@@ -309,7 +307,7 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 		private final Item melon;
 		private final Block melonblock;
 		private int cooldown;
-		private BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		private BlockPos.Mutable pos = new BlockPos.Mutable();
 		private boolean foundMelon = false;
 
 		EntityAISearchAndEatMelons(MobEntity entity) {
@@ -348,7 +346,7 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 			if (cooldown > 0)
 				cooldown--;
 			final int radius = 25;
-			AxisAlignedBB area = new AxisAlignedBB(parent.posX - radius, parent.posY - radius, parent.posZ - radius, parent.posX + radius, parent.posY + radius, parent.posZ + radius);
+			AxisAlignedBB area = new AxisAlignedBB(parent.getX() - radius, parent.getY() - radius, parent.getZ() - radius, parent.getX() + radius, parent.getY() + radius, parent.getZ() + radius);
 			List<ItemEntity> items = parent.world.getEntitiesWithinAABB(ItemEntity.class, area);
 			for (ItemEntity item : items) {
 				if (parent.getNavigator().noPath() && isMelon(item)) {

@@ -2,6 +2,8 @@ package tamaized.melongolem;
 
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockRenderType;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -17,7 +19,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.Items;
 import net.minecraft.item.SpawnEggItem;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -89,7 +90,7 @@ public class MelonMod {
 	public static final EntityType<? extends GolemEntity> entityTypeGlisteringMelonGolem = assign(EntityGlisteringMelonGolem.class, 0.7F, 1.9F, 128, 1, true, EntityClassification.CREATURE);
 
 	@ObjectHolder(MelonMod.MODID + ":entitymelonslice")
-	public static final EntityType<? extends ThrowableEntity> entityTypeMelonSlice = getNull();
+	public static final EntityType<? extends EntityMelonSlice> entityTypeMelonSlice = getNull();
 
 	@ObjectHolder(MelonMod.MODID + ":entitytinymelongolem")
 	public static final EntityType<? extends TameableEntity> entityTypeTinyMelonGolem = getNull();
@@ -133,32 +134,7 @@ public class MelonMod {
 	public static void registerBlocks(RegistryEvent.Register<Block> e) {
 		e.getRegistry().registerAll(
 
-				assign(new Block(Block.Properties.create(Material.GOURD, MaterialColor.LIME).hardnessAndResistance(1.0F).sound(SoundType.WOOD).lightValue(4)) {
-					/*@Nonnull
-					@Override
-					public IItemProvider getItemDropped(BlockState p_199769_1_, World p_199769_2_, BlockPos p_199769_3_, int p_199769_4_) {
-						return Items.GLISTERING_MELON_SLICE;
-					}
-
-					@Override
-					@Deprecated
-					@SuppressWarnings({"deprecation", "DeprecatedIsStillUsed"})
-					public int quantityDropped(BlockState p_196264_1_, Random p_196264_2_) {
-						return 3 + p_196264_2_.nextInt(5);
-					}
-
-					@Override
-					@SuppressWarnings("deprecation")
-					public int getItemsToDropCount(@Nonnull BlockState p_196251_1_, int p_196251_2_, World p_196251_3_, BlockPos p_196251_4_, @Nonnull Random p_196251_5_) {
-						return Math.min(9, this.quantityDropped(p_196251_1_, p_196251_5_) + p_196251_5_.nextInt(1 + p_196251_2_));
-					}*/
-
-					@Nonnull
-					@Override
-					public BlockRenderLayer getRenderLayer() {
-						return BlockRenderLayer.CUTOUT;
-					}
-				}, "glisteringmelonblock")
+				assign(new Block(Block.Properties.create(Material.GOURD, MaterialColor.LIME).hardnessAndResistance(1.0F).sound(SoundType.WOOD).lightValue(4)), "glisteringmelonblock")
 
 		);
 	}

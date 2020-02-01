@@ -1,7 +1,10 @@
 package tamaized.melongolem.client;
 
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
 import net.minecraft.client.renderer.entity.MobRenderer;
@@ -16,6 +19,7 @@ import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.EntityTinyMelonGolem;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 @OnlyIn(Dist.CLIENT)
 public class RenderMelonGolem<T extends MobEntity & IModProxy.ISignHolder> extends MobRenderer<T, SnowManModel<T>> {
@@ -23,76 +27,66 @@ public class RenderMelonGolem<T extends MobEntity & IModProxy.ISignHolder> exten
 	private static final ResourceLocation TEXTURES_GREY = new ResourceLocation(MelonMod.MODID, "textures/entity/greygolem.png");
 	private static final ResourceLocation TEXTURES_GLISTER = new ResourceLocation(MelonMod.MODID, "textures/entity/glistening_melon_golem.png");
 	private static final ResourceLocation TEXTURES_GLISTER_OVERLAY = new ResourceLocation(MelonMod.MODID, "textures/entity/glistening_melon_golem_overlay.png");
-
+	private static final ColorHack COLOR_STATE = new ColorHack();
 	private final Type type;
 
 	@SuppressWarnings("unchecked")
 	public RenderMelonGolem(EntityRendererManager renderManagerIn, Type type) {
-		super(renderManagerIn, new SnowManModel(), type == Type.TINY ? 0.125F : 0.5F);
+		super(renderManagerIn, new SnowManModel() {
+			@Override
+			public void render(@Nonnull MatrixStack stack, @Nonnull IVertexBuilder buffer, int p_225598_3_, int p_225598_4_, float red, float green, float blue, float alpha) {
+				super.render(stack, buffer, p_225598_3_, p_225598_4_, COLOR_STATE.red, COLOR_STATE.green, COLOR_STATE.blue, alpha);
+			}
+		}, type == Type.TINY ? 0.125F : 0.5F);
 		addLayer(new LayerMelonHead(this));
 		if (type == Type.GLISTER)
 			addLayer(new LayerMelonGlister(this));
 		this.type = type;
 	}
 
-	class LayerMelonGlister<E extends MobEntity> extends LayerRenderer<E, SnowManModel<E>> {
-
-		public LayerMelonGlister(IEntityRenderer<E, SnowManModel<E>> p_i50926_1_) {
-			super(p_i50926_1_);
-		}
-
-		@Override
-		public void render(@Nonnull E entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
-			bindTexture(TEXTURES_GLISTER_OVERLAY);
-			GlStateManager.enableBlend();
-			GlStateManager.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
-			GlStateManager.pushMatrix();
-			final float s = 1.01F;
-			GlStateManager.scalef(s, s, s);
-			int i = 0xF000F0;
-			GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, i % 65536, i >> 16);
-			getEntityModel().render(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
-			GlStateManager.popMatrix();
-			GlStateManager.disableBlend();
-		}
-
-		@Override
-		public boolean shouldCombineTextures() {
-			return true;
-		}
-	}
-
 	@Override
-	public void doRender(@Nonnull T entity, double x, double y, double z, float entityYaw, float partialTicks) {
-		GlStateManager.pushMatrix();
+	public void render(T entity, float rotation, float partialTicks, @Nonnull MatrixStack stack, @Nonnull IRenderTypeBuffer buffer, int light) {
+		stack.push();
 		if (type == Type.TINY) {
-			GlStateManager.translatef(0, -1.11F, 0);
+			stack.translate(0, -1.11F, 0);
 			EntityTinyMelonGolem golem = (EntityTinyMelonGolem) entity;
 			if (golem.isEnabled()) {
 				int color = golem.getColor();
-				float r = ((color >> 16) & 0xFF) / 255F;
-				float g = ((color >> 8) & 0xFF) / 255F;
-				float b = ((color) & 0xFF) / 255F;
-				GlStateManager.color4f(r, g, b, 1F);
+				COLOR_STATE.red = ((color >> 16) & 0xFF) / 255F;
+				COLOR_STATE.green = ((color >> 8) & 0xFF) / 255F;
+				COLOR_STATE.blue = ((color) & 0xFF) / 255F;
 			}
 		}
 		if (type == Type.GLISTER) {
-			int i = entity.world.getCombinedLight(entity.getPosition(), 0) | 0x100010;
-			GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, i % 65536, i >> 16);
+			//			int i = entity.world.getCombinedLight(entity.getPosition(), 0) | 0x100010;
+			//			GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, i % 65536, i >> 16);
+//			light = 0xF000F0;
 		}
-		super.doRender(entity, x, y, z, entityYaw, partialTicks);
-		GlStateManager.color4f(1F, 1F, 1F, 1F);
-		GlStateManager.popMatrix();
+		super.render(entity, rotation, partialTicks, stack, buffer, light);
+		stack.pop();
 	}
 
+	@Nonnull
 	@Override
-	protected ResourceLocation getEntityTexture(@Nonnull T entity) {
+	public ResourceLocation getEntityTexture(@Nonnull T entity) {
 		return entity instanceof EntityTinyMelonGolem && ((EntityTinyMelonGolem) entity).isEnabled() ? TEXTURES_GREY : type == Type.GLISTER ? TEXTURES_GLISTER : TEXTURES;
 	}
 
 	@Override
-	public float prepareScale(@Nonnull T entitylivingbaseIn, float partialTicks) {
-		return super.prepareScale(entitylivingbaseIn, partialTicks) * (type == Type.TINY ? 0.25F : 1F);
+	protected void scale(T p_225620_1_, MatrixStack p_225620_2_, float p_225620_3_) {
+		if (type == Type.TINY)
+			p_225620_2_.scale(0.25F, 0.25F, 0.25F);
+	}
+
+	public enum Type {
+		NORMAL, TINY, GLISTER
+	}
+
+	private static class ColorHack {
+		private float red = 1F;
+		private float green = 1F;
+		private float blue = 1F;
+		private float alpha = 1F;
 	}
 
 	public static class Factory {
@@ -111,7 +105,25 @@ public class RenderMelonGolem<T extends MobEntity & IModProxy.ISignHolder> exten
 
 	}
 
-	public enum Type {
-		NORMAL, TINY, GLISTER
+	class LayerMelonGlister<E extends T> extends LayerRenderer<E, SnowManModel<E>> {
+
+		public LayerMelonGlister(IEntityRenderer<E, SnowManModel<E>> p_i50926_1_) {
+			super(p_i50926_1_);
+		}
+
+		@Override
+		public void render(@Nonnull MatrixStack stack, @Nonnull IRenderTypeBuffer buffer, int light, @Nonnull E entity, float limbSwing, float limbSwingAmount, float partialTicks, float rotation, float yawHead, float pitch) {
+			IVertexBuilder builder = buffer.getBuffer(RenderType.getEnergySwirl(TEXTURES_GLISTER_OVERLAY, 0, 0));
+			//			GlStateManager.enableBlend();
+			//			GlStateManager.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
+			stack.push();
+			final float s = 1.01F;
+			stack.scale(s, s, s);
+			//			int i = 0xF000F0;
+			//			GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, i % 65536, i >> 16);
+			getEntityModel().render(stack, builder, 0xF000F0, getOverlay(entity, getWhiteOverlayProgress(entity, partialTicks)), 1F, 1F, 1F, (!func_225622_a_(entity) && !entity.isInvisibleToPlayer(Objects.requireNonNull(Minecraft.getInstance().player))) ? 0.15F : 1.0F);
+			stack.pop();
+			//			GlStateManager.disableBlend();
+		}
 	}
 }

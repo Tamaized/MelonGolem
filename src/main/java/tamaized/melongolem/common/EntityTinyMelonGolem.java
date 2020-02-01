@@ -147,7 +147,7 @@ public class EntityTinyMelonGolem extends TameableEntity implements IShearable, 
 
 	@Override
 	protected void registerGoals() {
-		goalSelector.addGoal(0, new FollowOwnerGoal(this, 1.0D, 4.0F, 2.0F));
+		goalSelector.addGoal(0, new FollowOwnerGoal(this, 1.0D, 4.0F, 2.0F, true));
 		goalSelector.addGoal(1, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
 		goalSelector.addGoal(2, new LookAtGoal(this, PlayerEntity.class, 8.0F));
 		goalSelector.addGoal(2, new LookRandomlyGoal(this));
@@ -189,8 +189,7 @@ public class EntityTinyMelonGolem extends TameableEntity implements IShearable, 
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
-	public boolean processInteract(PlayerEntity player, Hand hand) {
+	public boolean processInteract(PlayerEntity player, @Nonnull Hand hand) {
 		if (player.getHeldItemMainhand().getItem() instanceof ShearsItem || player.getHeldItemOffhand().getItem() instanceof ShearsItem)
 			return false;
 		ItemStack stack = player.getHeldItem(hand);
@@ -239,7 +238,7 @@ public class EntityTinyMelonGolem extends TameableEntity implements IShearable, 
 		super.onDeath(cause);
 		ItemStack stack = getHead();
 		if (!world.isRemote && !stack.isEmpty()) {
-			ItemEntity e = new ItemEntity(world, posX, posY, posZ, stack);
+			ItemEntity e = new ItemEntity(world, getX(), getY(), getZ(), stack);
 			e.setMotion(e.getMotion().add(
 
 					rand.nextFloat() * 0.05F,
@@ -255,7 +254,6 @@ public class EntityTinyMelonGolem extends TameableEntity implements IShearable, 
 
 	@Nonnull
 	@Override
-	@SuppressWarnings("deprecation")
 	public CompoundNBT writeWithoutTypeId(CompoundNBT compound) {
 		compound.put("head", getHead().serializeNBT());
 		compound.putBoolean("donator_enabled", isEnabled());

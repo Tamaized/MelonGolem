@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.Direction;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelBakeEvent;
-import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
 import net.minecraftforge.client.model.pipeline.VertexLighterFlat;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -45,7 +44,7 @@ public class ModelBakeListener {
 						List<BakedQuad> delegateQuads = model.getQuads(state, side, rand);
 						List<BakedQuad> quads = Lists.newArrayList();
 						for (BakedQuad quad : delegateQuads)
-							quads.add(delegateQuads.indexOf(quad) == 1 ? transformQuad(quad, 0.007F) : quad);
+							quads.add(delegateQuads.indexOf(quad) == 1 ? /*transformQuad(quad, 0.007F)*/quad : quad);
 						return quads;
 					});
 				}
@@ -58,6 +57,11 @@ public class ModelBakeListener {
 				@Override
 				public boolean isGui3d() {
 					return model.isGui3d();
+				}
+
+				@Override
+				public boolean isSideLit() {
+					return model.isSideLit();
 				}
 
 				@Override
@@ -88,7 +92,7 @@ public class ModelBakeListener {
 		}
 	}
 
-	private static BakedQuad transformQuad(BakedQuad quad, float light) {
+	/*private static BakedQuad transformQuad(BakedQuad quad, float light) {
 		VertexFormat newFormat = DefaultVertexFormats.BLOCK;
 
 		UnpackedBakedQuad.Builder builder = new UnpackedBakedQuad.Builder(newFormat);
@@ -116,6 +120,6 @@ public class ModelBakeListener {
 		builder.setApplyDiffuseLighting(false);
 
 		return builder.build();
-	}
+	}*/
 
 }

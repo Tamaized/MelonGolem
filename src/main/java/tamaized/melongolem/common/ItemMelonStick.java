@@ -46,7 +46,7 @@ public class ItemMelonStick extends Item {
 		if (cap != null && cap.load(true)) {
 			DimensionType dim = DimensionType.getById(cap.getLoadDimID());
 			if (dim != null) {
-				ServerWorld loader = ServerLifecycleHooks.getCurrentServer().func_71218_a(dim);
+				ServerWorld loader = ServerLifecycleHooks.getCurrentServer().getWorld(dim);
 				loader.getBlockState(cap.getLoadPos()); // Ensure chunk is loaded
 				Entity entity = loader.getEntityByUuid(cap.getLoadPetID());
 				if (entity instanceof EntityTinyMelonGolem) {
@@ -66,8 +66,8 @@ public class ItemMelonStick extends Item {
 		if (oldPet == null && cap != null)
 			cap.setPet(pet);
 
-		int x = MathHelper.floor(owner.posX) - 2;
-		int z = MathHelper.floor(owner.posZ) - 2;
+		int x = MathHelper.floor(owner.getX()) - 2;
+		int z = MathHelper.floor(owner.getZ()) - 2;
 		int y = MathHelper.floor(owner.getBoundingBox().minY);
 
 		loop:
@@ -89,7 +89,7 @@ public class ItemMelonStick extends Item {
 						}
 						for (int i = 0; i < 25; i++) {
 							Vec3d result = pet.getLook(1F).rotateYaw(pet.getRNG().nextFloat() * 360F).rotatePitch(pet.getRNG().nextFloat() * 360F).scale(0.35F);
-							spawnVanillaParticleOnServer(world, ParticleTypes.END_ROD, pet.posX + result.x, pet.posY + pet.getHeight() / 2F + result.y, pet.posZ + result.z, 0, 0, 0);
+							spawnVanillaParticleOnServer(world, ParticleTypes.END_ROD, pet.getX() + result.x, pet.getY() + pet.getHeight() / 2F + result.y, pet.getZ() + result.z, 0, 0, 0);
 						}
 						if (oldPet == null)
 							world.addEntity(pet);

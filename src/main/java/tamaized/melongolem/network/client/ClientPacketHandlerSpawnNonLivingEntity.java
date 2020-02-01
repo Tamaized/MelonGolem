@@ -32,9 +32,9 @@ public class ClientPacketHandlerSpawnNonLivingEntity implements NetworkMessages.
 	public ClientPacketHandlerSpawnNonLivingEntity(Entity entity) {
 		this.entityId = entity.getEntityId();
 		this.uniqueId = entity.getUniqueID();
-		this.x = entity.posX;
-		this.y = entity.posY;
-		this.z = entity.posZ;
+		this.x = entity.getX();
+		this.y = entity.getY();
+		this.z = entity.getZ();
 		this.pitch = MathHelper.floor(entity.rotationPitch * 256.0F / 360.0F);
 		this.yaw = MathHelper.floor(entity.rotationYaw * 256.0F / 360.0F);
 		this.type = entity.getType();
