@@ -1,6 +1,8 @@
 package tamaized.melongolem;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.entity.SpriteRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -26,6 +28,8 @@ public class ClientProxy implements IModProxy {
 		RenderingRegistry.registerEntityRenderingHandler(MelonMod.entityTypeMelonSlice, manager -> new SpriteRenderer<>(manager, Minecraft.getInstance().getItemRenderer()));
 		RenderingRegistry.registerEntityRenderingHandler(MelonMod.entityTypeTinyMelonGolem, RenderMelonGolem.Factory::tiny);
 		RenderingRegistry.registerEntityRenderingHandler(MelonMod.entityTypeGlisteringMelonGolem, RenderMelonGolem.Factory::glister);
+
+		RenderTypeLookup.setRenderLayer(MelonMod.glisteringMelonBlock, RenderType.getCutoutMipped());
 	}
 
 	@Override
