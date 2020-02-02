@@ -13,16 +13,15 @@ import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.Matrix4f;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraft.client.renderer.model.Material;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.tileentity.SignTileEntityRenderer;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.tileentity.SignTileEntity;
+import net.minecraft.item.WallOrFloorItem;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -50,7 +49,6 @@ public class GuiEditGolemSign extends Screen {
 
 	@Override
 	protected void init() {
-		super.init();
 		Objects.requireNonNull(minecraft).keyboardListener.enableRepeatEvents(true);
 		this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120, 200, 20, I18n.format("gui.done"), (p_214266_1_) -> {
 			this.close();
@@ -60,6 +58,8 @@ public class GuiEditGolemSign extends Screen {
 
 	@Override
 	public void removed() {
+		if (minecraft == null)
+			return;
 		Objects.requireNonNull(minecraft).keyboardListener.enableRepeatEvents(false);
 		if (canSend)
 			MelonMod.network.sendToServer(new ServerPacketHandlerMelonSign(golem));
@@ -106,59 +106,34 @@ public class GuiEditGolemSign extends Screen {
 
 	@Override
 	public void render(int mouseX, int mouseY, float partialTicks) {
-		RenderHelper.disableGuiDepthLighting();
+		for (int index = 0; index < 4; index++)
+			EntityMelonGolem.te.setText(index, golem.getSignText(index));
+		EntityMelonGolem.SIGN_TILE_BLOCKSTATE = ((WallOrFloorItem) golem.getHead().getItem()).wallBlock.getDefaultState();
+		//		RenderHelper.disableGuiDepthLighting();
 		this.renderBackground();
 		this.drawCenteredString(this.font, I18n.format("sign.edit"), this.width / 2, 40, 0xFFFFFF);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F); // TODO: may not be needed
 		MatrixStack matrixstack = new MatrixStack();
 		matrixstack.push();
 		matrixstack.translate(this.width / 2, 0.0D, 50.0D);
-		//		float f = 93.75F;
+		matrixstack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(180F));
 		matrixstack.scale(-93.75F, -93.75F, -93.75F);
-		/*Block block = golem.getBlockType();
+		matrixstack.translate(0.0D, -1.625D, 0.0D);
 
-		if (block == Blocks.STANDING_SIGN) {
-			float f1 = (float) (EntityMelonGolem.te.getBlockMetadata() * 360) / 16.0F;
-			GlStateManager.rotatef(f1, 0.0F, 1.0F, 0.0F);
-			GlStateManager.translatef(0.0F, -1.0625F, 0.0F);
-		} else {
-			int i = EntityMelonGolem.te.getBlockMetadata();
-			float f2 = 0.0F;
-
-			if (i == 2) {
-				f2 = 180.0F;
-			}
-
-			if (i == 4) {
-				f2 = 90.0F;
-			}
-
-			if (i == 5) {
-				f2 = -90.0F;
-			}
-
-			GlStateManager.rotatef(f2, 0.0F, 1.0F, 0.0F);
-		}*/
-		matrixstack.translate(0.0F, -1.0625F, 0.0F);
-
-		boolean flag1 = this.updateCounter / 6 % 2 == 0;float f1 = 0.6666667F;
+		boolean flag1 = this.updateCounter / 6 % 2 == 0;
 		matrixstack.push();
 		matrixstack.scale(0.6666667F, -0.6666667F, -0.6666667F);
 		IRenderTypeBuffer.Impl irendertypebuffer$impl = this.minecraft.getBufferBuilders().getEntityVertexConsumers();
 		Material material = SignTileEntityRenderer.getModelTexture(EntityMelonGolem.te.getBlockState().getBlock());
 		IVertexBuilder ivertexbuilder = material.getVertexConsumer(irendertypebuffer$impl, this.field_228191_a_::getLayer);
-		this.field_228191_a_.field_78166_a.render(matrixstack, ivertexbuilder, 15728880, OverlayTexture.DEFAULT_UV);
+		this.field_228191_a_.field_78166_a.render(matrixstack, ivertexbuilder, 0xF000F0, OverlayTexture.DEFAULT_UV);
 
 		matrixstack.pop();
-		float f2 = 0.010416667F;
-		matrixstack.translate(0.0D, (double)0.33333334F, (double)0.046666667F);
+		matrixstack.translate(0.0D, (double) 0.33333334F, (double) 0.046666667F);
 		matrixstack.scale(0.010416667F, -0.010416667F, 0.010416667F);
-		for (int index = 0; index < 4; index++)
-			EntityMelonGolem.te.setText(index, golem.getSignText(index));
 		int i = EntityMelonGolem.te.getTextColor().getTextColor();
 		String[] astring = new String[4];
 
-		for(int j = 0; j < astring.length; ++j) {
+		for (int j = 0; j < astring.length; ++j) {
 			astring[j] = EntityMelonGolem.te.getRenderText(j, (p_228192_1_) -> {
 				List<ITextComponent> list = RenderComponentsUtil.splitText(p_228192_1_, 90, this.minecraft.fontRenderer, false, true);
 				return list.isEmpty() ? "" : list.get(0).getFormattedText();
@@ -171,16 +146,16 @@ public class GuiEditGolemSign extends Screen {
 		int i1 = this.minecraft.fontRenderer.getBidiFlag() ? -1 : 1;
 		int j1 = this.editLine * 10 - EntityMelonGolem.te.signText.length * 5;
 
-		for(int k1 = 0; k1 < astring.length; ++k1) {
+		for (int k1 = 0; k1 < astring.length; ++k1) {
 			String s = astring[k1];
 			if (s != null) {
-				float f3 = (float)(-this.minecraft.fontRenderer.getStringWidth(s) / 2);
-				this.minecraft.fontRenderer.draw(s, f3, (float)(k1 * 10 - EntityMelonGolem.te.signText.length * 5), i, false, matrix4f, irendertypebuffer$impl, false, 0, 15728880);
+				float f3 = (float) (-this.minecraft.fontRenderer.getStringWidth(s) / 2);
+				this.minecraft.fontRenderer.draw(s, f3, (float) (k1 * 10 - EntityMelonGolem.te.signText.length * 5), i, false, matrix4f, irendertypebuffer$impl, false, 0, 15728880);
 				if (k1 == this.editLine && k >= 0 && flag1) {
 					int l1 = this.minecraft.fontRenderer.getStringWidth(s.substring(0, Math.max(Math.min(k, s.length()), 0)));
 					int i2 = (l1 - this.minecraft.fontRenderer.getStringWidth(s) / 2) * i1;
 					if (k >= s.length()) {
-						this.minecraft.fontRenderer.draw("_", (float)i2, (float)j1, i, false, matrix4f, irendertypebuffer$impl, false, 0, 15728880);
+						this.minecraft.fontRenderer.draw("_", (float) i2, (float) j1, i, false, matrix4f, irendertypebuffer$impl, false, 0, 15728880);
 					}
 				}
 			}
@@ -188,7 +163,7 @@ public class GuiEditGolemSign extends Screen {
 
 		irendertypebuffer$impl.draw();
 
-		for(int k3 = 0; k3 < astring.length; ++k3) {
+		for (int k3 = 0; k3 < astring.length; ++k3) {
 			String s1 = astring[k3];
 			if (s1 != null && k3 == this.editLine && k >= 0) {
 				int l3 = this.minecraft.fontRenderer.getStringWidth(s1.substring(0, Math.max(Math.min(k, s1.length()), 0)));
@@ -210,10 +185,10 @@ public class GuiEditGolemSign extends Screen {
 					RenderSystem.enableColorLogicOp();
 					RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
 					bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
-					bufferbuilder.vertex(matrix4f, (float)i3, (float)(j1 + 9), 0.0F).color(0, 0, 255, 255).endVertex();
-					bufferbuilder.vertex(matrix4f, (float)j3, (float)(j1 + 9), 0.0F).color(0, 0, 255, 255).endVertex();
-					bufferbuilder.vertex(matrix4f, (float)j3, (float)j1, 0.0F).color(0, 0, 255, 255).endVertex();
-					bufferbuilder.vertex(matrix4f, (float)i3, (float)j1, 0.0F).color(0, 0, 255, 255).endVertex();
+					bufferbuilder.vertex(matrix4f, (float) i3, (float) (j1 + 9), 0.0F).color(0, 0, 255, 255).endVertex();
+					bufferbuilder.vertex(matrix4f, (float) j3, (float) (j1 + 9), 0.0F).color(0, 0, 255, 255).endVertex();
+					bufferbuilder.vertex(matrix4f, (float) j3, (float) j1, 0.0F).color(0, 0, 255, 255).endVertex();
+					bufferbuilder.vertex(matrix4f, (float) i3, (float) j1, 0.0F).color(0, 0, 255, 255).endVertex();
 					bufferbuilder.finishDrawing();
 					WorldVertexBufferUploader.draw(bufferbuilder);
 					RenderSystem.disableColorLogicOp();
@@ -223,7 +198,8 @@ public class GuiEditGolemSign extends Screen {
 		}
 
 		matrixstack.pop();
-		RenderHelper.enableGuiDepthLighting();
+		//		RenderHelper.enableGuiDepthLighting();
+		super.render(mouseX, mouseY, partialTicks);
 
 		/*EntityMelonGolem.te.func_214062_a(this.editLine, this.textInputUtil.func_216896_c(), this.textInputUtil.func_216898_d(), flag1);
 		for (int index = 0; index < 4; index++)
