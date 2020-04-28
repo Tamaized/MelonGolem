@@ -4,20 +4,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.entity.SpriteRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.item.Items;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import tamaized.melongolem.client.GuiEditGolemSign;
 import tamaized.melongolem.client.RenderMelonGolem;
-import tamaized.melongolem.common.EntityGlisteringMelonGolem;
-import tamaized.melongolem.common.EntityMelonGolem;
-import tamaized.melongolem.common.EntityMelonSlice;
-import tamaized.melongolem.common.EntityTinyMelonGolem;
-
-import java.util.function.Function;
 
 public class ClientProxy implements IModProxy {
 
