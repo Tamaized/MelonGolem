@@ -66,8 +66,8 @@ public class ItemMelonStick extends Item {
 		if (oldPet == null && cap != null)
 			cap.setPet(pet);
 
-		int x = MathHelper.floor(owner.getX()) - 2;
-		int z = MathHelper.floor(owner.getZ()) - 2;
+		int x = MathHelper.floor(owner.getPosX()) - 2;
+		int z = MathHelper.floor(owner.getPosZ()) - 2;
 		int y = MathHelper.floor(owner.getBoundingBox().minY);
 
 		loop:
@@ -89,7 +89,7 @@ public class ItemMelonStick extends Item {
 						}
 						for (int i = 0; i < 25; i++) {
 							Vec3d result = pet.getLook(1F).rotateYaw(pet.getRNG().nextFloat() * 360F).rotatePitch(pet.getRNG().nextFloat() * 360F).scale(0.35F);
-							spawnVanillaParticleOnServer(world, ParticleTypes.END_ROD, pet.getX() + result.x, pet.getY() + pet.getHeight() / 2F + result.y, pet.getZ() + result.z, 0, 0, 0);
+							spawnVanillaParticleOnServer(world, ParticleTypes.END_ROD, pet.getPosX() + result.x, pet.getPosY() + pet.getHeight() / 2F + result.y, pet.getPosZ() + result.z, 0, 0, 0);
 						}
 						if (oldPet == null)
 							world.addEntity(pet);

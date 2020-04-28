@@ -25,13 +25,13 @@ public class MelonConfigScreen extends Screen {
 	@Override
 	protected void init() {
 		super.init();
-		float sw = Minecraft.getInstance().getWindow().getScaledWidth();
+		float sw = Minecraft.getInstance().getMainWindow().getScaledWidth();
 		int w = 396;
 		float x = (sw - w);
 		x -= x / 2F;
-		addButton(new ExtendedButton((int) x, Minecraft.getInstance().getWindow().getScaledHeight() - 25, w, 20, "Close", button -> Minecraft.getInstance().displayGuiScreen(parent)));
+		addButton(new ExtendedButton((int) x, Minecraft.getInstance().getMainWindow().getScaledHeight() - 25, w, 20, "Close", button -> Minecraft.getInstance().displayGuiScreen(parent)));
 		int ix = font.getStringWidth(TEXT_DONATOR_COLOR) + 10;
-		addButton(input = new TextFieldWidget(font, ix, 25, Minecraft.getInstance().getWindow().getScaledWidth() - ix - 15, 20, ""));
+		addButton(input = new TextFieldWidget(font, ix, 25, Minecraft.getInstance().getMainWindow().getScaledWidth() - ix - 15, 20, ""));
 		input.setText(MelonMod.config.DONATOR_SETTINGS.color.get());
 		addButton(enabled = new CheckboxButton(ix, 50, 20, 20, "Enabled", MelonMod.config.DONATOR_SETTINGS.enable.get()));
 
@@ -50,7 +50,7 @@ public class MelonConfigScreen extends Screen {
 	@Override
 	public void render(int p_render_1_, int p_render_2_, float p_render_3_) {
 		renderBackground();
-		drawCenteredString(font, "Melon Golem Config", (int) (Minecraft.getInstance().getWindow().getScaledWidth() / 2F), 5, 0xFFFFFFFF);
+		drawCenteredString(font, "Melon Golem Config", (int) (Minecraft.getInstance().getMainWindow().getScaledWidth() / 2F), 5, 0xFFFFFFFF);
 		int color = 0xFFFFFFFF;
 		try {
 			color = Integer.decode(input.getText());

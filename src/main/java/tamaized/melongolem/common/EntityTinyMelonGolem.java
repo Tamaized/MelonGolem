@@ -231,7 +231,7 @@ public class EntityTinyMelonGolem extends TameableEntity implements IShearable, 
 		super.onDeath(cause);
 		ItemStack stack = getHead();
 		if (!world.isRemote && !stack.isEmpty()) {
-			ItemEntity e = new ItemEntity(world, getX(), getY(), getZ(), stack);
+			ItemEntity e = new ItemEntity(world, getPosX(), getPosY(), getPosZ(), stack);
 			e.setMotion(e.getMotion().add(
 
 					rand.nextFloat() * 0.05F,

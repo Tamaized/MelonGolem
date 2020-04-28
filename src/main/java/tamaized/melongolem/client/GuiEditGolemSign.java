@@ -115,17 +115,17 @@ public class GuiEditGolemSign extends Screen {
 		MatrixStack matrixstack = new MatrixStack();
 		matrixstack.push();
 		matrixstack.translate(this.width / 2, 0.0D, 50.0D);
-		matrixstack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(180F));
+		matrixstack.rotate(Vector3f.YP.rotationDegrees(180F));
 		matrixstack.scale(-93.75F, -93.75F, -93.75F);
 		matrixstack.translate(0.0D, -1.625D, 0.0D);
 
 		boolean flag1 = this.updateCounter / 6 % 2 == 0;
 		matrixstack.push();
 		matrixstack.scale(0.6666667F, -0.6666667F, -0.6666667F);
-		IRenderTypeBuffer.Impl irendertypebuffer$impl = this.minecraft.getBufferBuilders().getEntityVertexConsumers();
-		Material material = SignTileEntityRenderer.getModelTexture(EntityMelonGolem.te.getBlockState().getBlock());
-		IVertexBuilder ivertexbuilder = material.getVertexConsumer(irendertypebuffer$impl, this.field_228191_a_::getLayer);
-		this.field_228191_a_.field_78166_a.render(matrixstack, ivertexbuilder, 0xF000F0, OverlayTexture.DEFAULT_UV);
+		IRenderTypeBuffer.Impl irendertypebuffer$impl = this.minecraft.getRenderTypeBuffers().getBufferSource();
+		Material material = SignTileEntityRenderer.getMaterial(EntityMelonGolem.te.getBlockState().getBlock());
+		IVertexBuilder ivertexbuilder = material.getBuffer(irendertypebuffer$impl, this.field_228191_a_::getRenderType);
+		this.field_228191_a_.signBoard.render(matrixstack, ivertexbuilder, 0xF000F0, OverlayTexture.NO_OVERLAY);
 
 		matrixstack.pop();
 		matrixstack.translate(0.0D, (double) 0.33333334F, (double) 0.046666667F);
@@ -140,7 +140,7 @@ public class GuiEditGolemSign extends Screen {
 			});
 		}
 
-		Matrix4f matrix4f = matrixstack.peek().getModel();
+		Matrix4f matrix4f = matrixstack.getLast().getMatrix();
 		int k = this.textInputUtil.func_216896_c();
 		int l = this.textInputUtil.func_216898_d();
 		int i1 = this.minecraft.fontRenderer.getBidiFlag() ? -1 : 1;
@@ -150,18 +150,18 @@ public class GuiEditGolemSign extends Screen {
 			String s = astring[k1];
 			if (s != null) {
 				float f3 = (float) (-this.minecraft.fontRenderer.getStringWidth(s) / 2);
-				this.minecraft.fontRenderer.draw(s, f3, (float) (k1 * 10 - EntityMelonGolem.te.signText.length * 5), i, false, matrix4f, irendertypebuffer$impl, false, 0, 15728880);
+				this.minecraft.fontRenderer.renderString(s, f3, (float) (k1 * 10 - EntityMelonGolem.te.signText.length * 5), i, false, matrix4f, irendertypebuffer$impl, false, 0, 15728880);
 				if (k1 == this.editLine && k >= 0 && flag1) {
 					int l1 = this.minecraft.fontRenderer.getStringWidth(s.substring(0, Math.max(Math.min(k, s.length()), 0)));
 					int i2 = (l1 - this.minecraft.fontRenderer.getStringWidth(s) / 2) * i1;
 					if (k >= s.length()) {
-						this.minecraft.fontRenderer.draw("_", (float) i2, (float) j1, i, false, matrix4f, irendertypebuffer$impl, false, 0, 15728880);
+						this.minecraft.fontRenderer.renderString("_", (float) i2, (float) j1, i, false, matrix4f, irendertypebuffer$impl, false, 0, 15728880);
 					}
 				}
 			}
 		}
 
-		irendertypebuffer$impl.draw();
+		irendertypebuffer$impl.finish();
 
 		for (int k3 = 0; k3 < astring.length; ++k3) {
 			String s1 = astring[k3];
@@ -185,10 +185,10 @@ public class GuiEditGolemSign extends Screen {
 					RenderSystem.enableColorLogicOp();
 					RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
 					bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
-					bufferbuilder.vertex(matrix4f, (float) i3, (float) (j1 + 9), 0.0F).color(0, 0, 255, 255).endVertex();
-					bufferbuilder.vertex(matrix4f, (float) j3, (float) (j1 + 9), 0.0F).color(0, 0, 255, 255).endVertex();
-					bufferbuilder.vertex(matrix4f, (float) j3, (float) j1, 0.0F).color(0, 0, 255, 255).endVertex();
-					bufferbuilder.vertex(matrix4f, (float) i3, (float) j1, 0.0F).color(0, 0, 255, 255).endVertex();
+					bufferbuilder.pos(matrix4f, (float) i3, (float) (j1 + 9), 0.0F).color(0, 0, 255, 255).endVertex();
+					bufferbuilder.pos(matrix4f, (float) j3, (float) (j1 + 9), 0.0F).color(0, 0, 255, 255).endVertex();
+					bufferbuilder.pos(matrix4f, (float) j3, (float) j1, 0.0F).color(0, 0, 255, 255).endVertex();
+					bufferbuilder.pos(matrix4f, (float) i3, (float) j1, 0.0F).color(0, 0, 255, 255).endVertex();
 					bufferbuilder.finishDrawing();
 					WorldVertexBufferUploader.draw(bufferbuilder);
 					RenderSystem.disableColorLogicOp();

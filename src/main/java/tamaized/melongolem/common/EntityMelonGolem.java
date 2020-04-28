@@ -142,14 +142,14 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 	@Override
 	public void attackEntityWithRangedAttack(@Nonnull LivingEntity target, float distanceFactor) {
 		EntityMelonSlice slice = new EntityMelonSlice(this.world, this);
-		double d0 = target.getY() + (double) target.getEyeHeight() - 1.100000023841858D;
-		double d1 = target.getX() - this.getX();
-		double d2 = d0 - slice.getY();
-		double d3 = target.getZ() - this.getZ();
+		double d0 = target.getPosY() + (double) target.getEyeHeight() - 1.100000023841858D;
+		double d1 = target.getPosX() - this.getPosX();
+		double d2 = d0 - slice.getPosY();
+		double d3 = target.getPosZ() - this.getPosZ();
 		float f = MathHelper.sqrt(d1 * d1 + d3 * d3) * 0.2F;
 		slice.shoot(d1, d2 + (double) f, d3, 1.6F, 12.0F);
 		this.playSound(SoundEvents.ENTITY_SNOW_GOLEM_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
-		slice.setPositionAndUpdate(slice.getX(), slice.getY(), slice.getZ());
+		slice.setPositionAndUpdate(slice.getPosX(), slice.getPosY(), slice.getPosZ());
 		MelonMod.spawnNonLivingEntity(world, slice);
 	}
 
@@ -251,7 +251,7 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 		super.onDeath(cause);
 		ItemStack stack = getHead();
 		if (!world.isRemote && !stack.isEmpty()) {
-			ItemEntity e = new ItemEntity(world, getX(), getY(), getZ(), stack);
+			ItemEntity e = new ItemEntity(world, getPosX(), getPosY(), getPosZ(), stack);
 			e.setMotion(e.getMotion().add(
 
 					rand.nextFloat() * 0.05F,
@@ -347,7 +347,7 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 			if (cooldown > 0)
 				cooldown--;
 			final int radius = 25;
-			AxisAlignedBB area = new AxisAlignedBB(parent.getX() - radius, parent.getY() - radius, parent.getZ() - radius, parent.getX() + radius, parent.getY() + radius, parent.getZ() + radius);
+			AxisAlignedBB area = new AxisAlignedBB(parent.getPosX() - radius, parent.getPosY() - radius, parent.getPosZ() - radius, parent.getPosX() + radius, parent.getPosY() + radius, parent.getPosZ() + radius);
 			List<ItemEntity> items = parent.world.getEntitiesWithinAABB(ItemEntity.class, area);
 			for (ItemEntity item : items) {
 				if (parent.getNavigator().noPath() && isMelon(item)) {

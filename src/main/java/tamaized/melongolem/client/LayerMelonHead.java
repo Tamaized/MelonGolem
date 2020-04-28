@@ -37,18 +37,18 @@ public class LayerMelonHead<T extends LivingEntity & IModProxy.ISignHolder> exte
 		ItemStack itemStack = entity.getHead();
 		if (!entity.isInvisible() || !itemStack.isEmpty()) {
 			stack.push();
-			getEntityModel().head.rotate(stack);
+			getEntityModel().head.translateRotate(stack);
 			stack.translate(0.0D, -0.25D, 0.0D);
-			stack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(180F));
+			stack.rotate(Vector3f.YP.rotationDegrees(180F));
 			stack.scale(0.625F, -0.625F, -0.625F);
 			if (MelonMod.SIGNS.contains(itemStack.getItem())) {
 				for (int index = 0; index < 4; index++)
 					EntityMelonGolem.te.setText(index, entity.getSignText(index));
 				stack.translate(-0.5D, -0.5D, -1.33D);
 				EntityMelonGolem.SIGN_TILE_BLOCKSTATE = ((WallOrFloorItem)entity.getHead().getItem()).wallBlock.getDefaultState();
-				Objects.requireNonNull(TileEntityRendererDispatcher.instance.getRenderer(EntityMelonGolem.te)).render(EntityMelonGolem.te, partialTicks, stack, buffer, light, LivingRenderer.getOverlay(entity, 0F));
+				Objects.requireNonNull(TileEntityRendererDispatcher.instance.getRenderer(EntityMelonGolem.te)).render(EntityMelonGolem.te, partialTicks, stack, buffer, light, LivingRenderer.getPackedOverlay(entity, 0F));
 			} else
-				Minecraft.getInstance().getFirstPersonRenderer().renderItem(entity, itemStack, ItemCameraTransforms.TransformType.HEAD, false, stack, buffer, light);
+				Minecraft.getInstance().getFirstPersonRenderer().renderItemSide(entity, itemStack, ItemCameraTransforms.TransformType.HEAD, false, stack, buffer, light);
 			stack.pop();
 		}
 	}

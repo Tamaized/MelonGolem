@@ -67,7 +67,7 @@ public class RenderMelonGolem<T extends MobEntity & IModProxy.ISignHolder> exten
 	}
 
 	@Override
-	protected void scale(T p_225620_1_, MatrixStack p_225620_2_, float p_225620_3_) {
+	protected void preRenderCallback(T p_225620_1_, MatrixStack p_225620_2_, float p_225620_3_) {
 		if (type == Type.TINY)
 			p_225620_2_.scale(0.25F, 0.25F, 0.25F);
 	}
@@ -115,7 +115,7 @@ public class RenderMelonGolem<T extends MobEntity & IModProxy.ISignHolder> exten
 			stack.scale(s, s, s);
 			//			int i = 0xF000F0;
 			//			GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, i % 65536, i >> 16);
-			getEntityModel().render(stack, builder, 0xF000F0, getOverlay(entity, getWhiteOverlayProgress(entity, partialTicks)), 1F, 1F, 1F, (!func_225622_a_(entity) && !entity.isInvisibleToPlayer(Objects.requireNonNull(Minecraft.getInstance().player))) ? 0.15F : 1.0F);
+			getEntityModel().render(stack, builder, 0xF000F0, getPackedOverlay(entity, getOverlayProgress(entity, partialTicks)), 1F, 1F, 1F, (!isVisible(entity) && !entity.isInvisibleToPlayer(Objects.requireNonNull(Minecraft.getInstance().player))) ? 0.15F : 1.0F);
 			stack.pop();
 			//			GlStateManager.disableBlend();
 		}
