@@ -13,6 +13,7 @@ import net.minecraft.util.Direction;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.model.pipeline.BakedQuadBuilder;
+import net.minecraftforge.client.model.pipeline.LightUtil;
 import net.minecraftforge.client.model.pipeline.VertexLighterFlat;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -40,10 +41,10 @@ public class ModelBakeListener {
 				@Override
 				public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull Random rand) {
 					return cachedQuads.computeIfAbsent(side, (face) -> {
-						List<BakedQuad> delegateQuads = model.getQuads(state, side, rand);
-						List<BakedQuad> quads = Lists.newArrayList();
-						for (BakedQuad quad : delegateQuads)
-							quads.add(delegateQuads.indexOf(quad) == 1 ? transformQuad(quad, 0.007F) : quad);
+						List<BakedQuad> quads = model.getQuads(state, side, rand);
+						for (BakedQuad quad : quads)
+							if(quads.indexOf(quad) == 1)
+								LightUtil.setLightData(quad, 0xF000F0);
 						return quads;
 					});
 				}
@@ -59,8 +60,8 @@ public class ModelBakeListener {
 				}
 
 				@Override
-				public boolean isSideLit() {
-					return model.isSideLit();
+				public boolean func_230044_c_() {
+					return model.func_230044_c_();
 				}
 
 				@Override
@@ -89,34 +90,6 @@ public class ModelBakeListener {
 
 			});
 		}
-	}
-
-	private static BakedQuad transformQuad(BakedQuad quad, final float light) {
-		BakedQuadBuilder builder = new BakedQuadBuilder();
-
-		VertexLighterFlat trans = new VertexLighterFlat(Minecraft.getInstance().getBlockColors()) {
-			@Override
-			protected void updateLightmap(@Nonnull float[] normal, float[] lightmap, float x, float y, float z) {
-				lightmap[0] = light;
-				lightmap[1] = light;
-			}
-
-			@Override
-			public void setQuadTint(int tint) {
-				// NO OP
-			}
-		};
-
-		trans.setParent(builder);
-
-		quad.pipe(trans);
-
-		builder.setQuadTint(quad.getTintIndex());
-		builder.setQuadOrientation(quad.getFace());
-		builder.setTexture(quad.getSprite());
-		builder.setApplyDiffuseLighting(false);
-
-		return builder.build();
 	}
 
 }
