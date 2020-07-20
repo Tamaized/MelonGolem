@@ -36,6 +36,7 @@ import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraftforge.forgespi.language.IConfigurable;
 import net.minecraftforge.registries.ObjectHolder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -53,6 +54,7 @@ import tamaized.melongolem.network.DonatorHandler;
 import tamaized.melongolem.network.NetworkMessages;
 import tamaized.melongolem.network.client.ClientPacketHandlerSpawnNonLivingEntity;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
@@ -98,13 +100,27 @@ public class MelonMod {
 		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, specPair.getRight());
 		config = specPair.getLeft();
 		DonatorHandler.start();
-		// Lol a non-copy modifiable list
-		ModList.get().getMods().replaceAll(modInfo -> !modInfo.getModId().equalsIgnoreCase(MODID) ? modInfo : new ModInfo(modInfo.getOwningFile(), modInfo.getModConfig()) {
-			@Override
-			public boolean hasConfigUI() {
-				return true;
-			}
-		});
+		try {
+			Field bitchIDoWhatIWant = ModInfo.class.getDeclaredField("config");
+			bitchIDoWhatIWant.setAccessible(true);
+			ModList.get().getMods().replaceAll(modInfo -> {
+				if (modInfo.getModId().equalsIgnoreCase(MODID))
+					try {
+						IConfigurable config = (IConfigurable) bitchIDoWhatIWant.get(modInfo);
+						return new ModInfo(modInfo.getOwningFile(), config) {
+							@Override
+							public boolean hasConfigUI() {
+								return true;
+							}
+						};
+					} catch (Throwable e) {
+						e.printStackTrace();
+					}
+				return modInfo;
+			});
+		} catch (Throwable e) {
+			e.printStackTrace(); // Catch all, dont crash the game just ignore this 'feature'
+		}
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> MelonConfigScreen::new);
 	}
 
