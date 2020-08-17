@@ -5,7 +5,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.particles.ParticleType;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistries;
 import tamaized.melongolem.network.NetworkMessages;
@@ -13,16 +13,16 @@ import tamaized.melongolem.network.NetworkMessages;
 public class ClientPacketHandlerParticle implements NetworkMessages.IMessage<ClientPacketHandlerParticle> {
 
 	private ResourceLocation id;
-	private Vec3d vec;
-	private Vec3d vel;
+	private Vector3d vec;
+	private Vector3d vel;
 
-	public ClientPacketHandlerParticle(ResourceLocation particle, Vec3d pos, Vec3d vel) {
+	public ClientPacketHandlerParticle(ResourceLocation particle, Vector3d pos, Vector3d vel) {
 		id = particle;
 		vec = pos;
 		this.vel = vel;
 	}
 
-	public static void spawnParticle(World world, IParticleData particle, Vec3d pos, Vec3d vel) {
+	public static void spawnParticle(World world, IParticleData particle, Vector3d pos, Vector3d vel) {
 		world.addParticle(particle, pos.x, pos.y, pos.z, vel.x, vel.y, vel.z);
 	}
 
@@ -54,8 +54,8 @@ public class ClientPacketHandlerParticle implements NetworkMessages.IMessage<Cli
 	@Override
 	public ClientPacketHandlerParticle fromBytes(PacketBuffer packet) {
 		id = packet.readResourceLocation();
-		vec = new Vec3d(packet.readDouble(), packet.readDouble(), packet.readDouble());
-		vel = new Vec3d(packet.readDouble(), packet.readDouble(), packet.readDouble());
+		vec = new Vector3d(packet.readDouble(), packet.readDouble(), packet.readDouble());
+		vel = new Vector3d(packet.readDouble(), packet.readDouble(), packet.readDouble());
 		return this;
 	}
 }

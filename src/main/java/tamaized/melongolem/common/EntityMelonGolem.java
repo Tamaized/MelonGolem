@@ -12,7 +12,8 @@ import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.Pose;
-import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.AttributeModifierMap;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.LookAtGoal;
 import net.minecraft.entity.ai.goal.LookRandomlyGoal;
@@ -34,6 +35,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tileentity.SignTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
@@ -42,13 +44,13 @@ import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextComponentUtils;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
-import net.minecraftforge.common.IShearable;
+import net.minecraftforge.common.IForgeShearable;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -56,7 +58,6 @@ import net.minecraftforge.items.IItemHandler;
 import tamaized.melongolem.IModProxy;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.MelonSounds;
-import tamaized.melongolem.common.capability.CapabilityList;
 import tamaized.melongolem.network.client.ClientPacketHandlerMelonTTS;
 
 import javax.annotation.Nonnull;
@@ -64,17 +65,10 @@ import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
-public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, IShearable, IEntityAdditionalSpawnData, IModProxy.ISignHolder {
+public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, IForgeShearable, IEntityAdditionalSpawnData, IModProxy.ISignHolder {
 
-	public static BlockState SIGN_TILE_BLOCKSTATE = Blocks.OAK_WALL_SIGN.getDefaultState();
-	public static final SignTileEntity te = new SignTileEntity() {
-		@Nonnull
-		@Override
-		public BlockState getBlockState() {
-			return SIGN_TILE_BLOCKSTATE;
-		}
-	};
 	private static final DataParameter<ItemStack> HEAD = EntityDataManager.createKey(EntityMelonGolem.class, DataSerializers.ITEMSTACK);
 	//	private static final ResourceLocation LOOT = LootTables.register(new ResourceLocation(MelonMod.MODID, "melongolem"));
 	private static final List<DataParameter<ITextComponent>> SIGN_TEXT = Lists.newArrayList(
@@ -88,6 +82,14 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 			EntityDataManager.createKey(EntityMelonGolem.class, DataSerializers.TEXT_COMPONENT)
 
 	);
+	public static BlockState SIGN_TILE_BLOCKSTATE = Blocks.OAK_WALL_SIGN.getDefaultState();
+	public static final SignTileEntity te = new SignTileEntity() {
+		@Nonnull
+		@Override
+		public BlockState getBlockState() {
+			return SIGN_TILE_BLOCKSTATE;
+		}
+	};
 	private final float pitch = rand.nextFloat() * 3.0F;
 
 	public EntityMelonGolem(World worldIn) {
@@ -96,6 +98,12 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 
 	protected EntityMelonGolem(EntityType<? extends GolemEntity> p_i48569_1_, World p_i48569_2_) {
 		super(p_i48569_1_, p_i48569_2_);
+	}
+
+	public static AttributeModifierMap.MutableAttribute registerAttributes() {
+		return MobEntity.func_233666_p_().
+				createMutableAttribute(Attributes.MAX_HEALTH, MelonMod.config.health.get().floatValue()).
+				createMutableAttribute(Attributes.MOVEMENT_SPEED, 0.2F);
 	}
 
 	@Override
@@ -133,13 +141,6 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 	}
 
 	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(MelonMod.config.health.get());
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.20000000298023224D);
-	}
-
-	@Override
 	public void attackEntityWithRangedAttack(@Nonnull LivingEntity target, float distanceFactor) {
 		EntityMelonSlice slice = new EntityMelonSlice(this.world, this);
 		double d0 = target.getPosY() + (double) target.getEyeHeight() - 1.100000023841858D;
@@ -154,7 +155,7 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 	}
 
 	@Override
-	public boolean isShearable(@Nonnull ItemStack item, IWorldReader world, BlockPos pos) {
+	public boolean isShearable(@Nonnull ItemStack item, World world, BlockPos pos) {
 		return !getHead().isEmpty();
 	}
 
@@ -201,23 +202,24 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 			super.playAmbientSound();
 	}
 
+	@Nonnull
 	@Override
-	protected boolean processInteract(PlayerEntity player, Hand hand) {
+	public ActionResultType applyPlayerInteraction(PlayerEntity player, Vector3d vec, Hand hand) {
 		if (!MelonMod.config.hats.get() || player.getHeldItemMainhand().getItem() instanceof ShearsItem || player.getHeldItemOffhand().getItem() instanceof ShearsItem)
-			return false;
+			return ActionResultType.FAIL;
 		ItemStack stack = player.getHeldItem(hand);
 		if (!stack.isEmpty() && getHead().isEmpty()) {
 			if (Block.getBlockFromItem(stack.getItem()) != Blocks.AIR || MelonMod.SIGNS.contains(stack.getItem())) {
 				setHead(stack);
 				if (!player.isCreative())
 					player.getHeldItem(hand).shrink(1);
-				return true;
+				return ActionResultType.SUCCESS;
 			}
 		} else if (!getHead().isEmpty() && MelonMod.SIGNS.contains(getHead().getItem())) {
 			MelonMod.proxy.openSignHolderGui(this);
-			return true;
+			return ActionResultType.SUCCESS;
 		}
-		return false;
+		return ActionResultType.FAIL;
 	}
 
 	@Override
@@ -240,7 +242,7 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 
 	@Nonnull
 	@Override
-	public List<ItemStack> onSheared(@Nonnull ItemStack item, IWorld world, BlockPos pos, int fortune) {
+	public List<ItemStack> onSheared(@Nullable PlayerEntity player, @Nonnull ItemStack item, World world, BlockPos pos, int fortune) {
 		List<ItemStack> list = Lists.newArrayList(MelonMod.config.shear.get() ? getHead() : ItemStack.EMPTY);
 		setHead(ItemStack.EMPTY);
 		return list;
@@ -281,10 +283,10 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 		setHead(ItemStack.read(compound.getCompound("head")));
 		for (int i = 0; i < 4; ++i) {
 			String s = compound.getString("Text" + (i + 1));
-			ITextComponent itextcomponent = ITextComponent.Serializer.fromJson(s);
+			ITextComponent itextcomponent = ITextComponent.Serializer.func_240643_a_(s);
 
 			try {
-				setSignText(i, itextcomponent == null ? new StringTextComponent("") : TextComponentUtils.updateForEntity(getCommandSource(), itextcomponent, null, 0));
+				setSignText(i, itextcomponent == null ? new StringTextComponent("") : TextComponentUtils.func_240645_a_(getCommandSource(), itextcomponent, null, 0));
 			} catch (CommandException | CommandSyntaxException var7) {
 				setSignText(i, itextcomponent);
 			}
@@ -372,15 +374,16 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 							if (parent.world.isBlockLoaded(pos)) {
 								TileEntity te = parent.world.getTileEntity(pos);
 								if (te != null) {
-									IItemHandler cap = CapabilityList.getCap(te, CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP);
-									if (cap != null)
+									te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP).ifPresent(cap -> {
 										for (int i = 0; i < cap.getSlots(); i++) {
 											if (isMelon(cap.getStackInSlot(i))) {
 												foundMelon = parent.getDistanceSq(pos.getX(), pos.getY(), pos.getZ()) < 4 || parent.getNavigator().tryMoveToXYZ(pos.getX(), pos.getY(), pos.getZ(), 1.25F);
-												if (foundMelon)
-													break search;
+												break;
 											}
 										}
+									});
+									if (foundMelon)
+										break search;
 								}
 							}
 						}
@@ -398,32 +401,34 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 					foundMelon = false;
 					return;
 				}
-				IItemHandler cap = CapabilityList.getCap(te, CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP);
-				if (cap == null) {
-					parent.getNavigator().clearPath();
-					foundMelon = false;
-					return;
-				}
-				boolean valid = false;
-				int i;
-				for (i = 0; i < cap.getSlots(); i++) {
-					if (isMelon(cap.getStackInSlot(i))) {
-						valid = true;
-						break;
-					}
-				}
-				if (!valid) {
-					parent.getNavigator().clearPath();
-					foundMelon = false;
-					return;
-				}
+				LazyOptional<IItemHandler> handler = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP);
+				if (handler.isPresent()) {
+					handler.ifPresent(cap -> {
+						boolean valid = false;
+						int i;
+						for (i = 0; i < cap.getSlots(); i++) {
+							if (isMelon(cap.getStackInSlot(i))) {
+								valid = true;
+								break;
+							}
+						}
+						if (!valid) {
+							parent.getNavigator().clearPath();
+							foundMelon = false;
+							return;
+						}
 
-				if (cooldown <= 0 && parent.getDistanceSq(pos.getX(), pos.getY(), pos.getZ()) < 4) {
-					boolean flag = cap.getStackInSlot(i).getItem() == melonblock.asItem();
-					cap.getStackInSlot(i).shrink(1);
-					parent.playSound(SoundEvents.ENTITY_PLAYER_BURP, 1F, 1F);
-					parent.heal(MelonMod.config.heal.get().floatValue() * (flag ? 9 : 1));
-					cooldown = 10 + parent.getRNG().nextInt(40);
+						if (cooldown <= 0 && parent.getDistanceSq(pos.getX(), pos.getY(), pos.getZ()) < 4) {
+							boolean flag = cap.getStackInSlot(i).getItem() == melonblock.asItem();
+							cap.getStackInSlot(i).shrink(1);
+							parent.playSound(SoundEvents.ENTITY_PLAYER_BURP, 1F, 1F);
+							parent.heal(MelonMod.config.heal.get().floatValue() * (flag ? 9 : 1));
+							cooldown = 10 + parent.getRNG().nextInt(40);
+						}
+					});
+				} else {
+					parent.getNavigator().clearPath();
+					foundMelon = false;
 				}
 			}
 		}

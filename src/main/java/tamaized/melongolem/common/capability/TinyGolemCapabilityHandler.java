@@ -1,6 +1,9 @@
 package tamaized.melongolem.common.capability;
 
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import tamaized.melongolem.common.EntityTinyMelonGolem;
 
 import java.util.UUID;
@@ -10,7 +13,7 @@ public class TinyGolemCapabilityHandler implements ITinyGolemCapability {
 	private EntityTinyMelonGolem pet;
 
 	private BlockPos pos;
-	private int dimID;
+	private ResourceLocation dim;
 	private UUID petID;
 
 	@Override
@@ -24,15 +27,15 @@ public class TinyGolemCapabilityHandler implements ITinyGolemCapability {
 	}
 
 	@Override
-	public void markDirty(BlockPos pos, int dimID, UUID petID) {
+	public void markDirty(BlockPos pos, ResourceLocation dim, UUID petID) {
 		this.pos = pos;
-		this.dimID = dimID;
+		this.dim = dim;
 		this.petID = petID;
 	}
 
 	@Override
-	public int getLoadDimID() {
-		return dimID;
+	public ResourceLocation getLoadDim() {
+		return dim;
 	}
 
 	@Override
@@ -47,9 +50,9 @@ public class TinyGolemCapabilityHandler implements ITinyGolemCapability {
 
 	@Override
 	public boolean load(boolean clear) {
-		boolean flag = getPet() == null && pos != null && petID != null;
+		boolean flag = pet == null && pos != null && petID != null;
 		if (clear) {
-			dimID = 0;
+			dim = World.OVERWORLD.func_240901_a_();
 			pos = null;
 			petID = null;
 		}
@@ -59,7 +62,7 @@ public class TinyGolemCapabilityHandler implements ITinyGolemCapability {
 	@Override
 	public void copyFrom(ITinyGolemCapability cap) {
 		setPet(cap.getPet());
-		markDirty(cap.getLoadPos(), cap.getLoadDimID(), cap.getLoadPetID());
+		markDirty(cap.getLoadPos(), cap.getLoadDim(), cap.getLoadPetID());
 	}
 
 }

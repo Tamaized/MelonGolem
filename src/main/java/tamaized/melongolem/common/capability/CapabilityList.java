@@ -58,19 +58,7 @@ public class CapabilityList {
 
 	@SubscribeEvent
 	public static void updateClone(PlayerEvent.Clone e) {
-		ITinyGolemCapability newcap = getCap(e.getPlayer(), TINY_GOLEM, null);
-		ITinyGolemCapability oldcap = getCap(e.getOriginal(), TINY_GOLEM, null);
-		if (newcap != null && oldcap != null)
-			newcap.copyFrom(oldcap);
-	}
-
-	public static <T> T getCap(@Nullable ICapabilityProvider provider, Capability<T> cap) {
-		return getCap(provider, cap, null);
-	}
-
-	public static <T> T getCap(@Nullable ICapabilityProvider provider, Capability<T> cap, @Nullable Direction face) {
-		LazyOptional<T> data = provider != null ? provider.getCapability(cap, face) : null;
-		return data != null && data.isPresent() ? data.orElseThrow(IllegalStateException::new) : null;
+		e.getPlayer().getCapability(TINY_GOLEM).ifPresent(cap -> e.getOriginal().getCapability(TINY_GOLEM).ifPresent(cap::copyFrom));
 	}
 
 }

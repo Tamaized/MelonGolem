@@ -6,7 +6,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import tamaized.melongolem.network.NetworkMessages;
@@ -38,7 +38,7 @@ public class ClientPacketHandlerSpawnNonLivingEntity implements NetworkMessages.
 		this.pitch = MathHelper.floor(entity.rotationPitch * 256.0F / 360.0F);
 		this.yaw = MathHelper.floor(entity.rotationYaw * 256.0F / 360.0F);
 		this.type = entity.getType();
-		Vec3d motion = entity.getMotion();
+		Vector3d motion = entity.getMotion();
 		this.speedX = (int) (MathHelper.clamp(motion.x, -3.9D, 3.9D) * 8000.0D);
 		this.speedY = (int) (MathHelper.clamp(motion.y, -3.9D, 3.9D) * 8000.0D);
 		this.speedZ = (int) (MathHelper.clamp(motion.z, -3.9D, 3.9D) * 8000.0D);

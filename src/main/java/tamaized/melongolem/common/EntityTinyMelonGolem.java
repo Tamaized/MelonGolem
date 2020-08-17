@@ -7,8 +7,10 @@ import net.minecraft.block.Blocks;
 import net.minecraft.command.CommandException;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.EntitySize;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.Pose;
-import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.AttributeModifierMap;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.goal.FollowOwnerGoal;
 import net.minecraft.entity.ai.goal.LookAtGoal;
 import net.minecraft.entity.ai.goal.LookRandomlyGoal;
@@ -23,23 +25,23 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextComponentUtils;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
-import net.minecraftforge.common.IShearable;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.IForgeShearable;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import tamaized.melongolem.IModProxy;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.capability.CapabilityList;
-import tamaized.melongolem.common.capability.ITinyGolemCapability;
 import tamaized.melongolem.network.DonatorHandler;
 
 import javax.annotation.Nonnull;
@@ -47,7 +49,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-public class EntityTinyMelonGolem extends TameableEntity implements IShearable, IEntityAdditionalSpawnData, IModProxy.ISignHolder {
+public class EntityTinyMelonGolem extends TameableEntity implements IForgeShearable, IEntityAdditionalSpawnData, IModProxy.ISignHolder {
 
 	private static final DataParameter<ItemStack> HEAD = EntityDataManager.createKey(EntityTinyMelonGolem.class, DataSerializers.ITEMSTACK);
 	private static final DataParameter<Boolean> ENABLED = EntityDataManager.createKey(EntityTinyMelonGolem.class, DataSerializers.BOOLEAN);
@@ -70,7 +72,7 @@ public class EntityTinyMelonGolem extends TameableEntity implements IShearable, 
 
 	@Nullable
 	@Override
-	public AgeableEntity createChild(@Nonnull AgeableEntity ageable) {
+	public AgeableEntity func_241840_a(ServerWorld p_241840_1_, AgeableEntity p_241840_2_) {
 		return null;
 	}
 
@@ -96,20 +98,20 @@ public class EntityTinyMelonGolem extends TameableEntity implements IShearable, 
 				dataManager.set(COLOR, settings.color);
 			}
 		}
-		ITinyGolemCapability cap = CapabilityList.getCap(getOwner(), CapabilityList.TINY_GOLEM, null);
-		if (cap != null && getOwner() instanceof PlayerEntity) {
-			if (cap.getPet() != this) {
-				if (cap.getPet() != null && cap.getPet().getUniqueID().equals(this.getUniqueID())) {
-					remove();
-					return;
+		if (getOwner() instanceof PlayerEntity)
+			getOwner().getCapability(CapabilityList.TINY_GOLEM).ifPresent(cap -> {
+				if (cap.getPet() != this) {
+					if (cap.getPet() != null && cap.getPet().getUniqueID().equals(this.getUniqueID())) {
+						remove();
+						return;
+					}
+					ItemMelonStick.summonPet(world, (PlayerEntity) getOwner(), this);
+					if (cap.getPet() == null)
+						cap.setPet(this);
+					else
+						this.attackEntityFrom(DamageSource.OUT_OF_WORLD, Float.MAX_VALUE);
 				}
-				ItemMelonStick.summonPet(world, (PlayerEntity) getOwner(), this);
-				if (cap.getPet() == null)
-					cap.setPet(this);
-				else
-					this.attackEntityFrom(DamageSource.OUT_OF_WORLD, Float.MAX_VALUE);
-			}
-		}
+			});
 	}
 
 	public boolean isEnabled() {
@@ -144,14 +146,7 @@ public class EntityTinyMelonGolem extends TameableEntity implements IShearable, 
 	}
 
 	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(MelonMod.config.health.get().floatValue());
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.20000000298023224D);
-	}
-
-	@Override
-	public boolean isShearable(@Nonnull ItemStack item, IWorldReader world, BlockPos pos) {
+	public boolean isShearable(@Nonnull ItemStack item, World world, BlockPos pos) {
 		return !getHead().isEmpty();
 	}
 
@@ -178,23 +173,24 @@ public class EntityTinyMelonGolem extends TameableEntity implements IShearable, 
 		return SoundEvents.ENTITY_SLIME_DEATH;
 	}
 
+	@Nonnull
 	@Override
-	public boolean processInteract(PlayerEntity player, Hand hand) {
+	public ActionResultType applyPlayerInteraction(PlayerEntity player, Vector3d vec, Hand hand) {
 		if (!MelonMod.config.hats.get() || player.getHeldItemMainhand().getItem() instanceof ShearsItem || player.getHeldItemOffhand().getItem() instanceof ShearsItem)
-			return false;
+			return ActionResultType.FAIL;
 		ItemStack stack = player.getHeldItem(hand);
 		if (!stack.isEmpty() && getHead().isEmpty()) {
 			if (Block.getBlockFromItem(stack.getItem()) != Blocks.AIR || MelonMod.SIGNS.contains(stack.getItem())) {
 				setHead(stack);
 				if (!player.isCreative())
 					player.getHeldItem(hand).shrink(1);
-				return true;
+				return ActionResultType.SUCCESS;
 			}
 		} else if (!getHead().isEmpty() && MelonMod.SIGNS.contains(getHead().getItem())) {
 			MelonMod.proxy.openSignHolderGui(this);
-			return true;
+			return ActionResultType.SUCCESS;
 		}
-		return false;
+		return ActionResultType.FAIL;
 	}
 
 	@Override
@@ -217,7 +213,7 @@ public class EntityTinyMelonGolem extends TameableEntity implements IShearable, 
 
 	@Nonnull
 	@Override
-	public List<ItemStack> onSheared(@Nonnull ItemStack item, IWorld world, BlockPos pos, int fortune) {
+	public List<ItemStack> onSheared(@Nullable PlayerEntity player, @Nonnull ItemStack item, World world, BlockPos pos, int fortune) {
 		List<ItemStack> list = Lists.newArrayList(MelonMod.config.shear.get() ? getHead() : ItemStack.EMPTY);
 		setHead(ItemStack.EMPTY);
 		return list;
@@ -265,10 +261,10 @@ public class EntityTinyMelonGolem extends TameableEntity implements IShearable, 
 
 		for (int i = 0; i < 4; ++i) {
 			String s = compound.getString("Text" + (i + 1));
-			ITextComponent itextcomponent = ITextComponent.Serializer.fromJson(s);
+			ITextComponent itextcomponent = ITextComponent.Serializer.func_240643_a_(s);
 
 			try {
-				setSignText(i, itextcomponent == null ? new StringTextComponent("") : TextComponentUtils.updateForEntity(getCommandSource(), itextcomponent, null, 0));
+				setSignText(i, itextcomponent == null ? new StringTextComponent("") : TextComponentUtils.func_240645_a_(getCommandSource(), itextcomponent, null, 0));
 			} catch (CommandException | CommandSyntaxException var7) {
 				setSignText(i, itextcomponent);
 			}

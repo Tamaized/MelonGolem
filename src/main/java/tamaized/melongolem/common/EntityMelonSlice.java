@@ -70,9 +70,9 @@ public class EntityMelonSlice extends ThrowableEntity implements IRendersAsItem 
 	@Override
 	protected void onImpact(@Nonnull RayTraceResult result) {
 		if (result instanceof EntityRayTraceResult) {
-			if (((EntityRayTraceResult) result).getEntity() == getThrower())
+			if (((EntityRayTraceResult) result).getEntity() == func_234616_v_())
 				return;
-			((EntityRayTraceResult) result).getEntity().attackEntityFrom(DamageSource.causeThrownDamage(this, getThrower()), MelonMod.config.damage.get().floatValue() * (isGlistering() ? MelonMod.config.glisterDamageAmp.get().floatValue() : 1F));
+			((EntityRayTraceResult) result).getEntity().attackEntityFrom(DamageSource.causeThrownDamage(this, func_234616_v_()), MelonMod.config.damage.get().floatValue() * (isGlistering() ? MelonMod.config.glisterDamageAmp.get().floatValue() : 1F));
 		}
 
 		if (!this.world.isRemote) {

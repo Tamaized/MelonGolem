@@ -10,6 +10,9 @@ import net.minecraft.block.material.MaterialColor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.AttributeModifierMap;
+import net.minecraft.entity.ai.attributes.GlobalEntityTypeAttributes;
 import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.item.BlockItem;
@@ -57,6 +60,7 @@ import tamaized.melongolem.network.client.ClientPacketHandlerSpawnNonLivingEntit
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 @Mod(MelonMod.MODID)
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -83,9 +87,11 @@ public class MelonMod {
 	@ObjectHolder(MelonMod.MODID + ":glisteringmelonblock")
 	public static final Block glisteringMelonBlock = Blocks.AIR;
 
-	public static final EntityType<? extends GolemEntity> entityTypeMelonGolem = assign(EntityMelonGolem.class, 0.7F, 1.9F, 128, 1, true, EntityClassification.CREATURE);
+	@ObjectHolder(MelonMod.MODID + ":entitymelongolem")
+	public static final EntityType<? extends GolemEntity> entityTypeMelonGolem = getNull();
 
-	public static final EntityType<? extends GolemEntity> entityTypeGlisteringMelonGolem = assign(EntityGlisteringMelonGolem.class, 0.7F, 1.9F, 128, 1, true, EntityClassification.CREATURE);
+	@ObjectHolder(MelonMod.MODID + ":entityglisteringmelongolem")
+	public static final EntityType<? extends GolemEntity> entityTypeGlisteringMelonGolem = getNull();
 
 	@ObjectHolder(MelonMod.MODID + ":entitymelonslice")
 	public static final EntityType<? extends EntityMelonSlice> entityTypeMelonSlice = getNull();
@@ -128,13 +134,13 @@ public class MelonMod {
 	public static void registerEntities(RegistryEvent.Register<EntityType<?>> e) {
 		e.getRegistry().registerAll(
 
-				entityTypeMelonGolem,
+				assign(EntityMelonGolem.class, 0.7F, 1.9F, 128, 1, true, EntityClassification.CREATURE, EntityMelonGolem::registerAttributes),
 
 				assign(EntityMelonSlice.class, 0.25F, 0.25F, 128, 1, true, EntityClassification.MISC),
 
-				assign(EntityTinyMelonGolem.class, 0.175F, 0.475F, 128, 1, true, EntityClassification.CREATURE),
+				assign(EntityTinyMelonGolem.class, 0.175F, 0.475F, 128, 1, true, EntityClassification.CREATURE, EntityMelonGolem::registerAttributes),
 
-				entityTypeGlisteringMelonGolem
+				assign(EntityGlisteringMelonGolem.class, 0.7F, 1.9F, 128, 1, true, EntityClassification.CREATURE, EntityMelonGolem::registerAttributes)
 
 		);
 	}
@@ -148,7 +154,7 @@ public class MelonMod {
 	public static void registerBlocks(RegistryEvent.Register<Block> e) {
 		e.getRegistry().registerAll(
 
-				assign(new Block(Block.Properties.create(Material.GOURD, MaterialColor.LIME).hardnessAndResistance(1.0F).sound(SoundType.WOOD).lightValue(4)), "glisteringmelonblock")
+				assign(new Block(Block.Properties.create(Material.GOURD, MaterialColor.LIME).hardnessAndResistance(1.0F).sound(SoundType.WOOD).setLightLevel(state -> 4)), "glisteringmelonblock")
 
 		);
 	}
@@ -188,6 +194,12 @@ public class MelonMod {
 		return item
 
 				.setRegistryName(MODID, name);
+	}
+
+	private static <T extends LivingEntity> EntityType<T> assign(Class<T> entity, float w, float h, int range, int freq, boolean updates, EntityClassification classification, Supplier<AttributeModifierMap.MutableAttribute> attributes) {
+		EntityType<T> type = assign(entity, w, h, range, freq, updates, classification);
+		GlobalEntityTypeAttributes.put(type, attributes.get().create());
+		return type;
 	}
 
 	private static <T extends Entity> EntityType<T> assign(Class<T> entity, float w, float h, int range, int freq, boolean updates, EntityClassification classification) {
