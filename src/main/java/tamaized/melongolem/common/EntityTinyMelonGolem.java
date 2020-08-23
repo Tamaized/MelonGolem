@@ -7,10 +7,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.command.CommandException;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.EntitySize;
-import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.Pose;
-import net.minecraft.entity.ai.attributes.AttributeModifierMap;
-import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.goal.FollowOwnerGoal;
 import net.minecraft.entity.ai.goal.LookAtGoal;
 import net.minecraft.entity.ai.goal.LookRandomlyGoal;
@@ -158,7 +155,7 @@ public class EntityTinyMelonGolem extends TameableEntity implements IForgeSheara
 	@Nullable
 	@Override
 	protected SoundEvent getAmbientSound() {
-		return SoundEvents.ENTITY_SLIME_SQUISH_SMALL;
+		return null;
 	}
 
 	@Nullable

@@ -15,6 +15,24 @@ import java.util.Objects;
 @Mod.EventBusSubscriber(modid = MelonMod.MODID)
 public class MelonConfig {
 
+	public static class Client {
+		public ForgeConfigSpec.BooleanValue tehnutMode;
+		public ForgeConfigSpec.BooleanValue tts;
+
+		public Client(ForgeConfigSpec.Builder builder) {
+			tehnutMode = builder.
+					translation("TehNut Mode").
+					comment(":^)").
+					define("tehnutMode", false);
+
+			tts = builder.
+					translation("TTS Signs").
+					comment("When enabled, written signs on a golem's head will play text to speech audio").
+					define("tts", true);
+		}
+
+	}
+
 	public static boolean dirty = true;
 	public static Item stabItem = Items.STICK;
 	public final DonatorSettings DONATOR_SETTINGS = new DonatorSettings();
@@ -25,8 +43,6 @@ public class MelonConfig {
 	public ForgeConfigSpec.BooleanValue shear;
 	public ForgeConfigSpec.BooleanValue eats;
 	public ForgeConfigSpec.DoubleValue heal;
-	public ForgeConfigSpec.BooleanValue tehnutMode;
-	public ForgeConfigSpec.BooleanValue tts;
 	public ForgeConfigSpec.ConfigValue<String> stabby;
 
 	public MelonConfig(ForgeConfigSpec.Builder builder) {
@@ -82,15 +98,6 @@ public class MelonConfig {
 				comment("The amount a golem will heal for after consuming a melon slice").
 				defineInRange("heal", 1.0F, 0.5F, Float.MAX_VALUE);
 
-		tehnutMode = builder.
-				translation("TehNut Mode").
-				comment(":^)").
-				define("tehnutMode", false);
-
-		tts = builder.
-				translation("TTS Signs").
-				comment("When enabled, written signs on a golem's head will play text to speech audio").
-				define("tts", true);
 
 		stabby = builder.
 				translation("Stabby Life Item").

@@ -7,7 +7,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 import net.minecraftforge.fml.unsafe.UnsafeHacks;
-import tamaized.melongolem.network.client.ClientPacketHandlerMelonTTS;
+import tamaized.melongolem.network.client.ClientPacketHandlerMelonAmbientSound;
 import tamaized.melongolem.network.client.ClientPacketHandlerParticle;
 import tamaized.melongolem.network.client.ClientPacketHandlerSpawnNonLivingEntity;
 import tamaized.melongolem.network.server.ServerPacketHandlerDonatorSettings;
@@ -23,7 +23,7 @@ public class NetworkMessages {
 		registerMessage(network, ServerPacketHandlerMelonSign.class, IMessage.Side.SERVER);
 		registerMessage(network, ServerPacketHandlerDonatorSettings.class, IMessage.Side.SERVER);
 
-		registerMessage(network, ClientPacketHandlerMelonTTS.class, IMessage.Side.CLIENT);
+		registerMessage(network, ClientPacketHandlerMelonAmbientSound.class, IMessage.Side.CLIENT);
 		registerMessage(network, ClientPacketHandlerParticle.class, IMessage.Side.CLIENT);
 		registerMessage(network, ClientPacketHandlerSpawnNonLivingEntity.class, IMessage.Side.CLIENT);
 	}

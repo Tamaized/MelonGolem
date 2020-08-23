@@ -73,6 +73,7 @@ public class MelonMod {
 	public static final IModProxy proxy = DistExecutor.runForDist(() -> ClientProxy::new, () -> ServerProxy::new);
 
 	public static MelonConfig config;
+	public static MelonConfig.Client configClient;
 
 	public static final SimpleChannel network = NetworkRegistry.ChannelBuilder.
 			named(new ResourceLocation(MODID, MODID)).
@@ -106,9 +107,16 @@ public class MelonMod {
 	public static final ImmutableSet<Item> SIGNS = ImmutableSet.of(Items.ACACIA_SIGN, Items.BIRCH_SIGN, Items.DARK_OAK_SIGN, Items.JUNGLE_SIGN, Items.JUNGLE_SIGN, Items.OAK_SIGN, Items.SPRUCE_SIGN);
 
 	public MelonMod() {
-		final Pair<MelonConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(MelonConfig::new);
-		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, specPair.getRight());
-		config = specPair.getLeft();
+		{
+			final Pair<MelonConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(MelonConfig::new);
+			ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, specPair.getRight());
+			config = specPair.getLeft();
+		}
+		{
+			final Pair<MelonConfig.Client, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(MelonConfig.Client::new);
+			ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, specPair.getRight());
+			configClient = specPair.getLeft();
+		}
 		DonatorHandler.start();
 		try {
 			Field bitchIDoWhatIWant = ModInfo.class.getDeclaredField("config");

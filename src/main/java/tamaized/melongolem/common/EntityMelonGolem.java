@@ -57,15 +57,13 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import tamaized.melongolem.IModProxy;
 import tamaized.melongolem.MelonMod;
-import tamaized.melongolem.MelonSounds;
-import tamaized.melongolem.network.client.ClientPacketHandlerMelonTTS;
+import tamaized.melongolem.network.client.ClientPacketHandlerMelonAmbientSound;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, IForgeShearable, IEntityAdditionalSpawnData, IModProxy.ISignHolder {
 
@@ -90,7 +88,7 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 			return SIGN_TILE_BLOCKSTATE;
 		}
 	};
-	private final float pitch = rand.nextFloat() * 3.0F;
+	private static final DataParameter<Float> PITCH = EntityDataManager.createKey(EntityMelonGolem.class, DataSerializers.FLOAT);
 
 	public EntityMelonGolem(World worldIn) {
 		this(Objects.requireNonNull(MelonMod.entityTypeMelonGolem), worldIn);
@@ -112,6 +110,7 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 		dataManager.register(HEAD, ItemStack.EMPTY);
 		for (DataParameter<ITextComponent> sign : SIGN_TEXT)
 			dataManager.register(sign, new StringTextComponent(""));
+		dataManager.register(PITCH, rand.nextFloat() * 3.0F);
 	}
 
 	@Override
@@ -165,17 +164,6 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 		return LOOT;
 	}*/
 
-	@Override
-	protected float getSoundPitch() {
-		return MelonMod.config.tehnutMode.get() ? pitch + rand.nextFloat() * 0.25F - 0.50F : super.getSoundPitch();
-	}
-
-	@Nullable
-	@Override
-	protected SoundEvent getAmbientSound() {
-		return MelonMod.config.tehnutMode.get() ? MelonSounds.daddy : SoundEvents.ENTITY_SLIME_SQUISH_SMALL;
-	}
-
 	@Nullable
 	@Override
 	protected SoundEvent getHurtSound(DamageSource p_184601_1_) {
@@ -194,12 +182,19 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 	}
 
 	@Override
+	public float getSoundPitch() { // protected -> public
+		return super.getSoundPitch();
+	}
+
+	@Override
+	public float getSoundVolume() { // protected -> public
+		return super.getSoundVolume();
+	}
+
+	@Override
 	public void playAmbientSound() {
-		if (MelonMod.config.tts.get() && MelonMod.SIGNS.contains(getHead().getItem())) {
-			if (world != null && !world.isRemote)
-				MelonMod.network.send(PacketDistributor.TRACKING_ENTITY.with(() -> this), new ClientPacketHandlerMelonTTS(this));
-		} else
-			super.playAmbientSound();
+		if (world != null && !world.isRemote)
+			MelonMod.network.send(PacketDistributor.TRACKING_ENTITY.with(() -> this), new ClientPacketHandlerMelonAmbientSound(this));
 	}
 
 	@Nonnull
@@ -302,6 +297,10 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 	@Override
 	public void readSpawnData(PacketBuffer additionalData) {
 		setHead(additionalData.readItemStack());
+	}
+
+	public float getPitch() {
+		return dataManager.get(PITCH);
 	}
 
 	static class EntityAISearchAndEatMelons extends Goal {
