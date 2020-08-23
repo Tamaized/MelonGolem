@@ -59,6 +59,8 @@ import tamaized.melongolem.network.client.ClientPacketHandlerSpawnNonLivingEntit
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -81,6 +83,8 @@ public class MelonMod {
 
 	public static final Logger logger = LogManager.getLogger(MODID);
 
+	private static final Map<EntityType<? extends LivingEntity>, Supplier<AttributeModifierMap.MutableAttribute>> attributes = new HashMap<>();
+
 	@ObjectHolder(MelonMod.MODID + ":melonstick")
 	public static final Item melonStick = Items.AIR;
 
@@ -88,10 +92,10 @@ public class MelonMod {
 	public static final Block glisteringMelonBlock = Blocks.AIR;
 
 	@ObjectHolder(MelonMod.MODID + ":entitymelongolem")
-	public static final EntityType<? extends GolemEntity> entityTypeMelonGolem = getNull();
+	public static final EntityType<? extends GolemEntity> entityTypeMelonGolem = assign(EntityMelonGolem.class, 0.7F, 1.9F, 128, 1, true, EntityClassification.CREATURE, EntityMelonGolem::registerAttributes);
 
 	@ObjectHolder(MelonMod.MODID + ":entityglisteringmelongolem")
-	public static final EntityType<? extends GolemEntity> entityTypeGlisteringMelonGolem = getNull();
+	public static final EntityType<? extends GolemEntity> entityTypeGlisteringMelonGolem = assign(EntityGlisteringMelonGolem.class, 0.7F, 1.9F, 128, 1, true, EntityClassification.CREATURE, EntityMelonGolem::registerAttributes);
 
 	@ObjectHolder(MelonMod.MODID + ":entitymelonslice")
 	public static final EntityType<? extends EntityMelonSlice> entityTypeMelonSlice = getNull();
@@ -134,15 +138,16 @@ public class MelonMod {
 	public static void registerEntities(RegistryEvent.Register<EntityType<?>> e) {
 		e.getRegistry().registerAll(
 
-				assign(EntityMelonGolem.class, 0.7F, 1.9F, 128, 1, true, EntityClassification.CREATURE, EntityMelonGolem::registerAttributes),
+				entityTypeMelonGolem,
 
 				assign(EntityMelonSlice.class, 0.25F, 0.25F, 128, 1, true, EntityClassification.MISC),
 
 				assign(EntityTinyMelonGolem.class, 0.175F, 0.475F, 128, 1, true, EntityClassification.CREATURE, EntityMelonGolem::registerAttributes),
 
-				assign(EntityGlisteringMelonGolem.class, 0.7F, 1.9F, 128, 1, true, EntityClassification.CREATURE, EntityMelonGolem::registerAttributes)
+				entityTypeGlisteringMelonGolem
 
 		);
+		attributes.forEach((type, attribute) -> GlobalEntityTypeAttributes.put(type, attribute.get().create()));
 	}
 
 	@SubscribeEvent
@@ -167,7 +172,7 @@ public class MelonMod {
 
 				assign(glisteringMelonBlock),
 
-				assign(new SpawnEggItem(entityTypeMelonGolem, 0xFF00, 0x0, new Item.Properties().group(ItemGroup.MISC)), "melongolemspawnegg"),
+				assign(new SpawnEggItem(entityTypeMelonGolem, 0x00FF00, 0x000000, new Item.Properties().group(ItemGroup.MISC)), "melongolemspawnegg"),
 
 				assign(new SpawnEggItem(entityTypeGlisteringMelonGolem, 0xAAFF00, 0xFFCC00, new Item.Properties().group(ItemGroup.MISC)), "glisteringmelongolemspawnegg")
 
@@ -198,7 +203,7 @@ public class MelonMod {
 
 	private static <T extends LivingEntity> EntityType<T> assign(Class<T> entity, float w, float h, int range, int freq, boolean updates, EntityClassification classification, Supplier<AttributeModifierMap.MutableAttribute> attributes) {
 		EntityType<T> type = assign(entity, w, h, range, freq, updates, classification);
-		GlobalEntityTypeAttributes.put(type, attributes.get().create());
+		MelonMod.attributes.put(type, attributes);
 		return type;
 	}
 
