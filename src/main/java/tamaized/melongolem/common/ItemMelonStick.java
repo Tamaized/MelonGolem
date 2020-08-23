@@ -46,7 +46,7 @@ public class ItemMelonStick extends Item {
 				if (!(world instanceof ServerWorld) || owner.world.getServer() == null)
 					return;
 				ServerWorld last = owner.world.getServer().getWorld(RegistryKey.func_240903_a_(Registry.WORLD_KEY, cap.getLoadDim()));
-				if (last != null) {
+				if (last != null && cap.getLoadPos() != null) {
 					last.getBlockState(cap.getLoadPos()); // Ensure chunk is loaded
 					Entity entity = last.getEntityByUuid(cap.getLoadPetID());
 					if (entity instanceof EntityTinyMelonGolem) {
