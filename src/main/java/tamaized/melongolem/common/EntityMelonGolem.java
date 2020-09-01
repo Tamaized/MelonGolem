@@ -80,6 +80,7 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 			EntityDataManager.createKey(EntityMelonGolem.class, DataSerializers.TEXT_COMPONENT)
 
 	);
+	private static final DataParameter<Float> PITCH = EntityDataManager.createKey(EntityMelonGolem.class, DataSerializers.FLOAT);
 	public static BlockState SIGN_TILE_BLOCKSTATE = Blocks.OAK_WALL_SIGN.getDefaultState();
 	public static final SignTileEntity te = new SignTileEntity() {
 		@Nonnull
@@ -88,7 +89,6 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 			return SIGN_TILE_BLOCKSTATE;
 		}
 	};
-	private static final DataParameter<Float> PITCH = EntityDataManager.createKey(EntityMelonGolem.class, DataSerializers.FLOAT);
 
 	public EntityMelonGolem(World worldIn) {
 		this(Objects.requireNonNull(MelonMod.entityTypeMelonGolem), worldIn);
@@ -98,7 +98,10 @@ public class EntityMelonGolem extends GolemEntity implements IRangedAttackMob, I
 		super(p_i48569_1_, p_i48569_2_);
 	}
 
-	public static AttributeModifierMap.MutableAttribute registerAttributes() {
+	/*
+	 * underscore required due to a bad reobf catch causing calls to this method to be obfuscated while the method remains the same
+	 */
+	public static AttributeModifierMap.MutableAttribute _registerAttributes() {
 		return MobEntity.func_233666_p_().
 				createMutableAttribute(Attributes.MAX_HEALTH, MelonMod.config.health.get().floatValue()).
 				createMutableAttribute(Attributes.MOVEMENT_SPEED, 0.2F);

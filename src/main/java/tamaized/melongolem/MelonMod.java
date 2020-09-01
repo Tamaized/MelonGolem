@@ -93,10 +93,10 @@ public class MelonMod {
 	public static final Block glisteringMelonBlock = Blocks.AIR;
 
 	@ObjectHolder(MelonMod.MODID + ":entitymelongolem")
-	public static final EntityType<? extends GolemEntity> entityTypeMelonGolem = assign(EntityMelonGolem.class, 0.7F, 1.9F, 128, 1, true, EntityClassification.CREATURE, EntityMelonGolem::registerAttributes);
+	public static final EntityType<? extends GolemEntity> entityTypeMelonGolem = assign(EntityMelonGolem.class, 0.7F, 1.9F, 128, 1, true, EntityClassification.CREATURE, EntityMelonGolem::_registerAttributes);
 
 	@ObjectHolder(MelonMod.MODID + ":entityglisteringmelongolem")
-	public static final EntityType<? extends GolemEntity> entityTypeGlisteringMelonGolem = assign(EntityGlisteringMelonGolem.class, 0.7F, 1.9F, 128, 1, true, EntityClassification.CREATURE, EntityMelonGolem::registerAttributes);
+	public static final EntityType<? extends GolemEntity> entityTypeGlisteringMelonGolem = assign(EntityGlisteringMelonGolem.class, 0.7F, 1.9F, 128, 1, true, EntityClassification.CREATURE, EntityMelonGolem::_registerAttributes);
 
 	@ObjectHolder(MelonMod.MODID + ":entitymelonslice")
 	public static final EntityType<? extends EntityMelonSlice> entityTypeMelonSlice = getNull();
@@ -150,7 +150,7 @@ public class MelonMod {
 
 				assign(EntityMelonSlice.class, 0.25F, 0.25F, 128, 1, true, EntityClassification.MISC),
 
-				assign(EntityTinyMelonGolem.class, 0.175F, 0.475F, 128, 1, true, EntityClassification.CREATURE, EntityMelonGolem::registerAttributes),
+				assign(EntityTinyMelonGolem.class, 0.175F, 0.475F, 128, 1, true, EntityClassification.CREATURE, EntityMelonGolem::_registerAttributes),
 
 				entityTypeGlisteringMelonGolem
 
