@@ -1,27 +1,27 @@
 package tamaized.melongolem.common;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.particles.IParticleData;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.fmllegacy.network.PacketDistributor;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.capability.CapabilityList;
 import tamaized.melongolem.network.client.ClientPacketHandlerParticle;
@@ -31,28 +31,27 @@ import javax.annotation.Nonnull;
 public class ItemMelonStick extends Item {
 
 	public ItemMelonStick(Properties prop) {
-		super(prop.defaultMaxDamage(25));
+		super(prop.defaultDurability(25));
 	}
 
-	public static void summonPet(World world, PlayerEntity owner) {
+	public static void summonPet(Level world, Player owner) {
 		summonPet(world, owner, null);
 	}
 
-	public static void summonPet(World world, PlayerEntity owner, EntityTinyMelonGolem golem) {
+	public static void summonPet(Level world, Player owner, EntityTinyMelonGolem golem) {
 		if (golem != null && !golem.isAlive())
 			return;
 		owner.getCapability(CapabilityList.TINY_GOLEM).ifPresent(cap -> {
 			if (cap.load(true)) {
-				if (!(world instanceof ServerWorld) || owner.world.getServer() == null)
+				if (!(world instanceof ServerLevel) || owner.level.getServer() == null)
 					return;
-				ServerWorld last = owner.world.getServer().getWorld(RegistryKey.func_240903_a_(Registry.WORLD_KEY, cap.getLoadDim()));
+				ServerLevel last = owner.level.getServer().getLevel(ResourceKey.create(Registry.DIMENSION_REGISTRY, cap.getLoadDim()));
 				if (last != null && cap.getLoadPos() != null) {
 					last.getBlockState(cap.getLoadPos()); // Ensure chunk is loaded
-					Entity entity = last.getEntityByUuid(cap.getLoadPetID());
-					if (entity instanceof EntityTinyMelonGolem) {
-						EntityTinyMelonGolem melon = (EntityTinyMelonGolem) entity;
-						if (!world.getDimensionKey().func_240901_a_().equals(last.getDimensionKey().func_240901_a_()))
-							melon.changeDimension((ServerWorld) world);
+					Entity entity = last.getEntity(cap.getLoadPetID());
+					if (entity instanceof EntityTinyMelonGolem melon) {
+						if (!world.dimension().location().equals(last.dimension().location()))
+							melon.changeDimension((ServerLevel) world);
 						summonPet(world, owner, melon);
 						return;
 					}
@@ -62,37 +61,37 @@ public class ItemMelonStick extends Item {
 			if (oldPet != null && !oldPet.isAlive())
 				oldPet = null;
 			EntityTinyMelonGolem pet = oldPet == null ? new EntityTinyMelonGolem(world) : oldPet;
-			pet.setTamedBy(owner);
+			pet.tame(owner);
 			if (oldPet == null)
 				cap.setPet(pet);
 
-			int x = MathHelper.floor(owner.getPosX()) - 2;
-			int z = MathHelper.floor(owner.getPosZ()) - 2;
-			int y = MathHelper.floor(owner.getBoundingBox().minY);
+			int x = Mth.floor(owner.getX()) - 2;
+			int z = Mth.floor(owner.getZ()) - 2;
+			int y = Mth.floor(owner.getBoundingBox().minY);
 
 			loop:
-			for (int l = pet.getRNG().nextInt(6); l <= 8; ++l) {
-				for (int i1 = pet.getRNG().nextInt(6); i1 <= 8; ++i1) {
+			for (int l = pet.getRandom().nextInt(6); l <= 8; ++l) {
+				for (int i1 = pet.getRandom().nextInt(6); i1 <= 8; ++i1) {
 					for (int j = 3; j > -3; j--) {
 						if (isTeleportFriendlyBlock(world, pet, x, z, y + j, l, i1)) {
 							double posx = (float) (x + l) + 0.5F;
 							double posy = (double) y + j;
 							double posz = (float) (z + i1) + 0.5F;
-							pet.setPositionAndUpdate(posx, posy, posz);
-							if (!pet.world.getDimensionKey().func_240901_a_().equals(owner.world.getDimensionKey().func_240901_a_())) {
-								pet = (EntityTinyMelonGolem) pet.changeDimension((ServerWorld) owner.world);
+							pet.teleportTo(posx, posy, posz);
+							if (!pet.level.dimension().location().equals(owner.level.dimension().location())) {
+								pet = (EntityTinyMelonGolem) pet.changeDimension((ServerLevel) owner.level);
 								cap.setPet(pet);
 								if (pet == null)
 									return;
-								pet.setPositionAndUpdate(posx, posy, posz);
+								pet.teleportTo(posx, posy, posz);
 							}
 							for (int i = 0; i < 25; i++) {
-								Vector3d result = pet.getLook(1F).rotateYaw(pet.getRNG().nextFloat() * 360F).rotatePitch(pet.getRNG().nextFloat() * 360F).scale(0.35F);
-								spawnVanillaParticleOnServer(world, ParticleTypes.END_ROD, pet.getPosX() + result.x, pet.getPosY() + pet.getHeight() / 2F + result.y, pet.getPosZ() + result.z, 0, 0, 0);
+								Vec3 result = pet.getViewVector(1F).yRot(pet.getRandom().nextFloat() * 360F).xRot(pet.getRandom().nextFloat() * 360F).scale(0.35F);
+								spawnVanillaParticleOnServer(world, ParticleTypes.END_ROD, pet.getX() + result.x, pet.getY() + pet.getBbHeight() / 2F + result.y, pet.getZ() + result.z, 0, 0, 0);
 							}
 							if (oldPet == null)
-								world.addEntity(pet);
-							world.playSound(null, pet.getPosition(), SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 1.0F, pet.getRNG().nextFloat() + 0.5F);
+								world.addFreshEntity(pet);
+							world.playSound(null, pet.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 1.0F, pet.getRandom().nextFloat() + 0.5F);
 							break loop;
 						}
 					}
@@ -101,24 +100,24 @@ public class ItemMelonStick extends Item {
 		});
 	}
 
-	public static void spawnVanillaParticleOnServer(World world, IParticleData particle, double x, double y, double z, double xS, double yS, double zS) {
-		MelonMod.network.send(PacketDistributor.TRACKING_CHUNK.with(() -> world.getChunkAt(new BlockPos(x, y, z))), new ClientPacketHandlerParticle(particle.getType().getRegistryName(), new Vector3d(x, y, z), new Vector3d(xS, yS, zS)));
+	public static void spawnVanillaParticleOnServer(Level world, ParticleOptions particle, double x, double y, double z, double xS, double yS, double zS) {
+		MelonMod.network.send(PacketDistributor.TRACKING_CHUNK.with(() -> world.getChunkAt(new BlockPos(x, y, z))), new ClientPacketHandlerParticle(particle.getType().getRegistryName(), new Vec3(x, y, z), new Vec3(xS, yS, zS)));
 	}
 
-	private static boolean isTeleportFriendlyBlock(World world, Entity entity, int x, int z, int y, int xOffset, int zOffset) {
+	private static boolean isTeleportFriendlyBlock(Level world, Entity entity, int x, int z, int y, int xOffset, int zOffset) {
 		BlockPos blockpos = new BlockPos(x + xOffset, y - 1, z + zOffset);
 		BlockState iblockstate = world.getBlockState(blockpos);
-		return Block.hasEnoughSolidSide(world, blockpos, Direction.UP) && iblockstate.canEntitySpawn(entity.world, entity.getPosition(), entity.getType()) && world.isAirBlock(blockpos.up()) && world.isAirBlock(blockpos.up(2));
+		return Block.canSupportCenter(world, blockpos, Direction.UP) && iblockstate.isValidSpawn(entity.level, entity.blockPosition(), entity.getType()) && world.isEmptyBlock(blockpos.above()) && world.isEmptyBlock(blockpos.above(2));
 	}
 
 	@Nonnull
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, @Nonnull Hand handIn) {
-		playerIn.swingArm(handIn);
-		if (worldIn.isRemote)
-			return new ActionResult<>(ActionResultType.PASS, playerIn.getHeldItem(handIn));
+	public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, @Nonnull InteractionHand handIn) {
+		playerIn.swing(handIn);
+		if (worldIn.isClientSide)
+			return new InteractionResultHolder<>(InteractionResult.PASS, playerIn.getItemInHand(handIn));
 		summonPet(worldIn, playerIn);
-		playerIn.getHeldItem(handIn).damageItem(1, playerIn, e -> e.sendBreakAnimation(handIn));
-		return new ActionResult<>(ActionResultType.SUCCESS, playerIn.getHeldItem(handIn));
+		playerIn.getItemInHand(handIn).hurtAndBreak(1, playerIn, e -> e.broadcastBreakEvent(handIn));
+		return new InteractionResultHolder<>(InteractionResult.SUCCESS, playerIn.getItemInHand(handIn));
 	}
 }

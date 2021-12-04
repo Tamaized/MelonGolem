@@ -1,7 +1,7 @@
 package tamaized.melongolem.network.server;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Player;
 import tamaized.melongolem.network.DonatorHandler;
 import tamaized.melongolem.network.NetworkMessages;
 
@@ -14,19 +14,19 @@ public class ServerPacketHandlerDonatorSettings implements NetworkMessages.IMess
 	}
 
 	@Override
-	public void handle(PlayerEntity player) {
-		if (DonatorHandler.donators.contains(player.getUniqueID()))
-			DonatorHandler.settings.put(player.getUniqueID(), settings);
+	public void handle(Player player) {
+		if (DonatorHandler.donators.contains(player.getUUID()))
+			DonatorHandler.settings.put(player.getUUID(), settings);
 	}
 
 	@Override
-	public void toBytes(PacketBuffer packet) {
+	public void toBytes(FriendlyByteBuf packet) {
 		packet.writeBoolean(settings.enabled);
 		packet.writeInt(settings.color);
 	}
 
 	@Override
-	public ServerPacketHandlerDonatorSettings fromBytes(PacketBuffer packet) {
+	public ServerPacketHandlerDonatorSettings fromBytes(FriendlyByteBuf packet) {
 		settings = new DonatorHandler.DonatorSettings(packet.readBoolean(), packet.readInt());
 		return this;
 	}

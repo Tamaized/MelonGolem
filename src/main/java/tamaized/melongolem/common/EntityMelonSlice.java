@@ -1,19 +1,19 @@
 package tamaized.melongolem.common;
 
-import net.minecraft.entity.IRendersAsItem;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.projectile.ThrowableEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.particles.ItemParticleData;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.EntityRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.World;
+import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.ItemSupplier;
+import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import tamaized.melongolem.MelonMod;
@@ -21,64 +21,68 @@ import tamaized.melongolem.MelonMod;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-@OnlyIn(value = Dist.CLIENT, _interface = IRendersAsItem.class)
-public class EntityMelonSlice extends ThrowableEntity implements IRendersAsItem {
+@OnlyIn(value = Dist.CLIENT, _interface = ItemSupplier.class)
+public class EntityMelonSlice extends ThrowableProjectile implements ItemSupplier {
 
-	private static final DataParameter<Boolean> GLIST = EntityDataManager.createKey(EntityMelonSlice.class, DataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Boolean> GLIST = SynchedEntityData.defineId(EntityMelonSlice.class, EntityDataSerializers.BOOLEAN);
 	private static ItemStack cacheRenderStack = ItemStack.EMPTY;
 
 	@SuppressWarnings("unused")
-	public EntityMelonSlice(World worldIn) {
+	public EntityMelonSlice(Level worldIn) {
 		super(Objects.requireNonNull(MelonMod.entityTypeMelonSlice), worldIn);
 	}
 
-	public EntityMelonSlice(World worldIn, LivingEntity throwerIn) {
+	public EntityMelonSlice(Level worldIn, LivingEntity throwerIn) {
 		super(Objects.requireNonNull(MelonMod.entityTypeMelonSlice), throwerIn, worldIn);
 		if (throwerIn instanceof EntityGlisteringMelonGolem)
 			setGlist();
 	}
 
 	@SuppressWarnings("unused")
-	public EntityMelonSlice(World worldIn, double x, double y, double z) {
+	public EntityMelonSlice(Level worldIn, double x, double y, double z) {
 		super(Objects.requireNonNull(MelonMod.entityTypeMelonSlice), x, y, z, worldIn);
 	}
 
 	@Override
-	protected void registerData() {
-		dataManager.register(GLIST, false);
+	protected void defineSynchedData() {
+		entityData.define(GLIST, false);
 	}
 
 	public boolean isGlistering() {
-		return dataManager.get(GLIST);
+		return entityData.get(GLIST);
 	}
 
 	public EntityMelonSlice setGlist() {
-		dataManager.set(GLIST, true);
+		entityData.set(GLIST, true);
 		return this;
 	}
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void handleStatusUpdate(byte id) {
+	public void handleEntityEvent(byte id) {
 		if (id == 3) {
 			for (int i = 0; i < 8; ++i) {
-				this.world.addParticle(new ItemParticleData(ParticleTypes.ITEM, rand.nextInt() == 0 ? new ItemStack(Items.MELON_SEEDS) : new ItemStack(Items.MELON_SLICE)), this.getPosX(), this.getPosY(), this.getPosZ(), 0.0D, 0.0D, 0.0D);
+				this.level.addParticle(new ItemParticleOption(ParticleTypes.ITEM, random.nextInt() == 0 ? new ItemStack(Items.MELON_SEEDS) : new ItemStack(Items.MELON_SLICE)), this.getX(), this.getY(), this.getZ(), 0.0D, 0.0D, 0.0D);
 			}
 		}
 	}
 
 	@Override
-	protected void onImpact(@Nonnull RayTraceResult result) {
-		if (result instanceof EntityRayTraceResult) {
-			if (((EntityRayTraceResult) result).getEntity() == func_234616_v_())
-				return;
-			((EntityRayTraceResult) result).getEntity().attackEntityFrom(DamageSource.causeThrownDamage(this, func_234616_v_()), MelonMod.config.damage.get().floatValue() * (isGlistering() ? MelonMod.config.glisterDamageAmp.get().floatValue() : 1F));
+	protected void onHit(@Nonnull HitResult result) {
+		super.onHit(result);
+		if (!this.level.isClientSide) {
+			this.level.broadcastEntityEvent(this, (byte) 3);
+			this.discard();
 		}
+	}
 
-		if (!this.world.isRemote) {
-			this.world.setEntityState(this, (byte) 3);
-			this.remove();
-		}
+	@Override
+	protected void onHitEntity(EntityHitResult result) {
+		super.onHitEntity(result);
+		if (result.getEntity() == getOwner())
+			return;
+		result.getEntity().hurt(DamageSource.thrown(this, getOwner()), MelonMod.config.damage.get().floatValue() * (isGlistering() ? MelonMod.config.glisterDamageAmp.get().floatValue() : 1F));
+
 	}
 
 	@Nonnull

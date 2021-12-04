@@ -1,11 +1,11 @@
 package tamaized.melongolem.network.client;
 
 import com.mojang.text2speech.Narrator;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.MelonSounds;
 import tamaized.melongolem.common.EntityMelonGolem;
@@ -20,17 +20,17 @@ public class ClientPacketHandlerMelonAmbientSound implements NetworkMessages.IMe
 	private int id;
 
 	public ClientPacketHandlerMelonAmbientSound(EntityMelonGolem golem) {
-		id = golem.getEntityId();
+		id = golem.getId();
 	}
 
-	private static void playAmbientSound(PlayerEntity player, EntityMelonGolem golem) {
+	private static void playAmbientSound(Player player, EntityMelonGolem golem) {
 		SoundEvent soundevent = getAmbientSound();
 		if (soundevent != null)
-			golem.world.playSound(player, golem.getPosX(), golem.getPosY(), golem.getPosZ(), soundevent, golem.getSoundCategory(), golem.getSoundVolume(), getSoundPitch(golem));
+			golem.level.playSound(player, golem.getX(), golem.getY(), golem.getZ(), soundevent, golem.getSoundSource(), golem.getSoundVolume(), getVoicePitch(golem));
 	}
 
-	private static float getSoundPitch(EntityMelonGolem golem) {
-		return MelonMod.configClient.tehnutMode.get() ? golem.getPitch() + golem.world.rand.nextFloat() * 0.25F - 0.50F : golem.getSoundPitch();
+	private static float getVoicePitch(EntityMelonGolem golem) {
+		return MelonMod.configClient.tehnutMode.get() ? golem.getPitch() + golem.level.random.nextFloat() * 0.25F - 0.50F : golem.getVoicePitch();
 	}
 
 	@Nullable
@@ -39,12 +39,12 @@ public class ClientPacketHandlerMelonAmbientSound implements NetworkMessages.IMe
 	}
 
 	@Override
-	public void handle(PlayerEntity player) {
-		Entity entity = player.world.getEntityByID(id);
+	public void handle(Player player) {
+		Entity entity = player.level.getEntity(id);
 		if (entity instanceof EntityMelonGolem) {
 			EntityMelonGolem golem = (EntityMelonGolem) entity;
 			if (MelonMod.SIGNS.contains(golem.getHead().getItem())) {
-				if (MelonMod.configClient.tts.get() && golem.getDistanceSq(player) <= 225) {
+				if (MelonMod.configClient.tts.get() && golem.distanceToSqr(player) <= 225) {
 					if (narrator == null)
 						narrator = Narrator.getNarrator();
 					if (!narrator.active())
@@ -52,7 +52,7 @@ public class ClientPacketHandlerMelonAmbientSound implements NetworkMessages.IMe
 					narrator.clear();
 					StringBuilder string = new StringBuilder();
 					for (int i = 0; i < 4; ++i)
-						string.append(TextFormatting.getTextWithoutFormattingCodes(golem.getSignText(i).getString())).append(" ");
+						string.append(ChatFormatting.stripFormatting(golem.getSignText(i).getString())).append(" ");
 					narrator.say(string.toString(), false);
 				}
 			} else
@@ -61,12 +61,12 @@ public class ClientPacketHandlerMelonAmbientSound implements NetworkMessages.IMe
 	}
 
 	@Override
-	public void toBytes(PacketBuffer packet) {
+	public void toBytes(FriendlyByteBuf packet) {
 		packet.writeInt(id);
 	}
 
 	@Override
-	public ClientPacketHandlerMelonAmbientSound fromBytes(PacketBuffer packet) {
+	public ClientPacketHandlerMelonAmbientSound fromBytes(FriendlyByteBuf packet) {
 		id = packet.readInt();
 		return this;
 	}

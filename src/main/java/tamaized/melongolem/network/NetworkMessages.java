@@ -1,11 +1,10 @@
 package tamaized.melongolem.network;
 
-
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
+import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
 import net.minecraftforge.fml.unsafe.UnsafeHacks;
 import tamaized.melongolem.network.client.ClientPacketHandlerMelonAmbientSound;
 import tamaized.melongolem.network.client.ClientPacketHandlerParticle;
@@ -34,11 +33,11 @@ public class NetworkMessages {
 
 	public interface IMessage<SELF extends IMessage<SELF>> {
 
-		static <M extends IMessage<M>> void encode(M message, PacketBuffer packet) {
+		static <M extends IMessage<M>> void encode(M message, FriendlyByteBuf packet) {
 			message.toBytes(packet);
 		}
 
-		static <M extends IMessage<M>> M decode(PacketBuffer packet, Class<M> type) {
+		static <M extends IMessage<M>> M decode(FriendlyByteBuf packet, Class<M> type) {
 			return UnsafeHacks.newInstance(type).fromBytes(packet);
 		}
 
@@ -48,20 +47,20 @@ public class NetworkMessages {
 		}
 
 		@SuppressWarnings({"Convert2Lambda", "Convert2Diamond"})
-		static Supplier<PlayerEntity> getClientSidePlayer() {
-			return new Supplier<PlayerEntity>() {
+		static Supplier<Player> getClientSidePlayer() {
+			return new Supplier<Player>() {
 				@Override
-				public PlayerEntity get() {
+				public Player get() {
 					return Minecraft.getInstance().player;
 				}
 			};
 		}
 
-		void handle(PlayerEntity player);
+		void handle(Player player);
 
-		void toBytes(PacketBuffer packet);
+		void toBytes(FriendlyByteBuf packet);
 
-		SELF fromBytes(PacketBuffer packet);
+		SELF fromBytes(FriendlyByteBuf packet);
 
 		enum Side {
 			CLIENT, SERVER

@@ -1,9 +1,7 @@
 package tamaized.melongolem.common.capability;
 
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.EntityTinyMelonGolem;
 
@@ -17,7 +15,7 @@ public interface ITinyGolemCapability {
 
 	void setPet(EntityTinyMelonGolem golem);
 
-	void markDirty(BlockPos pos, ResourceLocation dim, UUID petID);
+	void markDirty(BlockPos vertex, ResourceLocation dim, UUID petID);
 
 	ResourceLocation getLoadDim();
 

@@ -1,11 +1,8 @@
 package tamaized.melongolem.common.capability;
 
 
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 import tamaized.melongolem.common.EntityTinyMelonGolem;
 
@@ -13,22 +10,22 @@ public class TinyGolemCapabilityStorage implements Capability.IStorage<ITinyGole
 
 	@Override
 	public INBT writeNBT(Capability<ITinyGolemCapability> capability, ITinyGolemCapability instance, Direction side) {
-		CompoundNBT nbt = new CompoundNBT();
+		CompoundTag nbt = new CompoundTag();
 		EntityTinyMelonGolem pet = instance.getPet();
-		if (pet != null && pet.getOwnerId() != null) {
-			nbt.putLong("pos", pet.getPosition().toLong());
-			nbt.putString("dim", pet.world.getDimensionKey().func_240901_a_().toString());
-			nbt.putUniqueId("uuid", pet.getUniqueID());
+		if (pet != null && pet.getOwnerUUID() != null) {
+			nbt.putLong("vertex", pet.getPosition().toLong());
+			nbt.putString("dim", pet.level.dimension().location().toString());
+			nbt.putUniqueId("uuid", pet.getUUID());
 		}
 		return nbt;
 	}
 
 	@Override
 	public void readNBT(Capability<ITinyGolemCapability> capability, ITinyGolemCapability instance, Direction side, INBT nbt) {
-		if (nbt instanceof CompoundNBT) {
-			CompoundNBT data = (CompoundNBT) nbt;
-			if (data.contains("pos") && data.contains("dim") && data.contains("uuid")) {
-				instance.markDirty(BlockPos.fromLong(data.getLong("pos")), new ResourceLocation(data.getString("dim")), data.getUniqueId("uuid"));
+		if (nbt instanceof CompoundTag) {
+			CompoundTag data = (CompoundTag) nbt;
+			if (data.contains("vertex") && data.contains("dim") && data.contains("uuid")) {
+				instance.markDirty(BlockPos.fromLong(data.getLong("vertex")), new ResourceLocation(data.getString("dim")), data.getUniqueId("uuid"));
 			}
 		}
 	}

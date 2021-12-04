@@ -1,47 +1,47 @@
 package tamaized.melongolem.network.client;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.particles.IParticleData;
-import net.minecraft.particles.ParticleType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 import tamaized.melongolem.network.NetworkMessages;
 
 public class ClientPacketHandlerParticle implements NetworkMessages.IMessage<ClientPacketHandlerParticle> {
 
 	private ResourceLocation id;
-	private Vector3d vec;
-	private Vector3d vel;
+	private Vec3 vec;
+	private Vec3 vel;
 
-	public ClientPacketHandlerParticle(ResourceLocation particle, Vector3d pos, Vector3d vel) {
+	public ClientPacketHandlerParticle(ResourceLocation particle, Vec3 vertex, Vec3 vel) {
 		id = particle;
-		vec = pos;
+		vec = vertex;
 		this.vel = vel;
 	}
 
-	public static void spawnParticle(World world, IParticleData particle, Vector3d pos, Vector3d vel) {
-		world.addParticle(particle, pos.x, pos.y, pos.z, vel.x, vel.y, vel.z);
+	public static void spawnParticle(Level world, ParticleOptions particle, Vec3 vertex, Vec3 vel) {
+		world.addParticle(particle, vertex.x, vertex.y, vertex.z, vel.x, vel.y, vel.z);
 	}
 
-	private static IParticleData getRegisteredParticleTypes(ResourceLocation p_197589_0_) {
-		ParticleType<?> t = ForgeRegistries.PARTICLE_TYPES.getValue(p_197589_0_);
-		if (!(t instanceof IParticleData)) {
-			throw new IllegalStateException("Invalid or unknown particle type: " + p_197589_0_);
+	private static ParticleOptions getRegisteredParticleTypes(ResourceLocation location) {
+		ParticleType<?> t = ForgeRegistries.PARTICLE_TYPES.getValue(location);
+		if (!(t instanceof ParticleOptions)) {
+			throw new IllegalStateException("Invalid or unknown particle type: " + location);
 		} else {
-			return (IParticleData) t;
+			return (ParticleOptions) t;
 		}
 	}
 
 	@Override
-	public void handle(PlayerEntity player) {
-		spawnParticle(player.world, getRegisteredParticleTypes(id), vec, vel);
+	public void handle(Player player) {
+		spawnParticle(player.level, getRegisteredParticleTypes(id), vec, vel);
 	}
 
 	@Override
-	public void toBytes(PacketBuffer packet) {
+	public void toBytes(FriendlyByteBuf packet) {
 		packet.writeResourceLocation(id);
 		packet.writeDouble(vec.x);
 		packet.writeDouble(vec.y);
@@ -52,10 +52,10 @@ public class ClientPacketHandlerParticle implements NetworkMessages.IMessage<Cli
 	}
 
 	@Override
-	public ClientPacketHandlerParticle fromBytes(PacketBuffer packet) {
+	public ClientPacketHandlerParticle fromBytes(FriendlyByteBuf packet) {
 		id = packet.readResourceLocation();
-		vec = new Vector3d(packet.readDouble(), packet.readDouble(), packet.readDouble());
-		vel = new Vector3d(packet.readDouble(), packet.readDouble(), packet.readDouble());
+		vec = new Vec3(packet.readDouble(), packet.readDouble(), packet.readDouble());
+		vel = new Vec3(packet.readDouble(), packet.readDouble(), packet.readDouble());
 		return this;
 	}
 }
