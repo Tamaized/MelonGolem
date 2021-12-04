@@ -1,8 +1,8 @@
 package tamaized.melongolem;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
 
 public interface IModProxy {
 
@@ -18,9 +18,9 @@ public interface IModProxy {
 
 		float getDistance(Entity entityIn);
 
-		ITextComponent getSignText(int index);
+		Component getSignText(int index);
 
-		void setSignText(int index, ITextComponent text);
+		void setSignText(int index, Component text);
 
 		int networkID();
 	}

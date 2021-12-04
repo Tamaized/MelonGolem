@@ -1,13 +1,14 @@
 package tamaized.melongolem.client;
 
 import com.google.common.collect.Maps;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ItemOverrideList;
-import net.minecraft.client.renderer.model.ModelResourceLocation;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.Direction;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.model.pipeline.LightUtil;
@@ -29,8 +30,8 @@ public class ModelBakeListener {
 	public static void modelBake(ModelBakeEvent event) {
 		for (int i = 0; i <= 1; i++) {
 			ModelResourceLocation mrl = new ModelResourceLocation(Objects.requireNonNull(MelonMod.glisteringMelonBlock.getRegistryName()), i == 0 ? "" : "inventory");
-			final IBakedModel model = event.getModelRegistry().get(mrl);
-			event.getModelRegistry().put(mrl, new IBakedModel() {
+			final BakedModel model = event.getModelRegistry().get(mrl);
+			event.getModelRegistry().put(mrl, new BakedModel() {
 				private Map<Direction, List<BakedQuad>> cachedQuads = Maps.newHashMap();
 
 				@Nonnull
@@ -46,8 +47,8 @@ public class ModelBakeListener {
 				}
 
 				@Override
-				public boolean isAmbientOcclusion() {
-					return model.isAmbientOcclusion();
+				public boolean useAmbientOcclusion() {
+					return model.useAmbientOcclusion();
 				}
 
 				@Override
@@ -56,32 +57,33 @@ public class ModelBakeListener {
 				}
 
 				@Override
-				public boolean func_230044_c_() {
-					return model.func_230044_c_();
+				public boolean usesBlockLight() {
+					return model.usesBlockLight();
 				}
 
 				@Override
-				public boolean isBuiltInRenderer() {
-					return model.isBuiltInRenderer();
-				}
-
-				@Nonnull
-				@Override
-				public TextureAtlasSprite getParticleTexture() {
-					return model.getParticleTexture();
+				public boolean isCustomRenderer() {
+					return model.isCustomRenderer();
 				}
 
 				@Nonnull
 				@Override
-				public ItemOverrideList getOverrides() {
+				@Deprecated
+				public TextureAtlasSprite getParticleIcon() {
+					return model.getParticleIcon();
+				}
+
+				@Nonnull
+				@Override
+				public ItemOverrides getOverrides() {
 					return model.getOverrides();
 				}
 
 				@Nonnull
 				@Override
 				@SuppressWarnings("deprecation")
-				public net.minecraft.client.renderer.model.ItemCameraTransforms getItemCameraTransforms() {
-					return model.getItemCameraTransforms();
+				public ItemTransforms getTransforms() {
+					return model.getTransforms();
 				}
 
 			});

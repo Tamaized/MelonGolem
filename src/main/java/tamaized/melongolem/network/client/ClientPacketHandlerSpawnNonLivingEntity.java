@@ -1,14 +1,14 @@
 package tamaized.melongolem.network.client;
 
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.World;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.Registry;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import tamaized.melongolem.network.NetworkMessages;
 
 import java.util.Objects;
@@ -30,37 +30,37 @@ public class ClientPacketHandlerSpawnNonLivingEntity implements NetworkMessages.
 	private EntityType<?> type;
 
 	public ClientPacketHandlerSpawnNonLivingEntity(Entity entity) {
-		this.entityId = entity.getEntityId();
-		this.uniqueId = entity.getUniqueID();
-		this.x = entity.getPosX();
-		this.y = entity.getPosY();
-		this.z = entity.getPosZ();
-		this.pitch = MathHelper.floor(entity.rotationPitch * 256.0F / 360.0F);
-		this.yaw = MathHelper.floor(entity.rotationYaw * 256.0F / 360.0F);
+		this.entityId = entity.getId();
+		this.uniqueId = entity.getUUID();
+		this.x = entity.getX();
+		this.y = entity.getY();
+		this.z = entity.getZ();
+		this.pitch = Mth.floor(entity.getXRot() * 256.0F / 360.0F);
+		this.yaw = Mth.floor(entity.getYRot() * 256.0F / 360.0F);
 		this.type = entity.getType();
-		Vector3d motion = entity.getMotion();
-		this.speedX = (int) (MathHelper.clamp(motion.x, -3.9D, 3.9D) * 8000.0D);
-		this.speedY = (int) (MathHelper.clamp(motion.y, -3.9D, 3.9D) * 8000.0D);
-		this.speedZ = (int) (MathHelper.clamp(motion.z, -3.9D, 3.9D) * 8000.0D);
+		Vec3 motion = entity.getDeltaMovement();
+		this.speedX = (int) (Mth.clamp(motion.x, -3.9D, 3.9D) * 8000.0D);
+		this.speedY = (int) (Mth.clamp(motion.y, -3.9D, 3.9D) * 8000.0D);
+		this.speedZ = (int) (Mth.clamp(motion.z, -3.9D, 3.9D) * 8000.0D);
 	}
 
 	@Override
-	public void handle(PlayerEntity player) {
-		World world = player.world;
+	public void handle(Player player) {
+		Level world = player.level;
 		Entity entity = type.create(world);
 		Objects.requireNonNull(entity).setPacketCoordinates(x, y, z);
-		entity.setMotion(speedX, speedY, speedZ);
-		entity.rotationPitch = (float) (pitch * 360) / 256.0F;
-		entity.rotationYaw = (float) (yaw * 360) / 256.0F;
-		entity.setEntityId(entityId);
-		entity.setUniqueId(uniqueId);
-		((ClientWorld) world).addEntity(entityId, entity);
+		entity.setDeltaMovement(speedX, speedY, speedZ);
+		entity.setXRot((float) (pitch * 360) / 256.0F);
+		entity.setYRot((float) (yaw * 360) / 256.0F);
+		entity.setId(entityId);
+		entity.setUUID(uniqueId);
+		((ClientLevel) world).addFreshEntity(entityId, entity);
 	}
 
 	@Override
-	public void toBytes(PacketBuffer packet) {
+	public void toBytes(FriendlyByteBuf packet) {
 		packet.writeVarInt(this.entityId);
-		packet.writeUniqueId(this.uniqueId);
+		packet.writeUUID(this.uniqueId);
 		packet.writeVarInt(Registry.ENTITY_TYPE.getId(this.type));
 		packet.writeDouble(this.x);
 		packet.writeDouble(this.y);
@@ -73,10 +73,10 @@ public class ClientPacketHandlerSpawnNonLivingEntity implements NetworkMessages.
 	}
 
 	@Override
-	public ClientPacketHandlerSpawnNonLivingEntity fromBytes(PacketBuffer packet) {
+	public ClientPacketHandlerSpawnNonLivingEntity fromBytes(FriendlyByteBuf packet) {
 		this.entityId = packet.readVarInt();
-		this.uniqueId = packet.readUniqueId();
-		this.type = Registry.ENTITY_TYPE.getByValue(packet.readVarInt());
+		this.uniqueId = packet.readUUID();
+		this.type = Registry.ENTITY_TYPE.byId(packet.readVarInt());
 		this.x = packet.readDouble();
 		this.y = packet.readDouble();
 		this.z = packet.readDouble();

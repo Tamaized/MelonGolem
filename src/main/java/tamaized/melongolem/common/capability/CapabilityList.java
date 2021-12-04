@@ -1,10 +1,7 @@
 package tamaized.melongolem.common.capability;
 
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -31,8 +28,8 @@ public class CapabilityList {
 
 	@SubscribeEvent
 	public static void attachCapabilityEntity(AttachCapabilitiesEvent<Entity> e) {
-		if (e.getObject() instanceof PlayerEntity) {
-			e.addCapability(ITinyGolemCapability.ID, new ICapabilitySerializable<CompoundNBT>() {
+		if (e.getObject() instanceof Player) {
+			e.addCapability(ITinyGolemCapability.ID, new ICapabilitySerializable<CompoundTag>() {
 
 				ITinyGolemCapability inst = TINY_GOLEM.getDefaultInstance();
 
@@ -43,12 +40,12 @@ public class CapabilityList {
 				}
 
 				@Override
-				public CompoundNBT serializeNBT() {
-					return (CompoundNBT) TINY_GOLEM.getStorage().writeNBT(TINY_GOLEM, inst, null);
+				public CompoundTag serializeNBT() {
+					return (CompoundTag) TINY_GOLEM.getStorage().writeNBT(TINY_GOLEM, inst, null);
 				}
 
 				@Override
-				public void deserializeNBT(CompoundNBT nbt) {
+				public void deserializeNBT(CompoundTag nbt) {
 					TINY_GOLEM.getStorage().readNBT(TINY_GOLEM, inst, null, nbt);
 				}
 

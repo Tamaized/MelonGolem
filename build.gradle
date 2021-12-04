@@ -5,7 +5,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
@@ -20,17 +20,13 @@ repositories {
         name 'tterrag\'s Maven' // Mappings
         url 'https://maven.tterrag.com/'
     }
-    maven {
-        // Temporary mappings
-        url 'https://www.dogforce-games.com/maven/'
-    }
 }
 
 version = "1.${minecraftVersionMajor}-${modVersion}${modVersionValue}"
 group = "tamaized.melongolem"
 archivesBaseName = "MelonMod"
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 
 minecraft {
     mappings("${project.mappingType}", "${project.mappingVersion}")
@@ -74,7 +70,7 @@ minecraft {
 dependencies {
     minecraft "net.minecraftforge:forge:1.${project.minecraftVersionMajor}.${project.minecraftVersionMinor}-${project.forgeVersion}"
 
-    runtime fg.deobf("mezz.jei:${project.jeiVersion}")
+    implementation fg.deobf("mezz.jei:${project.jeiVersion}")
 }
 
 processResources {
@@ -97,11 +93,3 @@ jar {
                     "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
     }
 }
-
-task finalize << {
-    ant.propertyfile(file: "gradle.properties") {
-        entry(key: "modVersionValue", value: Integer.parseInt(project.modVersionValue) + 1)
-    }
-}
-
-build.finalizedBy(finalize)

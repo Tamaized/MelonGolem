@@ -1,33 +1,31 @@
 package tamaized.melongolem;
 
-
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.material.MaterialColor;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.AttributeModifierMap;
-import net.minecraft.entity.ai.attributes.GlobalEntityTypeAttributes;
-import net.minecraft.entity.passive.GolemEntity;
-import net.minecraft.entity.passive.TameableEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.Items;
-import net.minecraft.item.SpawnEggItem;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.AbstractGolem;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Items;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.MaterialColor;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -36,9 +34,9 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.PacketDistributor;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraftforge.fmllegacy.network.PacketDistributor;
+import net.minecraftforge.fmllegacy.network.NetworkRegistry;
+import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
 import net.minecraftforge.forgespi.language.IConfigurable;
 import net.minecraftforge.registries.ObjectHolder;
 import org.apache.commons.lang3.tuple.Pair;
@@ -55,7 +53,6 @@ import tamaized.melongolem.common.capability.TinyGolemCapabilityHandler;
 import tamaized.melongolem.common.capability.TinyGolemCapabilityStorage;
 import tamaized.melongolem.network.DonatorHandler;
 import tamaized.melongolem.network.NetworkMessages;
-import tamaized.melongolem.network.client.ClientPacketHandlerSpawnNonLivingEntity;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -84,7 +81,7 @@ public class MelonMod {
 
 	public static final Logger logger = LogManager.getLogger(MODID);
 
-	private static final Map<EntityType<? extends LivingEntity>, Supplier<AttributeModifierMap.MutableAttribute>> attributes = new HashMap<>();
+	private static final Map<EntityType<? extends LivingEntity>, Supplier<AttributeSupplier.Builder>> attributes = new HashMap<>();
 
 	@ObjectHolder(MelonMod.MODID + ":melonstick")
 	public static final Item melonStick = Items.AIR;
@@ -93,16 +90,16 @@ public class MelonMod {
 	public static final Block glisteringMelonBlock = Blocks.AIR;
 
 	@ObjectHolder(MelonMod.MODID + ":entitymelongolem")
-	public static final EntityType<? extends GolemEntity> entityTypeMelonGolem = assign(EntityMelonGolem.class, 0.7F, 1.9F, 128, 1, true, EntityClassification.CREATURE, EntityMelonGolem::_registerAttributes);
+	public static final EntityType<? extends AbstractGolem> entityTypeMelonGolem = assign(EntityMelonGolem.class, 0.7F, 1.9F, 128, 1, true, MobCategory.CREATURE, EntityMelonGolem::_registerAttributes);
 
 	@ObjectHolder(MelonMod.MODID + ":entityglisteringmelongolem")
-	public static final EntityType<? extends GolemEntity> entityTypeGlisteringMelonGolem = assign(EntityGlisteringMelonGolem.class, 0.7F, 1.9F, 128, 1, true, EntityClassification.CREATURE, EntityMelonGolem::_registerAttributes);
+	public static final EntityType<? extends AbstractGolem> entityTypeGlisteringMelonGolem = assign(EntityGlisteringMelonGolem.class, 0.7F, 1.9F, 128, 1, true, MobCategory.CREATURE, EntityMelonGolem::_registerAttributes);
 
 	@ObjectHolder(MelonMod.MODID + ":entitymelonslice")
 	public static final EntityType<? extends EntityMelonSlice> entityTypeMelonSlice = getNull();
 
 	@ObjectHolder(MelonMod.MODID + ":entitytinymelongolem")
-	public static final EntityType<? extends TameableEntity> entityTypeTinyMelonGolem = getNull();
+	public static final EntityType<? extends TamableAnimal> entityTypeTinyMelonGolem = getNull();
 
 	public static final ImmutableSet<Item> SIGNS = ImmutableSet.of(Items.ACACIA_SIGN, Items.BIRCH_SIGN, Items.DARK_OAK_SIGN, Items.JUNGLE_SIGN, Items.JUNGLE_SIGN, Items.OAK_SIGN, Items.SPRUCE_SIGN);
 
@@ -148,14 +145,14 @@ public class MelonMod {
 
 				entityTypeMelonGolem,
 
-				assign(EntityMelonSlice.class, 0.25F, 0.25F, 128, 1, true, EntityClassification.MISC),
+				assign(EntityMelonSlice.class, 0.25F, 0.25F, 128, 1, true, MobCategory.MISC),
 
-				assign(EntityTinyMelonGolem.class, 0.175F, 0.475F, 128, 1, true, EntityClassification.CREATURE, EntityMelonGolem::_registerAttributes),
+				assign(EntityTinyMelonGolem.class, 0.175F, 0.475F, 128, 1, true, MobCategory.CREATURE, EntityMelonGolem::_registerAttributes),
 
 				entityTypeGlisteringMelonGolem
 
 		);
-		attributes.forEach((type, attribute) -> GlobalEntityTypeAttributes.put(type, attribute.get().create()));
+		attributes.forEach((type, attribute) -> GlobalEntityTypeAttributes.put(type, attribute.get().build()));
 	}
 
 	@SubscribeEvent
@@ -167,7 +164,7 @@ public class MelonMod {
 	public static void registerBlocks(RegistryEvent.Register<Block> e) {
 		e.getRegistry().registerAll(
 
-				assign(new Block(Block.Properties.create(Material.GOURD, MaterialColor.LIME).hardnessAndResistance(1.0F).sound(SoundType.WOOD).setLightLevel(state -> 4)), "glisteringmelonblock")
+				assign(new Block(Block.Properties.of(Material.VEGETABLE, MaterialColor.COLOR_LIGHT_GREEN).strength(1.0F).sound(SoundType.WOOD).lightLevel(state -> 4)), "glisteringmelonblock")
 
 		);
 	}
@@ -176,13 +173,13 @@ public class MelonMod {
 	public static void registerItems(RegistryEvent.Register<Item> e) {
 		e.getRegistry().registerAll(
 
-				assign(new ItemMelonStick(new Item.Properties().group(ItemGroup.MISC)), "melonstick"),
+				assign(new ItemMelonStick(new Item.Properties().tab(CreativeModeTab.TAB_MISC)), "melonstick"),
 
 				assign(glisteringMelonBlock),
 
-				assign(new SpawnEggItem(entityTypeMelonGolem, 0x00FF00, 0x000000, new Item.Properties().group(ItemGroup.MISC)), "melongolemspawnegg"),
+				assign(new ForgeSpawnEggItem(() -> entityTypeMelonGolem, 0x00FF00, 0x000000, new Item.Properties().tab(CreativeModeTab.TAB_MISC)), "melongolemspawnegg"),
 
-				assign(new SpawnEggItem(entityTypeGlisteringMelonGolem, 0xAAFF00, 0xFFCC00, new Item.Properties().group(ItemGroup.MISC)), "glisteringmelongolemspawnegg")
+				assign(new ForgeSpawnEggItem(() -> entityTypeGlisteringMelonGolem, 0xAAFF00, 0xFFCC00, new Item.Properties().tab(CreativeModeTab.TAB_MISC)), "glisteringmelongolemspawnegg")
 
 		);
 	}
@@ -196,7 +193,7 @@ public class MelonMod {
 	private static BlockItem assign(Block block) {
 		return (BlockItem) new BlockItem(block,
 
-				new Item.Properties().setNoRepair().group(ItemGroup.MISC)
+				new Item.Properties().setNoRepair().tab(CreativeModeTab.TAB_MISC)
 
 		)
 
@@ -209,17 +206,17 @@ public class MelonMod {
 				.setRegistryName(MODID, name);
 	}
 
-	private static <T extends LivingEntity> EntityType<T> assign(Class<T> entity, float w, float h, int range, int freq, boolean updates, EntityClassification classification, Supplier<AttributeModifierMap.MutableAttribute> attributes) {
+	private static <T extends LivingEntity> EntityType<T> assign(Class<T> entity, float w, float h, int range, int freq, boolean updates, MobCategory classification, Supplier<AttributeSupplier.Builder> attributes) {
 		EntityType<T> type = assign(entity, w, h, range, freq, updates, classification);
 		MelonMod.attributes.put(type, attributes);
 		return type;
 	}
 
-	private static <T extends Entity> EntityType<T> assign(Class<T> entity, float w, float h, int range, int freq, boolean updates, EntityClassification classification) {
+	private static <T extends Entity> EntityType<T> assign(Class<T> entity, float w, float h, int range, int freq, boolean updates, MobCategory classification) {
 		final String name = entity.getSimpleName().toLowerCase();
-		EntityType<T> type = EntityType.Builder.<T>create((et, world) -> {
+		EntityType<T> type = EntityType.Builder.<T>of((et, world) -> {
 			try {
-				return entity.getConstructor(World.class).newInstance(world);
+				return entity.getConstructor(Level.class).newInstance(world);
 			} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 				e.printStackTrace();
 			}
@@ -228,7 +225,7 @@ public class MelonMod {
 				setTrackingRange(range).
 				setUpdateInterval(freq).
 				setShouldReceiveVelocityUpdates(updates).
-				size(w, h).
+				sized(w, h).
 				build(name);
 		type.setRegistryName(MODID, name);
 		return type;
@@ -255,13 +252,13 @@ public class MelonMod {
 		return null;
 	}
 
-	public static void spawnNonLivingEntity(World world, Entity entity) {
-		world.addEntity(entity);
+	public static void spawnNonLivingEntity(Level world, Entity entity) {
+		world.addFreshEntity(entity);
 		MelonMod.network.send(
 
 				PacketDistributor.TRACKING_CHUNK.with(() -> world.getChunk(entity.chunkCoordX, entity.chunkCoordZ)),
 
-				new ClientPacketHandlerSpawnNonLivingEntity(entity)
+				new ClientboundAddEntityPacket(entity)
 
 		);
 	}

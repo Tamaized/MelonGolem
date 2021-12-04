@@ -15,12 +15,12 @@ public class ClientChecker {
 
 	@SubscribeEvent
 	public static void onUpdate(TickEvent.ClientTickEvent event) {
-		if (Minecraft.getInstance().world == null) {
+		if (Minecraft.getInstance().level == null) {
 			MelonConfig.dirty = true;
 			return;
 		}
 		if (event.phase == TickEvent.Phase.START) {
-			if (MelonConfig.dirty && DonatorHandler.donators.contains(Minecraft.getInstance().player.getUniqueID())) {
+			if (MelonConfig.dirty && DonatorHandler.donators.contains(Minecraft.getInstance().player.getUUID())) {
 				MelonMod.network.sendToServer(new ServerPacketHandlerDonatorSettings(new DonatorHandler.DonatorSettings(MelonMod.config.DONATOR_SETTINGS.enable.get(), MelonMod.config.DONATOR_SETTINGS.colorint)));
 				MelonConfig.dirty = false;
 			}

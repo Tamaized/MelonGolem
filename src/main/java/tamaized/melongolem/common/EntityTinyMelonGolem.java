@@ -2,40 +2,40 @@ package tamaized.melongolem.common;
 
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.command.CommandException;
-import net.minecraft.entity.AgeableEntity;
-import net.minecraft.entity.EntitySize;
-import net.minecraft.entity.Pose;
-import net.minecraft.entity.ai.goal.FollowOwnerGoal;
-import net.minecraft.entity.ai.goal.LookAtGoal;
-import net.minecraft.entity.ai.goal.LookRandomlyGoal;
-import net.minecraft.entity.ai.goal.WaterAvoidingRandomWalkingGoal;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.passive.TameableEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ShearsItem;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.Hand;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextComponentUtils;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.commands.CommandRuntimeException;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.ai.goal.FollowOwnerGoal;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ShearsItem;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.IForgeShearable;
-import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+import net.minecraftforge.fmllegacy.common.registry.IEntityAdditionalSpawnData;
 import tamaized.melongolem.IModProxy;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.capability.CapabilityList;
@@ -46,110 +46,110 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-public class EntityTinyMelonGolem extends TameableEntity implements IForgeShearable, IEntityAdditionalSpawnData, IModProxy.ISignHolder {
+public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearable, IEntityAdditionalSpawnData, IModProxy.ISignHolder {
 
-	private static final DataParameter<ItemStack> HEAD = EntityDataManager.createKey(EntityTinyMelonGolem.class, DataSerializers.ITEMSTACK);
-	private static final DataParameter<Boolean> ENABLED = EntityDataManager.createKey(EntityTinyMelonGolem.class, DataSerializers.BOOLEAN);
-	private static final DataParameter<Integer> COLOR = EntityDataManager.createKey(EntityTinyMelonGolem.class, DataSerializers.VARINT);
-	private static final List<DataParameter<ITextComponent>> SIGN_TEXT = Lists.newArrayList(
+	private static final EntityDataAccessor<ItemStack> HEAD = SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.ITEM_STACK);
+	private static final EntityDataAccessor<Boolean> ENABLED = SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Integer> COLOR = SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.INT);
+	private static final List<EntityDataAccessor<Component>> SIGN_TEXT = Lists.newArrayList(
 
-			EntityDataManager.createKey(EntityTinyMelonGolem.class, DataSerializers.TEXT_COMPONENT),
+			SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.COMPONENT),
 
-			EntityDataManager.createKey(EntityTinyMelonGolem.class, DataSerializers.TEXT_COMPONENT),
+			SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.COMPONENT),
 
-			EntityDataManager.createKey(EntityTinyMelonGolem.class, DataSerializers.TEXT_COMPONENT),
+			SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.COMPONENT),
 
-			EntityDataManager.createKey(EntityTinyMelonGolem.class, DataSerializers.TEXT_COMPONENT)
+			SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.COMPONENT)
 
 	);
 
-	public EntityTinyMelonGolem(World worldIn) {
+	public EntityTinyMelonGolem(Level worldIn) {
 		super(Objects.requireNonNull(MelonMod.entityTypeTinyMelonGolem), worldIn);
 	}
 
 	@Nullable
 	@Override
-	public AgeableEntity func_241840_a(ServerWorld p_241840_1_, AgeableEntity p_241840_2_) {
+	public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob mob) {
 		return null;
 	}
 
 	@Override
-	protected void registerData() {
-		super.registerData();
-		dataManager.register(HEAD, ItemStack.EMPTY);
-		dataManager.register(ENABLED, false);
-		dataManager.register(COLOR, 0xFFFFFF);
-		for (DataParameter<ITextComponent> sign : SIGN_TEXT)
-			dataManager.register(sign, new StringTextComponent(""));
+	protected void defineSynchedData() {
+		super.defineSynchedData();
+		entityData.define(HEAD, ItemStack.EMPTY);
+		entityData.define(ENABLED, false);
+		entityData.define(COLOR, 0xFFFFFF);
+		for (EntityDataAccessor<Component> sign : SIGN_TEXT)
+			entityData.define(sign, new TextComponent(""));
 	}
 
 	@Override
-	public void livingTick() {
-		super.livingTick();
-		if (world.isRemote || !isAlive())
+	public void tick() {
+		super.tick();
+		if (level.isClientSide || !isAlive())
 			return;
-		if (getOwner() != null && getOwner().isAlive() && DonatorHandler.donators.contains(getOwnerId())) {
-			DonatorHandler.DonatorSettings settings = DonatorHandler.settings.get(getOwnerId());
+		if (getOwner() != null && getOwner().isAlive() && DonatorHandler.donators.contains(getOwnerUUID())) {
+			DonatorHandler.DonatorSettings settings = DonatorHandler.settings.get(getOwnerUUID());
 			if (settings != null) {
-				dataManager.set(ENABLED, settings.enabled);
-				dataManager.set(COLOR, settings.color);
+				entityData.set(ENABLED, settings.enabled);
+				entityData.set(COLOR, settings.color);
 			}
 		}
-		if (getOwner() instanceof PlayerEntity)
+		if (getOwner() instanceof Player)
 			getOwner().getCapability(CapabilityList.TINY_GOLEM).ifPresent(cap -> {
 				if (cap.getPet() != this) {
-					if (cap.getPet() != null && cap.getPet().getUniqueID().equals(this.getUniqueID())) {
-						remove();
+					if (cap.getPet() != null && cap.getPet().getUUID().equals(this.getUUID())) {
+						discard();
 						return;
 					}
-					ItemMelonStick.summonPet(world, (PlayerEntity) getOwner(), this);
+					ItemMelonStick.summonPet(level, (Player) getOwner(), this);
 					if (cap.getPet() == null)
 						cap.setPet(this);
 					else
-						this.attackEntityFrom(DamageSource.OUT_OF_WORLD, Float.MAX_VALUE);
+						this.hurt(DamageSource.OUT_OF_WORLD, Float.MAX_VALUE);
 				}
 			});
 	}
 
 	public boolean isEnabled() {
-		return dataManager.get(ENABLED);
+		return entityData.get(ENABLED);
 	}
 
 	public int getColor() {
-		return dataManager.get(COLOR);
+		return entityData.get(COLOR);
 	}
 
 	@Override
-	public void setSignText(int index, ITextComponent text) {
-		dataManager.set(SIGN_TEXT.get(index), text);
+	public void setSignText(int index, Component text) {
+		entityData.set(SIGN_TEXT.get(index), text);
 	}
 
 	@Override
 	public int networkID() {
-		return getEntityId();
+		return getId();
 	}
 
 	@Override
-	public ITextComponent getSignText(int index) {
-		return dataManager.get(SIGN_TEXT.get(index));
+	public Component getSignText(int index) {
+		return entityData.get(SIGN_TEXT.get(index));
 	}
 
 	@Override
 	protected void registerGoals() {
 		goalSelector.addGoal(0, new FollowOwnerGoal(this, 1.0D, 4.0F, 2.0F, true));
-		goalSelector.addGoal(1, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
-		goalSelector.addGoal(2, new LookAtGoal(this, PlayerEntity.class, 8.0F));
-		goalSelector.addGoal(2, new LookRandomlyGoal(this));
+		goalSelector.addGoal(1, new WaterAvoidingRandomStrollGoal(this, 1.0D));
+		goalSelector.addGoal(2, new LookAtPlayerGoal(this, Player.class, 8.0F));
+		goalSelector.addGoal(2, new RandomLookAroundGoal(this));
 	}
 
 	@Override
-	public boolean isShearable(@Nonnull ItemStack item, World world, BlockPos pos) {
+	public boolean isShearable(@Nonnull ItemStack item, Level world, BlockPos vertex) {
 		return !getHead().isEmpty();
 	}
 
 	@Override
-	protected float getSoundPitch() {
-		return rand.nextFloat() * 0.5F + 2F;
+	public float getVoicePitch() {
+		return random.nextFloat() * 0.5F + 2F;
 	}
 
 	@Nullable
@@ -161,122 +161,122 @@ public class EntityTinyMelonGolem extends TameableEntity implements IForgeSheara
 	@Nullable
 	@Override
 	protected SoundEvent getHurtSound(DamageSource source) {
-		return SoundEvents.ENTITY_SLIME_HURT;
+		return SoundEvents.SLIME_HURT;
 	}
 
 	@Nullable
 	@Override
 	protected SoundEvent getDeathSound() {
-		return SoundEvents.ENTITY_SLIME_DEATH;
+		return SoundEvents.SLIME_DEATH;
 	}
 
 	@Nonnull
 	@Override
-	public ActionResultType applyPlayerInteraction(PlayerEntity player, Vector3d vec, Hand hand) {
-		if (!MelonMod.config.hats.get() || player.getHeldItemMainhand().getItem() instanceof ShearsItem || player.getHeldItemOffhand().getItem() instanceof ShearsItem)
-			return ActionResultType.FAIL;
-		ItemStack stack = player.getHeldItem(hand);
+	public InteractionResult interactAt(Player player, Vec3 vec, InteractionHand hand) {
+		if (!MelonMod.config.hats.get() || player.getMainHandItem().getItem() instanceof ShearsItem || player.getOffhandItem().getItem() instanceof ShearsItem)
+			return InteractionResult.FAIL;
+		ItemStack stack = player.getItemInHand(hand);
 		if (!stack.isEmpty() && getHead().isEmpty()) {
-			if (Block.getBlockFromItem(stack.getItem()) != Blocks.AIR || MelonMod.SIGNS.contains(stack.getItem())) {
+			if (Block.byItem(stack.getItem()) != Blocks.AIR || MelonMod.SIGNS.contains(stack.getItem())) {
 				setHead(stack);
 				if (!player.isCreative())
-					player.getHeldItem(hand).shrink(1);
-				return ActionResultType.SUCCESS;
+					player.getItemInHand(hand).shrink(1);
+				return InteractionResult.SUCCESS;
 			}
 		} else if (!getHead().isEmpty() && MelonMod.SIGNS.contains(getHead().getItem())) {
 			MelonMod.proxy.openSignHolderGui(this);
-			return ActionResultType.SUCCESS;
+			return InteractionResult.SUCCESS;
 		}
-		return ActionResultType.FAIL;
+		return InteractionResult.FAIL;
 	}
 
 	@Override
-	public float getStandingEyeHeight(Pose p_213316_1_, EntitySize p_213316_2_) {
+	public float getEyeHeightAccess(Pose p_213316_1_, EntityDimensions p_213316_2_) {
 		return 0.425F;
 	}
 
 	@Override
 	public ItemStack getHead() {
-		return dataManager.get(HEAD);
+		return entityData.get(HEAD);
 	}
 
 	public void setHead(ItemStack stack) {
 		for (int i = 0; i < 4; ++i)
-			setSignText(i, new StringTextComponent(""));
+			setSignText(i, new TextComponent(""));
 		ItemStack newstack = stack.copy();
 		newstack.setCount(1);
-		dataManager.set(HEAD, newstack);
+		entityData.set(HEAD, newstack);
 	}
 
 	@Nonnull
 	@Override
-	public List<ItemStack> onSheared(@Nullable PlayerEntity player, @Nonnull ItemStack item, World world, BlockPos pos, int fortune) {
+	public List<ItemStack> onSheared(@Nullable Player player, @Nonnull ItemStack item, Level world, BlockPos vertex, int fortune) {
 		List<ItemStack> list = Lists.newArrayList(MelonMod.config.shear.get() ? getHead() : ItemStack.EMPTY);
 		setHead(ItemStack.EMPTY);
 		return list;
 	}
 
 	@Override
-	public void onDeath(@Nonnull DamageSource cause) {
-		super.onDeath(cause);
+	public void die(@Nonnull DamageSource cause) {
+		super.die(cause);
 		ItemStack stack = getHead();
-		if (!world.isRemote && !stack.isEmpty()) {
-			ItemEntity e = new ItemEntity(world, getPosX(), getPosY(), getPosZ(), stack);
-			e.setMotion(e.getMotion().add(
+		if (!level.isClientSide && !stack.isEmpty()) {
+			ItemEntity e = new ItemEntity(level, getX(), getY(), getZ(), stack);
+			e.setDeltaMovement(e.getDeltaMovement().add(
 
-					rand.nextFloat() * 0.05F,
+					random.nextFloat() * 0.05F,
 
-					(rand.nextFloat() - rand.nextFloat()) * 0.1F,
+					(random.nextFloat() - random.nextFloat()) * 0.1F,
 
-					(rand.nextFloat() - rand.nextFloat()) * 0.1F
+					(random.nextFloat() - random.nextFloat()) * 0.1F
 
 			));
-			world.addEntity(e);
+			level.addFreshEntity(e);
 		}
 	}
 
 	@Nonnull
 	@Override
-	public CompoundNBT writeWithoutTypeId(CompoundNBT compound) {
+	public CompoundTag saveWithoutId(CompoundTag compound) {
 		compound.put("head", getHead().serializeNBT());
 		compound.putBoolean("donator_enabled", isEnabled());
 		compound.putInt("donator_color", getColor());
 		for (int i = 0; i < 4; ++i) {
-			String s = ITextComponent.Serializer.toJson(getSignText(i));
+			String s = Component.Serializer.toJson(getSignText(i));
 			compound.putString("Text" + (i + 1), s);
 		}
-		return super.writeWithoutTypeId(compound);
+		return super.saveWithoutId(compound);
 	}
 
 	@Override
-	public void read(CompoundNBT compound) {
+	public void readAdditionalSaveData(CompoundTag compound) {
 		if (compound.contains("donator_enabled"))
-			dataManager.set(ENABLED, compound.getBoolean("donator_enabled"));
+			entityData.set(ENABLED, compound.getBoolean("donator_enabled"));
 		if (compound.contains("donator_color"))
-			dataManager.set(COLOR, compound.getInt("donator_color"));
-		setHead(ItemStack.read(compound.getCompound("head")));
+			entityData.set(COLOR, compound.getInt("donator_color"));
+		setHead(ItemStack.of(compound.getCompound("head")));
 
 		for (int i = 0; i < 4; ++i) {
 			String s = compound.getString("Text" + (i + 1));
-			ITextComponent itextcomponent = ITextComponent.Serializer.func_240643_a_(s);
+			Component itextcomponent = Component.Serializer.fromJson(s);
 
 			try {
-				setSignText(i, itextcomponent == null ? new StringTextComponent("") : TextComponentUtils.func_240645_a_(getCommandSource(), itextcomponent, null, 0));
-			} catch (CommandException | CommandSyntaxException var7) {
+				setSignText(i, itextcomponent == null ? new TextComponent("") : ComponentUtils.updateForEntity(createCommandSourceStack(), itextcomponent, null, 0));
+			} catch (CommandRuntimeException | CommandSyntaxException var7) {
 				setSignText(i, itextcomponent);
 			}
 		}
-		super.read(compound);
+		super.readAdditionalSaveData(compound);
 	}
 
 	@Override
-	public void writeSpawnData(PacketBuffer buffer) {
-		buffer.writeItemStack(getHead());
+	public void writeSpawnData(FriendlyByteBuf buffer) {
+		buffer.writeItem(getHead());
 	}
 
 	@Override
-	public void readSpawnData(PacketBuffer additionalData) {
-		setHead(additionalData.readItemStack());
+	public void readSpawnData(FriendlyByteBuf additionalData) {
+		setHead(additionalData.readItem());
 	}
 
 }
