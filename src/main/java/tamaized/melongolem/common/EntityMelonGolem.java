@@ -82,7 +82,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 	);
 	private static final EntityDataAccessor<Float> PITCH = SynchedEntityData.defineId(EntityMelonGolem.class, EntityDataSerializers.FLOAT);
 	public static BlockState SIGN_TILE_BLOCKSTATE = Blocks.OAK_WALL_SIGN.defaultBlockState();
-	public static final SignBlockEntity te = new SignBlockEntity(BlockPos.ZERO, SIGN_TILE_BLOCKSTATE) { //TODO: aylmao this is going to be wrong
+	public static final SignBlockEntity te = new SignBlockEntity(BlockPos.ZERO, SIGN_TILE_BLOCKSTATE) {
 		@Nonnull
 		@Override
 		public BlockState getBlockState() {
