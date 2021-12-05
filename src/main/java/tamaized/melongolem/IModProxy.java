@@ -16,7 +16,7 @@ public interface IModProxy {
 
 		ItemStack getHead();
 
-		float getDistance(Entity entityIn);
+		float distanceTo(Entity entityIn);
 
 		Component getSignText(int index);
 
