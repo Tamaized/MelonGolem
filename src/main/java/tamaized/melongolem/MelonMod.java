@@ -22,7 +22,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeSpawnEggItem;
-import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -49,8 +48,6 @@ import tamaized.melongolem.common.EntityMelonSlice;
 import tamaized.melongolem.common.EntityTinyMelonGolem;
 import tamaized.melongolem.common.ItemMelonStick;
 import tamaized.melongolem.common.capability.ITinyGolemCapability;
-import tamaized.melongolem.common.capability.TinyGolemCapabilityHandler;
-import tamaized.melongolem.common.capability.TinyGolemCapabilityStorage;
 import tamaized.melongolem.network.DonatorHandler;
 import tamaized.melongolem.network.NetworkMessages;
 
@@ -233,8 +230,6 @@ public class MelonMod {
 
 	@SubscribeEvent
 	public static void init(FMLCommonSetupEvent event) {
-		CapabilityManager.INSTANCE.register(ITinyGolemCapability.class, new TinyGolemCapabilityStorage(), TinyGolemCapabilityHandler::new);
-
 		NetworkMessages.register(network);
 
 		proxy.init();
