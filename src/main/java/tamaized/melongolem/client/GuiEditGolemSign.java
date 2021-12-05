@@ -27,7 +27,7 @@ import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.StandingSignBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.WoodType;
-import tamaized.melongolem.IModProxy;
+import tamaized.melongolem.ISignHolder;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.EntityMelonGolem;
 import tamaized.melongolem.network.server.ServerPacketHandlerMelonSign;
@@ -38,13 +38,13 @@ import java.util.Objects;
 public class GuiEditGolemSign extends Screen {
 
 	private SignRenderer.SignModel signModel;
-	private final IModProxy.ISignHolder golem;
+	private final ISignHolder golem;
 	private int updateCounter;
 	private int editLine;
 	private boolean canSend = true;
 	private TextFieldHelper textInputUtil;
 
-	public GuiEditGolemSign(IModProxy.ISignHolder golem) {
+	public GuiEditGolemSign(ISignHolder golem) {
 		super(new TranslatableComponent("melongolemsignholder"));
 		this.golem = golem;
 	}

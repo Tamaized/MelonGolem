@@ -12,14 +12,14 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.StandingAndWallBlockItem;
-import tamaized.melongolem.IModProxy;
+import tamaized.melongolem.ISignHolder;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.EntityMelonGolem;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-public class LayerMelonHead<T extends LivingEntity & IModProxy.ISignHolder> extends RenderLayer<T, SnowGolemModel<T>> {
+public class LayerMelonHead<T extends LivingEntity & ISignHolder> extends RenderLayer<T, SnowGolemModel<T>> {
 
 	public LayerMelonHead(RenderLayerParent<T, SnowGolemModel<T>> p_i50926_1_) {
 		super(p_i50926_1_);

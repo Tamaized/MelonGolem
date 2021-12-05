@@ -27,19 +27,16 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.fmlclient.ConfigGuiHandler;
 import net.minecraftforge.fmllegacy.network.PacketDistributor;
 import net.minecraftforge.fmllegacy.network.NetworkRegistry;
 import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
-import net.minecraftforge.forgespi.language.IConfigurable;
 import net.minecraftforge.registries.ObjectHolder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -54,7 +51,6 @@ import tamaized.melongolem.common.ItemMelonStick;
 import tamaized.melongolem.network.DonatorHandler;
 import tamaized.melongolem.network.NetworkMessages;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
@@ -66,8 +62,6 @@ import java.util.function.Supplier;
 public class MelonMod {
 
 	public static final String MODID = "melongolem";
-
-	public static final IModProxy proxy = DistExecutor.runForDist(() -> ClientProxy::new, () -> ServerProxy::new);
 
 	public static MelonConfig config;
 	public static MelonConfig.Client configClient;
@@ -238,16 +232,12 @@ public class MelonMod {
 	@SubscribeEvent
 	public static void init(FMLCommonSetupEvent event) {
 		NetworkMessages.register(network);
-
-		proxy.init();
 	}
 
 	@SubscribeEvent
 	public static void init(FMLLoadCompleteEvent event) {
 		MelonConfig.setupStabby();
 		MelonConfig.setupColor();
-
-		proxy.finish();
 	}
 
 	private static <T> T getNull() {

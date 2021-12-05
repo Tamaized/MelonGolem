@@ -54,7 +54,7 @@ import net.minecraftforge.fmllegacy.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fmllegacy.network.PacketDistributor;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
-import tamaized.melongolem.IModProxy;
+import tamaized.melongolem.ISignHolder;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.client.ClientListener;
 import tamaized.melongolem.network.client.ClientPacketHandlerMelonAmbientSound;
@@ -65,7 +65,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 
-public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, IForgeShearable, IEntityAdditionalSpawnData, IModProxy.ISignHolder {
+public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, IForgeShearable, IEntityAdditionalSpawnData, ISignHolder {
 
 	private static final EntityDataAccessor<ItemStack> HEAD = SynchedEntityData.defineId(EntityMelonGolem.class, EntityDataSerializers.ITEM_STACK);
 	//	private static final ResourceLocation LOOT = LootTables.register(new ResourceLocation(MelonMod.MODID, "melongolem"));
