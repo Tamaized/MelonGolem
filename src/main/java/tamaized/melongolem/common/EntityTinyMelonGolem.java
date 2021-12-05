@@ -184,8 +184,10 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearab
 				return InteractionResult.SUCCESS;
 			}
 		} else if (!getHead().isEmpty() && MelonMod.SIGNS.contains(getHead().getItem())) {
-			MelonMod.proxy.openSignHolderGui(this);
-			return InteractionResult.SUCCESS;
+			if (level.isClientSide) {
+				ClientListener.openSignHolderGui(this);
+			}
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		}
 		return InteractionResult.FAIL;
 	}
