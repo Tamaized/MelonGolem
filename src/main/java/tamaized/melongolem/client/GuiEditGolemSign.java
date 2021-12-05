@@ -76,6 +76,7 @@ public class GuiEditGolemSign extends Screen {
 		Objects.requireNonNull(minecraft).keyboardHandler.setSendRepeatsToGui(false);
 		if (canSend)
 			MelonMod.network.sendToServer(new ServerPacketHandlerMelonSign(golem));
+		this.minecraft.setScreen(null);
 	}
 
 	@Override

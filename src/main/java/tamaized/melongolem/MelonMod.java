@@ -20,6 +20,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.MaterialColor;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.event.RegistryEvent;
@@ -43,6 +44,7 @@ import net.minecraftforge.registries.ObjectHolder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tamaized.melongolem.client.ClientListener;
 import tamaized.melongolem.client.MelonConfigScreen;
 import tamaized.melongolem.common.EntityGlisteringMelonGolem;
 import tamaized.melongolem.common.EntityMelonGolem;
@@ -152,13 +154,14 @@ public class MelonMod {
 		);
 	}
 
+	@SubscribeEvent
 	public static void registerAttributes(EntityAttributeCreationEvent event) {
 		attributes.forEach((type, attribute) -> event.put(type, attribute.get().build()));
 	}
 
 	@SubscribeEvent
 	public static void clientSetup(FMLClientSetupEvent e) {
-		ClientProxy.registerRenders();
+		DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> ClientListener::registerRenders);
 	}
 
 	@SubscribeEvent

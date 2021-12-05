@@ -56,6 +56,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import tamaized.melongolem.IModProxy;
 import tamaized.melongolem.MelonMod;
+import tamaized.melongolem.client.ClientListener;
 import tamaized.melongolem.network.client.ClientPacketHandlerMelonAmbientSound;
 
 import javax.annotation.Nonnull;
@@ -213,8 +214,10 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 				return InteractionResult.SUCCESS;
 			}
 		} else if (!getHead().isEmpty() && MelonMod.SIGNS.contains(getHead().getItem())) {
-			MelonMod.proxy.openSignHolderGui(this);
-			return InteractionResult.SUCCESS;
+			if (level.isClientSide) {
+				ClientListener.openSignHolderGui(this);
+			}
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		}
 		return InteractionResult.FAIL;
 	}

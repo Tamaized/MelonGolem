@@ -35,11 +35,7 @@ public class CapabilityList {
 		if (e.getObject() instanceof Player) {
 			e.addCapability(ITinyGolemCapability.ID, new ICapabilitySerializable<CompoundTag>() {
 
-				LazyOptional<ITinyGolemCapability> inst = LazyOptional.of(() -> {
-					TinyGolemCapabilityHandler cap = new TinyGolemCapabilityHandler();
-					cap.setPet((EntityTinyMelonGolem) e.getObject());
-					return cap;
-				});
+				LazyOptional<ITinyGolemCapability> inst = LazyOptional.of(TinyGolemCapabilityHandler::new);
 
 				@Nonnull
 				@Override
