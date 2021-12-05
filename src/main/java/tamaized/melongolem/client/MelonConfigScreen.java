@@ -59,9 +59,9 @@ public class MelonConfigScreen extends Screen {
 		} catch (NumberFormatException e) {
 			// NO-OP
 		}
-		GlStateManager.enableBlend();
-		drawString(matrixStack, font, TEXT_DONATOR_COLOR, 5, 25 + font.FONT_HEIGHT / 2 + 1, color);
-		GlStateManager.disableBlend();
+		GlStateManager._enableBlend();
+		drawString(matrixStack, font, TEXT_DONATOR_COLOR, 5, 25 + font.lineHeight / 2 + 1, color);
+		GlStateManager._disableBlend();
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
 	}
 }

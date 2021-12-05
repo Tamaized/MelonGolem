@@ -77,7 +77,7 @@ public class GuiEditGolemSign extends Screen {
 	@Override
 	public void tick() {
 		++this.updateCounter;
-		if (golem.getDistance(Minecraft.getInstance().player) > 6) {
+		if (golem.distanceTo(Minecraft.getInstance().player) > 6) {
 			canSend = false;
 			onClose();
 		}

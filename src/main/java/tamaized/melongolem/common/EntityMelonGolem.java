@@ -15,7 +15,6 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -67,7 +66,7 @@ import java.util.Objects;
 
 public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, IForgeShearable, IEntityAdditionalSpawnData, IModProxy.ISignHolder {
 
-	private static final EntityDataAccessor<ItemStack> HEAD = SynchedEntityData.defineId(EntityMelonGolem.class, EntityDataSerializers.ITEMSTACK);
+	private static final EntityDataAccessor<ItemStack> HEAD = SynchedEntityData.defineId(EntityMelonGolem.class, EntityDataSerializers.ITEM_STACK);
 	//	private static final ResourceLocation LOOT = LootTables.register(new ResourceLocation(MelonMod.MODID, "melongolem"));
 	private static final List<EntityDataAccessor<Component>> SIGN_TEXT = Lists.newArrayList(
 
@@ -82,7 +81,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 	);
 	private static final EntityDataAccessor<Float> PITCH = SynchedEntityData.defineId(EntityMelonGolem.class, EntityDataSerializers.FLOAT);
 	public static BlockState SIGN_TILE_BLOCKSTATE = Blocks.OAK_WALL_SIGN.defaultBlockState();
-	public static final SignBlockEntity te = new SignBlockEntity() {
+	public static final SignBlockEntity te = new SignBlockEntity(BlockPos.ZERO, SIGN_TILE_BLOCKSTATE) { //TODO: aylmao this is going to be wrong
 		@Nonnull
 		@Override
 		public BlockState getBlockState() {

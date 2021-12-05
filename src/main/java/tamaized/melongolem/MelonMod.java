@@ -23,6 +23,7 @@ import net.minecraft.world.level.material.MaterialColor;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
@@ -47,7 +48,6 @@ import tamaized.melongolem.common.EntityMelonGolem;
 import tamaized.melongolem.common.EntityMelonSlice;
 import tamaized.melongolem.common.EntityTinyMelonGolem;
 import tamaized.melongolem.common.ItemMelonStick;
-import tamaized.melongolem.common.capability.ITinyGolemCapability;
 import tamaized.melongolem.network.DonatorHandler;
 import tamaized.melongolem.network.NetworkMessages;
 
@@ -149,7 +149,10 @@ public class MelonMod {
 				entityTypeGlisteringMelonGolem
 
 		);
-		attributes.forEach((type, attribute) -> GlobalEntityTypeAttributes.put(type, attribute.get().build()));
+	}
+
+	public static void registerAttributes(EntityAttributeCreationEvent event) {
+		attributes.forEach((type, attribute) -> event.put(type, attribute.get().build()));
 	}
 
 	@SubscribeEvent

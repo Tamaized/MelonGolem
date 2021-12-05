@@ -14,7 +14,7 @@ import tamaized.melongolem.network.NetworkMessages;
 import java.util.Objects;
 import java.util.UUID;
 
-// hi-jacked SSpawnObjectPacket
+// hi-jacked SSpawnObjectPacket TODO: Delete later
 public class ClientPacketHandlerSpawnNonLivingEntity implements NetworkMessages.IMessage<ClientPacketHandlerSpawnNonLivingEntity> {
 
 	private int entityId;
@@ -54,7 +54,7 @@ public class ClientPacketHandlerSpawnNonLivingEntity implements NetworkMessages.
 		entity.setYRot((float) (yaw * 360) / 256.0F);
 		entity.setId(entityId);
 		entity.setUUID(uniqueId);
-		((ClientLevel) world).addFreshEntity(entityId, entity);
+		//((ClientLevel) world).addFreshEntity(entityId, entity);
 	}
 
 	@Override

@@ -40,7 +40,7 @@ public class ClientProxy implements IModProxy {
 
 	@Override
 	public void openSignHolderGui(ISignHolder golem) {
-		if (MelonMod.SIGNS.contains(golem.getHead().getItem()) && golem.getDistance(Minecraft.getInstance().player) <= 6)
+		if (MelonMod.SIGNS.contains(golem.getHead().getItem()) && golem.distanceTo(Minecraft.getInstance().player) <= 6)
 			Minecraft.getInstance().setScreen(new GuiEditGolemSign(golem));
 	}
 
