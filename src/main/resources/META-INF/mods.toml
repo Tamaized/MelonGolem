@@ -4,7 +4,7 @@ issueTrackerURL="https://github.com/Tamaized/MelonGolem/issues"
 license="All Rights Reserved"
 [[mods]]
 modId="melongolem"
-version="1"
+version="${version}"
 displayName="Melon Golem"
 credits=""
 authors="Tamaized"
