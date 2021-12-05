@@ -86,15 +86,15 @@ public class RenderMelonGolem<T extends Mob & IModProxy.ISignHolder> extends Mob
 	public static class Factory {
 
 		public static RenderMelonGolem normal(EntityRendererProvider.Context renderManager) {
-			return new RenderMelonGolem(renderManager, Type.NORMAL);
+			return new RenderMelonGolem<>(renderManager, Type.NORMAL);
 		}
 
 		public static RenderMelonGolem tiny(EntityRendererProvider.Context renderManager) {
-			return new RenderMelonGolem(renderManager, Type.TINY);
+			return new RenderMelonGolem<>(renderManager, Type.TINY);
 		}
 
 		public static RenderMelonGolem glister(EntityRendererProvider.Context renderManager) {
-			return new RenderMelonGolem(renderManager, Type.GLISTER);
+			return new RenderMelonGolem<>(renderManager, Type.GLISTER);
 		}
 
 	}

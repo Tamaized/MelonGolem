@@ -11,22 +11,12 @@ import net.minecraftforge.fml.common.Mod;
 import tamaized.melongolem.client.GuiEditGolemSign;
 import tamaized.melongolem.client.RenderMelonGolem;
 
-@Mod.EventBusSubscriber(modid = MelonMod.MODID, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = MelonMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientProxy implements IModProxy {
 
 //	public static final VertexFormat ITEM_FORMAT_WITH_LIGHTMAP = new VertexFormat(DefaultVertexFormats.ITEM).addElement(DefaultVertexFormats.TEX_2S);
 
-	public static void registerRenders() {
-		ItemBlockRenderTypes.setRenderLayer(MelonMod.glisteringMelonBlock, RenderType.cutout());
-	}
 
-	@SubscribeEvent
-	public static void registerEntityRenders(EntityRenderersEvent.RegisterRenderers event) {
-		event.registerEntityRenderer(MelonMod.entityTypeMelonGolem, RenderMelonGolem.Factory::normal);
-		event.registerEntityRenderer(MelonMod.entityTypeMelonSlice, ThrownItemRenderer::new);
-		event.registerEntityRenderer(MelonMod.entityTypeTinyMelonGolem, RenderMelonGolem.Factory::tiny);
-		event.registerEntityRenderer(MelonMod.entityTypeGlisteringMelonGolem, RenderMelonGolem.Factory::glister);
-	}
 
 	@Override
 	public void init() {
@@ -40,8 +30,7 @@ public class ClientProxy implements IModProxy {
 
 	@Override
 	public void openSignHolderGui(ISignHolder golem) {
-		if (MelonMod.SIGNS.contains(golem.getHead().getItem()) && golem.distanceTo(Minecraft.getInstance().player) <= 6)
-			Minecraft.getInstance().setScreen(new GuiEditGolemSign(golem));
+
 	}
 
 	/*public enum DefaultTextureGetter implements Function<ResourceLocation, TextureAtlasSprite> {

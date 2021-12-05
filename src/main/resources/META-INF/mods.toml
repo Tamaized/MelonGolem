@@ -1,10 +1,10 @@
 modLoader="javafml"
-loaderVersion="[31,)"
+loaderVersion="[37,)"
 issueTrackerURL="https://github.com/Tamaized/MelonGolem/issues"
 license="All Rights Reserved"
 [[mods]]
 modId="melongolem"
-version="${version}"
+version="1"
 displayName="Melon Golem"
 credits=""
 authors="Tamaized"
