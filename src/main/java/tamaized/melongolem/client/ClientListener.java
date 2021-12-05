@@ -8,7 +8,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import tamaized.melongolem.IModProxy;
+import tamaized.melongolem.ISignHolder;
 import tamaized.melongolem.MelonMod;
 
 @Mod.EventBusSubscriber(modid = MelonMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -26,7 +26,7 @@ public class ClientListener {
         ItemBlockRenderTypes.setRenderLayer(MelonMod.glisteringMelonBlock, RenderType.cutout());
     }
 
-    public static void openSignHolderGui(IModProxy.ISignHolder golem) {
+    public static void openSignHolderGui(ISignHolder golem) {
         if (MelonMod.SIGNS.contains(golem.getHead().getItem()) && golem.distanceTo(Minecraft.getInstance().player) <= 6)
             Minecraft.getInstance().setScreen(new GuiEditGolemSign(golem));
     }

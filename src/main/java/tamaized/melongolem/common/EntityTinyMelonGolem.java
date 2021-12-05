@@ -36,8 +36,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.IForgeShearable;
 import net.minecraftforge.fmllegacy.common.registry.IEntityAdditionalSpawnData;
-import tamaized.melongolem.IModProxy;
+import tamaized.melongolem.ISignHolder;
 import tamaized.melongolem.MelonMod;
+import tamaized.melongolem.client.ClientListener;
 import tamaized.melongolem.common.capability.CapabilityList;
 import tamaized.melongolem.network.DonatorHandler;
 
@@ -46,7 +47,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearable, IEntityAdditionalSpawnData, IModProxy.ISignHolder {
+public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearable, IEntityAdditionalSpawnData, ISignHolder {
 
 	private static final EntityDataAccessor<ItemStack> HEAD = SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.ITEM_STACK);
 	private static final EntityDataAccessor<Boolean> ENABLED = SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.BOOLEAN);

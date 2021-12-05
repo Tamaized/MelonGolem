@@ -15,7 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Mob;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import tamaized.melongolem.IModProxy;
+import tamaized.melongolem.ISignHolder;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.EntityTinyMelonGolem;
 
@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
 import java.util.Objects;
 
 @OnlyIn(Dist.CLIENT)
-public class RenderMelonGolem<T extends Mob & IModProxy.ISignHolder> extends MobRenderer<T, SnowGolemModel<T>> {
+public class RenderMelonGolem<T extends Mob & ISignHolder> extends MobRenderer<T, SnowGolemModel<T>> {
 	private static final ResourceLocation TEXTURES = new ResourceLocation(MelonMod.MODID, "textures/entity/golem.png");
 	private static final ResourceLocation TEXTURES_GREY = new ResourceLocation(MelonMod.MODID, "textures/entity/greygolem.png");
 	private static final ResourceLocation TEXTURES_GLISTER = new ResourceLocation(MelonMod.MODID, "textures/entity/glistening_melon_golem.png");

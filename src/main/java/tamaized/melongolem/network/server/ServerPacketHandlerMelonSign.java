@@ -5,7 +5,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import tamaized.melongolem.IModProxy;
+import tamaized.melongolem.ISignHolder;
 import tamaized.melongolem.common.EntityMelonGolem;
 import tamaized.melongolem.network.NetworkMessages;
 
@@ -14,7 +14,7 @@ public class ServerPacketHandlerMelonSign implements NetworkMessages.IMessage<Se
 	private int id;
 	private String[] lines;
 
-	public ServerPacketHandlerMelonSign(IModProxy.ISignHolder golem) {
+	public ServerPacketHandlerMelonSign(ISignHolder golem) {
 		id = golem.networkID();
 		lines = new String[]{golem.getSignText(0).getString(), golem.getSignText(1).getString(), golem.getSignText(2).getString(), golem.getSignText(3).getString()};
 	}
