@@ -1,5 +1,7 @@
 package tamaized.melongolem.common.capability;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import tamaized.melongolem.common.EntityTinyMelonGolem;
@@ -63,4 +65,22 @@ public class TinyGolemCapabilityHandler implements ITinyGolemCapability {
 		markDirty(cap.getLoadPos(), cap.getLoadDim(), cap.getLoadPetID());
 	}
 
+	@Override
+	public CompoundTag serializeNBT() {
+		CompoundTag nbt = new CompoundTag();
+		EntityTinyMelonGolem pet = this.getPet();
+		if (pet != null && pet.getOwnerUUID() != null) {
+			nbt.putLong("vertex", pet.blockPosition().asLong());
+			nbt.putString("dim", pet.level.dimension().location().toString());
+			nbt.putUUID("uuid", pet.getUUID());
+		}
+		return nbt;
+	}
+
+	@Override
+	public void deserializeNBT(CompoundTag nbt) {
+		if (nbt.contains("vertex") && nbt.contains("dim") && nbt.contains("uuid")) {
+			this.markDirty(BlockPos.of(nbt.getLong("vertex")), new ResourceLocation(nbt.getString("dim")), nbt.getUUID("uuid"));
+		}
+	}
 }
