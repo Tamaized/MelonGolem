@@ -22,14 +22,14 @@ repositories {
     }
 }
 
-version = "1.${minecraftVersionMajor}-${modVersion}${modVersionValue}"
+version = "${artifactor_minecraft_version}-${artifactor_mod_version}." + (hasProperty("CIVersion") ? CIVersion : mod_version)
 group = "tamaized.melongolem"
 archivesBaseName = "MelonMod"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 
 minecraft {
-    mappings("${project.mappingType}", "${project.mappingVersion}")
+    mappings("${project.mapping_type}", "${project.mapping_version}")
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     runs {
@@ -68,9 +68,9 @@ minecraft {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:1.${project.minecraftVersionMajor}.${project.minecraftVersionMinor}-${project.forgeVersion}"
+    minecraft "net.minecraftforge:forge:${project.artifactor_minecraft_version}-${project.artifactor_forge_version}"
 
-    implementation fg.deobf("mezz.jei:${project.jeiVersion}")
+    implementation fg.deobf("mezz.jei:${project.jei_version}")
 }
 
 processResources {
@@ -86,7 +86,7 @@ jar {
     manifest {
         attributes(["Specification-Title"     : "Melon Golem",
                     "Specification-Vendor"    : "Tamaized",
-                    "Specification-Version"   : "${modVersion}${modVersionValue}",
+                    "Specification-Version"   : "${version}",
                     "Implementation-Title"    : project.name,
                     "Implementation-Version"  : "${version}",
                     "Implementation-Vendor"   : "Tamaized",
