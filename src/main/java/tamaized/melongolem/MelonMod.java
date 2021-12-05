@@ -109,27 +109,6 @@ public class MelonMod {
 			configClient = specPair.getLeft();
 		}
 		DonatorHandler.start();
-		/*try { FIXME: Okay, so I had to comment this all out because this method doesn't exist, but it seems as though all that is necessary is below
-			Field bitchIDoWhatIWant = ModInfo.class.getDeclaredField("config");
-			bitchIDoWhatIWant.setAccessible(true);
-			ModList.get().getMods().replaceAll(modInfo -> {
-				if (modInfo.getModId().equalsIgnoreCase(MODID))
-					try {
-						IConfigurable config = (IConfigurable) bitchIDoWhatIWant.get(modInfo);
-						return new ModInfo(modInfo.getOwningFile(), config) {
-							@Override
-							public boolean hasConfigUI() {
-								return true;
-							}
-						};
-					} catch (Throwable e) {
-						e.printStackTrace();
-					}
-				return modInfo;
-			});
-		} catch (Throwable e) {
-			e.printStackTrace(); // Catch all, dont crash the game just ignore this 'feature'
-		}*/
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory(MelonConfigScreen::new));
 	}
 
