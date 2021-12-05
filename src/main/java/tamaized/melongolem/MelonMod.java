@@ -34,6 +34,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
+import net.minecraftforge.fmlclient.ConfigGuiHandler;
 import net.minecraftforge.fmllegacy.network.PacketDistributor;
 import net.minecraftforge.fmllegacy.network.NetworkRegistry;
 import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
@@ -112,7 +113,7 @@ public class MelonMod {
 			configClient = specPair.getLeft();
 		}
 		DonatorHandler.start();
-		try {
+		/*try { FIXME: Okay, so I had to comment this all out because this method doesn't exist, but it seems as though all that is necessary is below
 			Field bitchIDoWhatIWant = ModInfo.class.getDeclaredField("config");
 			bitchIDoWhatIWant.setAccessible(true);
 			ModList.get().getMods().replaceAll(modInfo -> {
@@ -132,8 +133,8 @@ public class MelonMod {
 			});
 		} catch (Throwable e) {
 			e.printStackTrace(); // Catch all, dont crash the game just ignore this 'feature'
-		}
-		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> MelonConfigScreen::new);
+		}*/
+		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory(MelonConfigScreen::new));
 	}
 
 	@SubscribeEvent
@@ -254,7 +255,7 @@ public class MelonMod {
 		world.addFreshEntity(entity);
 		MelonMod.network.send(
 
-				PacketDistributor.TRACKING_CHUNK.with(() -> world.getChunk(entity.chunkCoordX, entity.chunkCoordZ)),
+				PacketDistributor.TRACKING_CHUNK.with(() -> world.getChunk(entity.chunkPosition().x, entity.chunkPosition().z)),
 
 				new ClientboundAddEntityPacket(entity)
 
