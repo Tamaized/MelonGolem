@@ -16,14 +16,17 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.font.TextFieldHelper;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.SignRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.StandingAndWallBlockItem;
+import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.StandingSignBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.WoodType;
 import tamaized.melongolem.IModProxy;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.EntityMelonGolem;
@@ -34,7 +37,7 @@ import java.util.Objects;
 
 public class GuiEditGolemSign extends Screen {
 
-	private final SignRenderer.SignModel signModel = new SignRenderer.SignModel();
+	private SignRenderer.SignModel signModel;
 	private final IModProxy.ISignHolder golem;
 	private int updateCounter;
 	private int editLine;
@@ -63,6 +66,7 @@ public class GuiEditGolemSign extends Screen {
 				(string) -> this.minecraft.font.width(string) <= 90
 
 		);
+		signModel = SignRenderer.createSignModel(minecraft.getEntityModels(), WoodType.OAK); //TODO: Only Oak, just to quiet errors
 	}
 
 	@Override
@@ -125,8 +129,8 @@ public class GuiEditGolemSign extends Screen {
 		matrixStack.pushPose();
 		matrixStack.scale(0.6666667F, -0.6666667F, -0.6666667F);
 		MultiBufferSource.BufferSource irendertypebuffer$impl = this.minecraft.renderBuffers().bufferSource();
-		Material rendermaterial = SignRenderer.getMaterial(blockstate.getBlock());
-		VertexConsumer ivertexbuilder = rendermaterial.getBuilder(irendertypebuffer$impl, this.signModel::getRenderType);
+		Material rendermaterial = Sheets.getSignMaterial(((SignBlock)blockstate.getBlock()).type());
+		VertexConsumer ivertexbuilder = rendermaterial.buffer(irendertypebuffer$impl, this.signModel::renderType);
 		this.signModel.root.render(matrixStack, ivertexbuilder, 15728880, OverlayTexture.NO_OVERLAY);
 		if (flag) {
 			this.signModel.stick.render(matrixStack, ivertexbuilder, 15728880, OverlayTexture.NO_OVERLAY);
