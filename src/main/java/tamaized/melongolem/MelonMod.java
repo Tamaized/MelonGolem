@@ -1,7 +1,6 @@
 package tamaized.melongolem;
 
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.level.block.Block;
@@ -34,7 +33,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fmlclient.ConfigGuiHandler;
-import net.minecraftforge.fmllegacy.network.PacketDistributor;
 import net.minecraftforge.fmllegacy.network.NetworkRegistry;
 import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
 import net.minecraftforge.registries.ObjectHolder;
@@ -222,16 +220,4 @@ public class MelonMod {
 	private static <T> T getNull() {
 		return null;
 	}
-
-	public static void spawnNonLivingEntity(Level world, Entity entity) {
-		world.addFreshEntity(entity);
-		MelonMod.network.send(
-
-				PacketDistributor.TRACKING_CHUNK.with(() -> world.getChunk(entity.chunkPosition().x, entity.chunkPosition().z)),
-
-				new ClientboundAddEntityPacket(entity)
-
-		);
-	}
-
 }
