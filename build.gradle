@@ -26,7 +26,7 @@ version = "${artifactor_minecraft_version}-${artifactor_mod_version}." + (hasPro
 group = "tamaized.melongolem"
 archivesBaseName = "MelonMod"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(16)
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
     mappings("${project.mapping_type}", "${project.mapping_version}")
