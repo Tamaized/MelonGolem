@@ -24,6 +24,7 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -32,6 +33,7 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.registries.DeferredRegister;
@@ -86,6 +88,8 @@ public class MelonMod {
 
 	public static final RegistryObject<Block> BLOCK_GLISTERING_MELON = BLOCK_REGISTRY
 			.register("glisteringmelonblock", () -> new Block(Block.Properties.of(Material.VEGETABLE, MaterialColor.COLOR_LIGHT_GREEN).strength(1.0F).sound(SoundType.WOOD).lightLevel(state -> 4)));
+	public static final RegistryObject<BlockItem> ITEMBLOCK_GLISTERING_MELON = ITEM_REGISTRY
+			.register("glisteringmelonblock", () -> new BlockItem(BLOCK_GLISTERING_MELON.get(), new Item.Properties().setNoRepair().tab(CreativeModeTab.TAB_MISC)));
 
 	public static final RegistryObject<EntityType<? extends AbstractGolem>> ENTITY_TYPE_MELON_GOLEM = ENTITY_REGISTRY
 			.register("entitymelongolem", () -> assign(EntityMelonGolem.class, 0.7F, 1.9F, 128, 1, true, MobCategory.CREATURE, EntityMelonGolem::_registerAttributes));
@@ -108,6 +112,10 @@ public class MelonMod {
 	public static final ImmutableSet<Item> SIGNS = ImmutableSet.of(Items.ACACIA_SIGN, Items.BIRCH_SIGN, Items.DARK_OAK_SIGN, Items.JUNGLE_SIGN, Items.JUNGLE_SIGN, Items.OAK_SIGN, Items.SPRUCE_SIGN);
 
 	public MelonMod() {
+		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+		ITEM_REGISTRY.register(modBus);
+		BLOCK_REGISTRY.register(modBus);
+		ENTITY_REGISTRY.register(modBus);
 		{
 			final Pair<MelonConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(MelonConfig::new);
 			ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, specPair.getRight());
