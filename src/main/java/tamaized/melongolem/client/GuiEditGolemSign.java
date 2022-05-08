@@ -45,7 +45,7 @@ public class GuiEditGolemSign extends Screen {
 	private TextFieldHelper textInputUtil;
 
 	public GuiEditGolemSign(ISignHolder golem) {
-		super(new TranslatableComponent("melongolemsignholder"));
+		super(new TranslatableComponent("sign.edit"));
 		this.golem = golem;
 	}
 
