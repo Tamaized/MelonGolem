@@ -132,6 +132,7 @@ public class GuiEditGolemSign extends Screen {
 		MultiBufferSource.BufferSource irendertypebuffer$impl = this.minecraft.renderBuffers().bufferSource();
 		Material rendermaterial = Sheets.getSignMaterial(((SignBlock)blockstate.getBlock()).type());
 		VertexConsumer ivertexbuilder = rendermaterial.buffer(irendertypebuffer$impl, this.signModel::renderType);
+		signModel.stick.visible = false;
 		this.signModel.root.render(matrixStack, ivertexbuilder, 15728880, OverlayTexture.NO_OVERLAY);
 		if (flag) {
 			this.signModel.stick.render(matrixStack, ivertexbuilder, 15728880, OverlayTexture.NO_OVERLAY);
