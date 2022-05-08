@@ -120,7 +120,7 @@ public class GuiEditGolemSign extends Screen {
 		matrixStack.scale(93.75F, -93.75F, 93.75F);
 		matrixStack.translate(0.0D, -1.3125D, 0.0D);
 		BlockState blockstate = EntityMelonGolem.SIGN_TILE_BLOCKSTATE = ((StandingAndWallBlockItem) golem.getHead().getItem()).wallBlock.defaultBlockState();
-		boolean flag = blockstate.getBlock() instanceof StandingSignBlock;
+		boolean flag = false;//blockstate.getBlock() instanceof StandingSignBlock;
 		if (!flag) {
 			matrixStack.translate(0.0D, -0.3125D, 0.0D);
 		}
