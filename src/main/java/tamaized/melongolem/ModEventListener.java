@@ -30,7 +30,7 @@ public class ModEventListener {
 
 					Blocks.MELON,
 
-					MelonMod.glisteringMelonBlock
+					MelonMod.BLOCK_GLISTERING_MELON.get()
 
 			);
 		for (Block melonCheck : MELONS) {
@@ -43,7 +43,7 @@ public class ModEventListener {
 					world.removeBlock(vertex.below(), false);
 					world.removeBlock(vertex, false);
 					world.removeBlock(vertex.above(), false);
-					EntityMelonGolem melon = melonCheck == MelonMod.glisteringMelonBlock ? new EntityGlisteringMelonGolem(world) : new EntityMelonGolem(world);
+					EntityMelonGolem melon = melonCheck == MelonMod.BLOCK_GLISTERING_MELON.get() ? new EntityGlisteringMelonGolem(world) : new EntityMelonGolem(world);
 					melon.teleportTo(vertex.getX() + 0.5F, vertex.getY() - 0.5F, vertex.getZ() + 0.5F);
 					world.addFreshEntity(melon);
 					break;

@@ -16,14 +16,14 @@ public class ClientListener {
 
     @SubscribeEvent
     public static void registerEntityRenders(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(MelonMod.entityTypeMelonGolem, RenderMelonGolem.Factory::normal);
-        event.registerEntityRenderer(MelonMod.entityTypeMelonSlice, ThrownItemRenderer::new);
-        event.registerEntityRenderer(MelonMod.entityTypeTinyMelonGolem, RenderMelonGolem.Factory::tiny);
-        event.registerEntityRenderer(MelonMod.entityTypeGlisteringMelonGolem, RenderMelonGolem.Factory::glister);
+        event.registerEntityRenderer(MelonMod.ENTITY_TYPE_MELON_GOLEM.get(), RenderMelonGolem.Factory::normal);
+        event.registerEntityRenderer(MelonMod.ENTITY_TYPE_MELON_SLICE.get(), ThrownItemRenderer::new);
+        event.registerEntityRenderer(MelonMod.ENTITY_TYPE_TINY_MELON_GOLEM.get(), RenderMelonGolem.Factory::tiny);
+        event.registerEntityRenderer(MelonMod.ENTITY_TYPE_GLISTERING_MELON_GOLEM.get(), RenderMelonGolem.Factory::glister);
     }
 
     public static void registerRenders() {
-        ItemBlockRenderTypes.setRenderLayer(MelonMod.glisteringMelonBlock, RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(MelonMod.BLOCK_GLISTERING_MELON.get(), RenderType.cutout());
     }
 
     public static void openSignHolderGui(ISignHolder golem) {

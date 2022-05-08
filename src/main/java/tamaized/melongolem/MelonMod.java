@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.entity.Entity;
@@ -35,7 +34,10 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.ObjectHolder;
+import net.minecraftforge.registries.RegistryObject;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -75,23 +77,33 @@ public class MelonMod {
 
 	private static final Map<EntityType<? extends LivingEntity>, Supplier<AttributeSupplier.Builder>> attributes = new HashMap<>();
 
-	@ObjectHolder(MelonMod.MODID + ":melonstick")
-	public static final Item melonStick = Items.AIR;
+	private static final DeferredRegister<Item> ITEM_REGISTRY = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
+	private static final DeferredRegister<Block> BLOCK_REGISTRY = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
+	private static final DeferredRegister<EntityType<?>> ENTITY_REGISTRY = DeferredRegister.create(ForgeRegistries.ENTITIES, MODID);
 
-	@ObjectHolder(MelonMod.MODID + ":glisteringmelonblock")
-	public static final Block glisteringMelonBlock = Blocks.AIR;
+	public static final RegistryObject<Item> ITEM_MELON_STICK = ITEM_REGISTRY
+			.register("melonstick", () -> new ItemMelonStick(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 
-	@ObjectHolder(MelonMod.MODID + ":entitymelongolem")
-	public static final EntityType<? extends AbstractGolem> entityTypeMelonGolem = assign(EntityMelonGolem.class, 0.7F, 1.9F, 128, 1, true, MobCategory.CREATURE, EntityMelonGolem::_registerAttributes);
+	public static final RegistryObject<Block> BLOCK_GLISTERING_MELON = BLOCK_REGISTRY
+			.register("glisteringmelonblock", () -> new Block(Block.Properties.of(Material.VEGETABLE, MaterialColor.COLOR_LIGHT_GREEN).strength(1.0F).sound(SoundType.WOOD).lightLevel(state -> 4)));
 
-	@ObjectHolder(MelonMod.MODID + ":entityglisteringmelongolem")
-	public static final EntityType<? extends AbstractGolem> entityTypeGlisteringMelonGolem = assign(EntityGlisteringMelonGolem.class, 0.7F, 1.9F, 128, 1, true, MobCategory.CREATURE, EntityMelonGolem::_registerAttributes);
+	public static final RegistryObject<EntityType<? extends AbstractGolem>> ENTITY_TYPE_MELON_GOLEM = ENTITY_REGISTRY
+			.register("entitymelongolem", () -> assign(EntityMelonGolem.class, 0.7F, 1.9F, 128, 1, true, MobCategory.CREATURE, EntityMelonGolem::_registerAttributes));
 
-	@ObjectHolder(MelonMod.MODID + ":entitymelonslice")
-	public static final EntityType<? extends EntityMelonSlice> entityTypeMelonSlice = getNull();
+	public static final RegistryObject<EntityType<? extends AbstractGolem>> ENTITY_TYPE_GLISTERING_MELON_GOLEM = ENTITY_REGISTRY
+			.register("entityglisteringmelongolem", () -> assign(EntityGlisteringMelonGolem.class, 0.7F, 1.9F, 128, 1, true, MobCategory.CREATURE, EntityMelonGolem::_registerAttributes));
 
-	@ObjectHolder(MelonMod.MODID + ":entitytinymelongolem")
-	public static final EntityType<? extends TamableAnimal> entityTypeTinyMelonGolem = getNull();
+	public static final RegistryObject<EntityType<? extends EntityMelonSlice>> ENTITY_TYPE_MELON_SLICE = ENTITY_REGISTRY
+			.register("entitymelonslice", () -> assign(EntityMelonSlice.class, 0.25F, 0.25F, 128, 1, true, MobCategory.MISC));
+
+	public static final RegistryObject<EntityType<? extends TamableAnimal>> ENTITY_TYPE_TINY_MELON_GOLEM = ENTITY_REGISTRY
+			.register("entitytinymelongolem", () -> assign(EntityTinyMelonGolem.class, 0.175F, 0.475F, 128, 1, true, MobCategory.CREATURE, EntityMelonGolem::_registerAttributes));
+
+	public static final RegistryObject<Item> ITEM_SPAWN_EGG_MELON_GOLEM = ITEM_REGISTRY
+			.register("melongolemspawnegg", () -> new ForgeSpawnEggItem(ENTITY_TYPE_MELON_GOLEM, 0x00FF00, 0x000000, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+
+	public static final RegistryObject<Item> ITEM_SPAWN_EGG_GLISTERING_MELON_GOLEM = ITEM_REGISTRY
+			.register("glisteringmelongolemspawnegg", () -> new ForgeSpawnEggItem(ENTITY_TYPE_GLISTERING_MELON_GOLEM, 0xAAFF00, 0xFFCC00, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 
 	public static final ImmutableSet<Item> SIGNS = ImmutableSet.of(Items.ACACIA_SIGN, Items.BIRCH_SIGN, Items.DARK_OAK_SIGN, Items.JUNGLE_SIGN, Items.JUNGLE_SIGN, Items.OAK_SIGN, Items.SPRUCE_SIGN);
 
@@ -110,20 +122,6 @@ public class MelonMod {
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory(MelonConfigScreen::new));
 	}
 
-	@SubscribeEvent
-	public static void registerEntities(RegistryEvent.Register<EntityType<?>> e) {
-		e.getRegistry().registerAll(
-
-				entityTypeMelonGolem,
-
-				assign(EntityMelonSlice.class, 0.25F, 0.25F, 128, 1, true, MobCategory.MISC),
-
-				assign(EntityTinyMelonGolem.class, 0.175F, 0.475F, 128, 1, true, MobCategory.CREATURE, EntityMelonGolem::_registerAttributes),
-
-				entityTypeGlisteringMelonGolem
-
-		);
-	}
 
 	@SubscribeEvent
 	public static void registerAttributes(EntityAttributeCreationEvent event) {
@@ -135,52 +133,6 @@ public class MelonMod {
 		DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> ClientListener::registerRenders);
 	}
 
-	@SubscribeEvent
-	public static void registerBlocks(RegistryEvent.Register<Block> e) {
-		e.getRegistry().registerAll(
-
-				assign(new Block(Block.Properties.of(Material.VEGETABLE, MaterialColor.COLOR_LIGHT_GREEN).strength(1.0F).sound(SoundType.WOOD).lightLevel(state -> 4)), "glisteringmelonblock")
-
-		);
-	}
-
-	@SubscribeEvent
-	public static void registerItems(RegistryEvent.Register<Item> e) {
-		e.getRegistry().registerAll(
-
-				assign(new ItemMelonStick(new Item.Properties().tab(CreativeModeTab.TAB_MISC)), "melonstick"),
-
-				assign(glisteringMelonBlock),
-
-				assign(new ForgeSpawnEggItem(() -> entityTypeMelonGolem, 0x00FF00, 0x000000, new Item.Properties().tab(CreativeModeTab.TAB_MISC)), "melongolemspawnegg"),
-
-				assign(new ForgeSpawnEggItem(() -> entityTypeGlisteringMelonGolem, 0xAAFF00, 0xFFCC00, new Item.Properties().tab(CreativeModeTab.TAB_MISC)), "glisteringmelongolemspawnegg")
-
-		);
-	}
-
-	private static Block assign(Block block, String name) {
-		return block
-
-				.setRegistryName(MODID, name);
-	}
-
-	private static BlockItem assign(Block block) {
-		return (BlockItem) new BlockItem(block,
-
-				new Item.Properties().setNoRepair().tab(CreativeModeTab.TAB_MISC)
-
-		)
-
-				.setRegistryName(Objects.requireNonNull(block.getRegistryName()));
-	}
-
-	private static Item assign(Item item, String name) {
-		return item
-
-				.setRegistryName(MODID, name);
-	}
-
 	private static <T extends LivingEntity> EntityType<T> assign(Class<T> entity, float w, float h, int range, int freq, boolean updates, MobCategory classification, Supplier<AttributeSupplier.Builder> attributes) {
 		EntityType<T> type = assign(entity, w, h, range, freq, updates, classification);
 		MelonMod.attributes.put(type, attributes);
@@ -189,7 +141,7 @@ public class MelonMod {
 
 	private static <T extends Entity> EntityType<T> assign(Class<T> entity, float w, float h, int range, int freq, boolean updates, MobCategory classification) {
 		final String name = entity.getSimpleName().toLowerCase();
-		EntityType<T> type = EntityType.Builder.<T>of((et, world) -> {
+		return EntityType.Builder.<T>of((et, world) -> {
 			try {
 				return entity.getConstructor(Level.class).newInstance(world);
 			} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -202,8 +154,6 @@ public class MelonMod {
 				setShouldReceiveVelocityUpdates(updates).
 				sized(w, h).
 				build(name);
-		type.setRegistryName(MODID, name);
-		return type;
 	}
 
 	@SubscribeEvent

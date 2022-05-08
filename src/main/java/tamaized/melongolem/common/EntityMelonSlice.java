@@ -29,18 +29,18 @@ public class EntityMelonSlice extends ThrowableProjectile implements ItemSupplie
 
 	@SuppressWarnings("unused")
 	public EntityMelonSlice(Level worldIn) {
-		super(Objects.requireNonNull(MelonMod.entityTypeMelonSlice), worldIn);
+		super(Objects.requireNonNull(MelonMod.ENTITY_TYPE_MELON_SLICE.get()), worldIn);
 	}
 
 	public EntityMelonSlice(Level worldIn, LivingEntity throwerIn) {
-		super(Objects.requireNonNull(MelonMod.entityTypeMelonSlice), throwerIn, worldIn);
+		super(Objects.requireNonNull(MelonMod.ENTITY_TYPE_MELON_SLICE.get()), throwerIn, worldIn);
 		if (throwerIn instanceof EntityGlisteringMelonGolem)
 			setGlist();
 	}
 
 	@SuppressWarnings("unused")
 	public EntityMelonSlice(Level worldIn, double x, double y, double z) {
-		super(Objects.requireNonNull(MelonMod.entityTypeMelonSlice), x, y, z, worldIn);
+		super(Objects.requireNonNull(MelonMod.ENTITY_TYPE_MELON_SLICE.get()), x, y, z, worldIn);
 	}
 
 	@Override

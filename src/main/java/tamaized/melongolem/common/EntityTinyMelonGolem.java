@@ -65,7 +65,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearab
 	);
 
 	public EntityTinyMelonGolem(Level worldIn) {
-		super(Objects.requireNonNull(MelonMod.entityTypeTinyMelonGolem), worldIn);
+		super(Objects.requireNonNull(MelonMod.ENTITY_TYPE_TINY_MELON_GOLEM.get()), worldIn);
 	}
 
 	@Nullable

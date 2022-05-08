@@ -29,7 +29,7 @@ public class ModelBakeListener {
 	@SubscribeEvent
 	public static void modelBake(ModelBakeEvent event) {
 		for (int i = 0; i <= 1; i++) {
-			ModelResourceLocation mrl = new ModelResourceLocation(Objects.requireNonNull(MelonMod.glisteringMelonBlock.getRegistryName()), i == 0 ? "" : "inventory");
+			ModelResourceLocation mrl = new ModelResourceLocation(Objects.requireNonNull(MelonMod.BLOCK_GLISTERING_MELON.getKey().getRegistryName()), i == 0 ? "" : "inventory");
 			final BakedModel model = event.getModelRegistry().get(mrl);
 			event.getModelRegistry().put(mrl, new BakedModel() {
 				private Map<Direction, List<BakedQuad>> cachedQuads = Maps.newHashMap();

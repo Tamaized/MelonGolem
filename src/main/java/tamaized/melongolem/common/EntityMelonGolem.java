@@ -91,7 +91,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 	};
 
 	public EntityMelonGolem(Level worldIn) {
-		this(Objects.requireNonNull(MelonMod.entityTypeMelonGolem), worldIn);
+		this(Objects.requireNonNull(MelonMod.ENTITY_TYPE_MELON_GOLEM.get()), worldIn);
 	}
 
 	protected EntityMelonGolem(EntityType<? extends AbstractGolem> entity, Level level) {
@@ -321,7 +321,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 			parent = entity;
 			setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
 			melon = entity instanceof EntityGlisteringMelonGolem ? Items.GLISTERING_MELON_SLICE : Items.MELON_SLICE;
-			melonblock = entity instanceof EntityGlisteringMelonGolem ? MelonMod.glisteringMelonBlock : Blocks.MELON;
+			melonblock = entity instanceof EntityGlisteringMelonGolem ? MelonMod.BLOCK_GLISTERING_MELON.get() : Blocks.MELON;
 		}
 
 		@Override
