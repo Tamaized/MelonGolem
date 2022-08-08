@@ -59,6 +59,6 @@ public class CapabilityList {
 
 	@SubscribeEvent
 	public static void updateClone(PlayerEvent.Clone e) {
-		e.getPlayer().getCapability(TINY_GOLEM).ifPresent(cap -> e.getOriginal().getCapability(TINY_GOLEM).ifPresent(cap::copyFrom));
+		e.getEntity().getCapability(TINY_GOLEM).ifPresent(cap -> e.getOriginal().getCapability(TINY_GOLEM).ifPresent(cap::copyFrom));
 	}
 }

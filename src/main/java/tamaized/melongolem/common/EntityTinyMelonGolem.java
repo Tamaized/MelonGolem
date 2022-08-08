@@ -8,7 +8,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -30,9 +29,9 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShearsItem;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.IForgeShearable;
 import net.minecraftforge.entity.IEntityAdditionalSpawnData;
@@ -81,7 +80,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearab
 		entityData.define(ENABLED, false);
 		entityData.define(COLOR, 0xFFFFFF);
 		for (EntityDataAccessor<Component> sign : SIGN_TEXT)
-			entityData.define(sign, new TextComponent(""));
+			entityData.define(sign, Component.literal(""));
 	}
 
 	@Override
@@ -194,7 +193,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearab
 	}
 
 	@Override
-	public float getEyeHeightAccess(Pose p_213316_1_, EntityDimensions p_213316_2_) {
+	public float getEyeHeightAccess(Pose pose, EntityDimensions dimensions) {
 		return 0.425F;
 	}
 
@@ -205,7 +204,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearab
 
 	public void setHead(ItemStack stack) {
 		for (int i = 0; i < 4; ++i)
-			setSignText(i, new TextComponent(""));
+			setSignText(i, Component.literal(""));
 		ItemStack newstack = stack.copy();
 		newstack.setCount(1);
 		entityData.set(HEAD, newstack);
@@ -264,7 +263,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearab
 			Component itextcomponent = Component.Serializer.fromJson(s);
 
 			try {
-				setSignText(i, itextcomponent == null ? new TextComponent("") : ComponentUtils.updateForEntity(createCommandSourceStack(), itextcomponent, null, 0));
+				setSignText(i, itextcomponent == null ? Component.literal("") : ComponentUtils.updateForEntity(createCommandSourceStack(), itextcomponent, null, 0));
 			} catch (CommandRuntimeException | CommandSyntaxException var7) {
 				setSignText(i, itextcomponent);
 			}

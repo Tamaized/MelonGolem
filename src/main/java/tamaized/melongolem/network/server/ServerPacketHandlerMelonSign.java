@@ -2,7 +2,7 @@ package tamaized.melongolem.network.server;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import tamaized.melongolem.ISignHolder;
@@ -25,7 +25,7 @@ public class ServerPacketHandlerMelonSign implements NetworkMessages.IMessage<Se
 		if (entity instanceof EntityMelonGolem && entity.distanceTo(player) <= 6)
 			for (int i = 0; i < lines.length; ++i) {
 				String text = ChatFormatting.stripFormatting(lines[i]);
-				((EntityMelonGolem) entity).setSignText(i, new TextComponent(text == null ? "" : text));
+				((EntityMelonGolem) entity).setSignText(i, Component.literal(text == null ? "" : text));
 			}
 	}
 
