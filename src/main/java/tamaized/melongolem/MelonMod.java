@@ -1,25 +1,22 @@
 package tamaized.melongolem;
 
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.animal.AbstractGolem;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.material.Material;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.AbstractGolem;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Items;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.ConfigGuiHandler;
+import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -43,11 +40,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import tamaized.melongolem.client.ClientListener;
 import tamaized.melongolem.client.MelonConfigScreen;
-import tamaized.melongolem.common.EntityGlisteringMelonGolem;
-import tamaized.melongolem.common.EntityMelonGolem;
-import tamaized.melongolem.common.EntityMelonSlice;
-import tamaized.melongolem.common.EntityTinyMelonGolem;
-import tamaized.melongolem.common.ItemMelonStick;
+import tamaized.melongolem.common.*;
 import tamaized.melongolem.network.DonatorHandler;
 import tamaized.melongolem.network.NetworkMessages;
 
@@ -78,7 +71,8 @@ public class MelonMod {
 
 	private static final DeferredRegister<Item> ITEM_REGISTRY = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
 	private static final DeferredRegister<Block> BLOCK_REGISTRY = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
-	private static final DeferredRegister<EntityType<?>> ENTITY_REGISTRY = DeferredRegister.create(ForgeRegistries.ENTITIES, MODID);
+	private static final DeferredRegister<EntityType<?>> ENTITY_REGISTRY = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, MODID);
+	public static final DeferredRegister<SoundEvent> SOUND_REGISTRY = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, MODID);
 
 	public static final RegistryObject<Item> ITEM_MELON_STICK = ITEM_REGISTRY
 			.register("melonstick", () -> new ItemMelonStick(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
@@ -106,13 +100,17 @@ public class MelonMod {
 	public static final RegistryObject<Item> ITEM_SPAWN_EGG_GLISTERING_MELON_GOLEM = ITEM_REGISTRY
 			.register("glisteringmelongolemspawnegg", () -> new ForgeSpawnEggItem(ENTITY_TYPE_GLISTERING_MELON_GOLEM, 0xAAFF00, 0xFFCC00, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 
-	public static final ImmutableSet<Item> SIGNS = ImmutableSet.of(Items.ACACIA_SIGN, Items.BIRCH_SIGN, Items.DARK_OAK_SIGN, Items.JUNGLE_SIGN, Items.JUNGLE_SIGN, Items.OAK_SIGN, Items.SPRUCE_SIGN, Items.CRIMSON_SIGN, Items.WARPED_SIGN);
+	public static final RegistryObject<SoundEvent> DADDY = SOUND_REGISTRY
+			.register("melonmedaddy", () -> new SoundEvent(new ResourceLocation(MelonMod.MODID, "melonmedaddy")));
+
+	public static final ImmutableSet<Item> SIGNS = ImmutableSet.of(Items.ACACIA_SIGN, Items.BIRCH_SIGN, Items.DARK_OAK_SIGN, Items.JUNGLE_SIGN, Items.JUNGLE_SIGN, Items.OAK_SIGN, Items.SPRUCE_SIGN, Items.CRIMSON_SIGN, Items.WARPED_SIGN, Items.MANGROVE_SIGN);
 
 	public MelonMod() {
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		ITEM_REGISTRY.register(modBus);
 		BLOCK_REGISTRY.register(modBus);
 		ENTITY_REGISTRY.register(modBus);
+		SOUND_REGISTRY.register(modBus);
 		{
 			final Pair<MelonConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(MelonConfig::new);
 			ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, specPair.getRight());
@@ -124,18 +122,13 @@ public class MelonMod {
 			configClient = specPair.getLeft();
 		}
 		DonatorHandler.start();
-		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory(MelonConfigScreen::new));
+		ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory(MelonConfigScreen::new));
 	}
 
 
 	@SubscribeEvent
 	public static void registerAttributes(EntityAttributeCreationEvent event) {
 		attributes.forEach((type, attribute) -> event.put(type, attribute.get().build()));
-	}
-
-	@SubscribeEvent
-	public static void clientSetup(FMLClientSetupEvent e) {
-		DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> ClientListener::registerRenders);
 	}
 
 	private static <T extends LivingEntity> EntityType<T> assign(Class<T> entity, float w, float h, int range, int freq, boolean updates, MobCategory classification, Supplier<AttributeSupplier.Builder> attributes) {
@@ -170,9 +163,5 @@ public class MelonMod {
 	public static void init(FMLLoadCompleteEvent event) {
 		MelonConfig.setupStabby();
 		MelonConfig.setupColor();
-	}
-
-	private static <T> T getNull() {
-		return null;
 	}
 }

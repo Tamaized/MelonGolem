@@ -7,7 +7,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import tamaized.melongolem.MelonMod;
-import tamaized.melongolem.MelonSounds;
 import tamaized.melongolem.common.EntityMelonGolem;
 import tamaized.melongolem.network.NetworkMessages;
 
@@ -35,7 +34,7 @@ public class ClientPacketHandlerMelonAmbientSound implements NetworkMessages.IMe
 
 	@Nullable
 	private static SoundEvent getAmbientSound() {
-		return MelonMod.configClient.tehnutMode.get() ? MelonSounds.daddy : null;
+		return MelonMod.configClient.tehnutMode.get() ? MelonMod.DADDY.get() : null;
 	}
 
 	@Override

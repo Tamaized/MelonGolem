@@ -1,10 +1,10 @@
 package tamaized.melongolem;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.AirItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -101,7 +101,7 @@ public class MelonConfig {
 		stabby = builder.
 				translation("Stabby Life Item").
 				comment("The item used to spawn a melon golem\n\n[domain:name] domain will default to `minecraft`").
-				define("stabby", Objects.requireNonNull(Items.STICK.getRegistryName()).getPath());
+				define("stabby", Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(Items.STICK)).getPath());
 	}
 
 	public static void setupStabby() {

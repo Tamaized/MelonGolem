@@ -34,8 +34,8 @@ public class RenderMelonGolem<T extends Mob & ISignHolder> extends MobRenderer<T
 	public RenderMelonGolem(EntityRendererProvider.Context renderManagerIn, Type type) {
 		super(renderManagerIn, new SnowGolemModel<>(renderManagerIn.bakeLayer(ModelLayers.SNOW_GOLEM)) {
 			@Override
-			public void renderToBuffer(@Nonnull PoseStack stack, @Nonnull VertexConsumer buffer, int p_225598_3_, int p_225598_4_, float red, float green, float blue, float alpha) {
-				super.renderToBuffer(stack, buffer, p_225598_3_, p_225598_4_, COLOR_STATE.red, COLOR_STATE.green, COLOR_STATE.blue, alpha);
+			public void renderToBuffer(@Nonnull PoseStack stack, @Nonnull VertexConsumer buffer, int light, int overlay, float red, float green, float blue, float alpha) {
+				super.renderToBuffer(stack, buffer, light, overlay, COLOR_STATE.red, COLOR_STATE.green, COLOR_STATE.blue, alpha);
 			}
 		}, type == Type.TINY ? 0.125F : 0.5F);
 		addLayer(new LayerMelonHead<>(this));
@@ -67,7 +67,7 @@ public class RenderMelonGolem<T extends Mob & ISignHolder> extends MobRenderer<T
 	}
 
 	@Override
-	protected void scale(T p_225620_1_, PoseStack stack, float p_225620_3_) {
+	protected void scale(T entity, PoseStack stack, float partialTicks) {
 		if (type == Type.TINY)
 			stack.scale(0.25F, 0.25F, 0.25F);
 	}
@@ -80,9 +80,9 @@ public class RenderMelonGolem<T extends Mob & ISignHolder> extends MobRenderer<T
 		private float red = 1F;
 		private float green = 1F;
 		private float blue = 1F;
-		private float alpha = 1F;
 	}
 
+	@SuppressWarnings("rawtypes")
 	public static class Factory {
 
 		public static RenderMelonGolem normal(EntityRendererProvider.Context renderManager) {
@@ -108,16 +108,11 @@ public class RenderMelonGolem<T extends Mob & ISignHolder> extends MobRenderer<T
 		@Override
 		public void render(@Nonnull PoseStack stack, @Nonnull MultiBufferSource buffer, int light, @Nonnull E entity, float limbSwing, float limbSwingAmount, float partialTicks, float rotation, float yawHead, float pitch) {
 			VertexConsumer builder = buffer.getBuffer(RenderType.energySwirl(TEXTURES_GLISTER_OVERLAY, 0, 0));
-			//			GlStateManager.enableBlend();
-			//			GlStateManager.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
 			stack.pushPose();
 			final float s = 1.01F;
 			stack.scale(s, s, s);
-			//			int i = 0xF000F0;
-			//			GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, i % 65536, i >> 16);
 			getParentModel().renderToBuffer(stack, builder, 0xF000F0, getOverlayCoords(entity, getWhiteOverlayProgress(entity, partialTicks)), 1F, 1F, 1F, (!isBodyVisible(entity) && !entity.isInvisibleTo(Objects.requireNonNull(Minecraft.getInstance().player))) ? 0.15F : 1.0F);
 			stack.popPose();
-			//			GlStateManager.disableBlend();
 		}
 	}
 }

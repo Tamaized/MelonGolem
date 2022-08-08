@@ -22,8 +22,8 @@ public class ModEventListener {
 
 	@SubscribeEvent
 	public static void onRightClick(PlayerInteractEvent.RightClickBlock e) {
-		Player player = e.getPlayer();
-		Level world = e.getWorld();
+		Player player = e.getEntity();
+		Level world = e.getLevel();
 		BlockPos vertex = e.getPos();
 		if (MELONS == null)
 			MELONS = ImmutableSet.of(

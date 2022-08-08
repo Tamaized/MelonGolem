@@ -1,5 +1,6 @@
 {
   "parent": "melongolem:block/overlay/side",
+  "render_type": "minecraft:cutout",
   "textures": {
 	"end": "melongolem:blocks/glistening_melon_top",
 	"side": "melongolem:blocks/glistening_melon_side",

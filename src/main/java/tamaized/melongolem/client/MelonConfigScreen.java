@@ -6,8 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.client.gui.widget.ExtendedButton;
 import tamaized.melongolem.MelonConfig;
 import tamaized.melongolem.MelonMod;
@@ -20,7 +19,7 @@ public class MelonConfigScreen extends Screen {
 	private static final String TEXT_DONATOR_COLOR = "Donator Color:";
 
 	public MelonConfigScreen(Minecraft mc, Screen parent) {
-		super(new TranslatableComponent(MelonMod.MODID + "_config"));
+		super(Component.translatable(MelonMod.MODID + "_config"));
 		this.parent = parent;
 	}
 
@@ -31,11 +30,11 @@ public class MelonConfigScreen extends Screen {
 		int w = 396;
 		float x = (sw - w);
 		x -= x / 2F;
-		addRenderableWidget(new ExtendedButton((int) x, Minecraft.getInstance().getWindow().getGuiScaledHeight() - 25, w, 20, new TextComponent("Close"), button -> Minecraft.getInstance().setScreen(parent)));
+		addRenderableWidget(new ExtendedButton((int) x, Minecraft.getInstance().getWindow().getGuiScaledHeight() - 25, w, 20, Component.literal("Close"), button -> Minecraft.getInstance().setScreen(parent)));
 		int ix = font.width(TEXT_DONATOR_COLOR) + 10;
-		addRenderableWidget(input = new EditBox(font, ix, 25, Minecraft.getInstance().getWindow().getGuiScaledWidth() - ix - 15, 20, new TextComponent("")));
+		addRenderableWidget(input = new EditBox(font, ix, 25, Minecraft.getInstance().getWindow().getGuiScaledWidth() - ix - 15, 20, Component.literal("")));
 		input.setValue(MelonMod.config.DONATOR_SETTINGS.color.get());
-		addRenderableWidget(enabled = new Checkbox(ix, 50, 20, 20, new TextComponent("Enabled"), MelonMod.config.DONATOR_SETTINGS.enable.get()));
+		addRenderableWidget(enabled = new Checkbox(ix, 50, 20, 20, Component.literal("Enabled"), MelonMod.config.DONATOR_SETTINGS.enable.get()));
 
 	}
 
@@ -52,7 +51,7 @@ public class MelonConfigScreen extends Screen {
 	@Override
 	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		renderBackground(matrixStack);
-		drawCenteredString(matrixStack, font, new TextComponent("Melon Golem Config"), (int) (Minecraft.getInstance().getWindow().getGuiScaledWidth() / 2F), 5, 0xFFFFFFFF);
+		drawCenteredString(matrixStack, font, Component.literal("Melon Golem Config"), (int) (Minecraft.getInstance().getWindow().getGuiScaledWidth() / 2F), 5, 0xFFFFFFFF);
 		int color = 0xFFFFFFFF;
 		try {
 			color = Integer.decode(input.getValue());

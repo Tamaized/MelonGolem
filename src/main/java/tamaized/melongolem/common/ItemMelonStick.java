@@ -22,6 +22,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.registries.ForgeRegistries;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.capability.CapabilityList;
 import tamaized.melongolem.network.client.ClientPacketHandlerParticle;
@@ -101,7 +102,7 @@ public class ItemMelonStick extends Item {
 	}
 
 	public static void spawnVanillaParticleOnServer(Level world, ParticleOptions particle, double x, double y, double z, double xS, double yS, double zS) {
-		MelonMod.network.send(PacketDistributor.TRACKING_CHUNK.with(() -> world.getChunkAt(new BlockPos(x, y, z))), new ClientPacketHandlerParticle(particle.getType().getRegistryName(), new Vec3(x, y, z), new Vec3(xS, yS, zS)));
+		MelonMod.network.send(PacketDistributor.TRACKING_CHUNK.with(() -> world.getChunkAt(new BlockPos(x, y, z))), new ClientPacketHandlerParticle(ForgeRegistries.PARTICLE_TYPES.getKey(particle.getType()), new Vec3(x, y, z), new Vec3(xS, yS, zS)));
 	}
 
 	private static boolean isTeleportFriendlyBlock(Level world, Entity entity, int x, int z, int y, int xOffset, int zOffset) {
