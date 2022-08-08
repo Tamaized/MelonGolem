@@ -19,6 +19,6 @@ repositories {
 }
 
 dependencies {
-    runtimeOnly fg.deobf("tamaized:melongolem:{version}")
+    implementation fg.deobf("tamaized:melongolem:{version}")
 }
 ```
