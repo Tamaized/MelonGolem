@@ -2,6 +2,7 @@ package tamaized.melongolem.common;
 
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -37,10 +38,12 @@ import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.IForgeShearable;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.entity.IEntityAdditionalSpawnData;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.network.PacketDistributor;
 import tamaized.melongolem.ISignHolder;
@@ -77,6 +80,13 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 		@Override
 		public BlockState getBlockState() {
 			return SIGN_TILE_BLOCKSTATE;
+		}
+		@Nonnull
+		@Override
+		public BlockPos getBlockPos() {
+			return FMLEnvironment.dist == Dist.CLIENT && Minecraft.getInstance().getCameraEntity() != null ?
+					Minecraft.getInstance().getCameraEntity().blockPosition() :
+					this.worldPosition;
 		}
 	};
 
