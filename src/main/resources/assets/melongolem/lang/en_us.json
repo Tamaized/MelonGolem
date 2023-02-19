@@ -5,8 +5,8 @@
   "entity.melongolem.entityglisteringmelongolem": "Glistering Melon Golem",
 
   "item.melongolem.melonstick": "Melon on a Stick",
-  "item.melongolem.melongolemspawnegg": "Spawn Melon Golem",
-  "item.melongolem.glisteringmelongolemspawnegg": "Spawn Glistering Melon Golem",
+  "item.melongolem.melongolemspawnegg": "Melon Golem Spawn Egg",
+  "item.melongolem.glisteringmelongolemspawnegg": "Glistering Melon Golem Spawn Egg",
 
   "block.melongolem.glisteringmelonblock": "Glistering Melon"
 }

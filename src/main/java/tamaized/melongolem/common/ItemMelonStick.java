@@ -2,9 +2,9 @@ package tamaized.melongolem.common;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -46,9 +46,9 @@ public class ItemMelonStick extends Item {
 			if (cap.load(true)) {
 				if (!(world instanceof ServerLevel) || owner.level.getServer() == null)
 					return;
-				ServerLevel last = owner.level.getServer().getLevel(ResourceKey.create(Registry.DIMENSION_REGISTRY, cap.getLoadDim()));
+				ServerLevel last = owner.level.getServer().getLevel(ResourceKey.create(Registries.DIMENSION, cap.getLoadDim()));
 				if (last != null && cap.getLoadPos() != null) {
-					last.getBlockState(cap.getLoadPos()); // Ensure chunk is loaded
+					last.getChunk(cap.getLoadPos()); // Ensure chunk is loaded
 					Entity entity = last.getEntity(cap.getLoadPetID());
 					if (entity instanceof EntityTinyMelonGolem melon) {
 						if (!world.dimension().location().equals(last.dimension().location()))
@@ -78,13 +78,13 @@ public class ItemMelonStick extends Item {
 							double posx = (float) (x + l) + 0.5F;
 							double posy = (double) y + j;
 							double posz = (float) (z + i1) + 0.5F;
-							pet.teleportTo(posx, posy, posz);
+							pet.moveTo(posx, posy, posz);
 							if (!pet.level.dimension().location().equals(owner.level.dimension().location())) {
 								pet = (EntityTinyMelonGolem) pet.changeDimension((ServerLevel) owner.level);
 								cap.setPet(pet);
 								if (pet == null)
 									return;
-								pet.teleportTo(posx, posy, posz);
+								pet.moveTo(posx, posy, posz);
 							}
 							for (int i = 0; i < 25; i++) {
 								Vec3 result = pet.getViewVector(1F).yRot(pet.getRandom().nextFloat() * 360F).xRot(pet.getRandom().nextFloat() * 360F).scale(0.35F);

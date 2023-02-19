@@ -1,7 +1,7 @@
 package tamaized.melongolem.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.SnowGolemModel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -10,11 +10,11 @@ import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.StandingAndWallBlockItem;
 import tamaized.melongolem.ISignHolder;
-import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.EntityMelonGolem;
 
 import javax.annotation.Nonnull;
@@ -33,13 +33,16 @@ public class LayerMelonHead<T extends LivingEntity & ISignHolder> extends Render
 			stack.pushPose();
 			getParentModel().head.translateAndRotate(stack);
 			stack.translate(0.0D, -0.25D, 0.0D);
-			stack.mulPose(Vector3f.YP.rotationDegrees(180F));
+			stack.mulPose(Axis.YP.rotationDegrees(180F));
 			stack.scale(0.625F, -0.625F, -0.625F);
-			if (MelonMod.SIGNS.contains(itemStack.getItem())) {
+			if (itemStack.is(ItemTags.SIGNS) && itemStack.getItem() instanceof StandingAndWallBlockItem item) {
 				for (int index = 0; index < 4; index++)
 					EntityMelonGolem.te.setMessage(index, entity.getSignText(index));
 				stack.translate(-0.5D, -0.5D, -1.33D);
-				EntityMelonGolem.SIGN_TILE_BLOCKSTATE = ((StandingAndWallBlockItem)entity.getHead().getItem()).wallBlock.defaultBlockState();
+				//we have to set these like this because using the setter methods calls markUpdated, which crashes because our TE has no level
+				EntityMelonGolem.te.hasGlowingText = entity.glowingText();
+				EntityMelonGolem.te.color = entity.getTextColor();
+				EntityMelonGolem.SIGN_TILE_BLOCKSTATE = item.wallBlock.defaultBlockState();
 				Objects.requireNonNull(Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(EntityMelonGolem.te)).render(EntityMelonGolem.te, partialTicks, stack, buffer, light, LivingEntityRenderer.getOverlayCoords(entity, 0F));
 			} else
 				Minecraft.getInstance().getItemRenderer().renderStatic(itemStack, ItemTransforms.TransformType.HEAD, light, OverlayTexture.NO_OVERLAY, stack, buffer, 0);
