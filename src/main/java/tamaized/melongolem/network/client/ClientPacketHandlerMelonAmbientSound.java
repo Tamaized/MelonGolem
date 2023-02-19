@@ -4,6 +4,7 @@ import com.mojang.text2speech.Narrator;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import tamaized.melongolem.MelonMod;
@@ -42,7 +43,7 @@ public class ClientPacketHandlerMelonAmbientSound implements NetworkMessages.IMe
 		Entity entity = player.level.getEntity(id);
 		if (entity instanceof EntityMelonGolem) {
 			EntityMelonGolem golem = (EntityMelonGolem) entity;
-			if (MelonMod.SIGNS.contains(golem.getHead().getItem())) {
+			if (golem.getHead().is(ItemTags.SIGNS)) {
 				if (MelonMod.configClient.tts.get() && golem.distanceToSqr(player) <= 225) {
 					if (narrator == null)
 						narrator = Narrator.getNarrator();

@@ -2,6 +2,7 @@ package tamaized.melongolem.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
+import net.minecraft.tags.ItemTags;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -21,7 +22,7 @@ public class ClientListener {
     }
 
     public static void openSignHolderGui(ISignHolder golem) {
-        if (MelonMod.SIGNS.contains(golem.getHead().getItem()) && golem.distanceTo(Minecraft.getInstance().player) <= 6)
+        if (golem.getHead().is(ItemTags.SIGNS) && golem.distanceTo(Minecraft.getInstance().player) <= 6)
             Minecraft.getInstance().setScreen(new GuiEditGolemSign(golem));
     }
 }

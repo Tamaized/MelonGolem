@@ -2,6 +2,7 @@ package tamaized.melongolem.common;
 
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -14,6 +15,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -27,10 +29,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.ShearsItem;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -39,10 +38,12 @@ import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.IForgeShearable;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.entity.IEntityAdditionalSpawnData;
-import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.network.PacketDistributor;
 import tamaized.melongolem.ISignHolder;
@@ -59,6 +60,8 @@ import java.util.Objects;
 public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, IForgeShearable, IEntityAdditionalSpawnData, ISignHolder {
 
 	private static final EntityDataAccessor<ItemStack> HEAD = SynchedEntityData.defineId(EntityMelonGolem.class, EntityDataSerializers.ITEM_STACK);
+	private static final EntityDataAccessor<Boolean> GLOWING_TEXT = SynchedEntityData.defineId(EntityMelonGolem.class, EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Integer> TEXT_COLOR = SynchedEntityData.defineId(EntityMelonGolem.class, EntityDataSerializers.INT);
 	private static final List<EntityDataAccessor<Component>> SIGN_TEXT = Lists.newArrayList(
 
 			SynchedEntityData.defineId(EntityMelonGolem.class, EntityDataSerializers.COMPONENT),
@@ -77,6 +80,13 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 		@Override
 		public BlockState getBlockState() {
 			return SIGN_TILE_BLOCKSTATE;
+		}
+		@Nonnull
+		@Override
+		public BlockPos getBlockPos() {
+			return FMLEnvironment.dist == Dist.CLIENT && Minecraft.getInstance().getCameraEntity() != null ?
+					Minecraft.getInstance().getCameraEntity().blockPosition() :
+					this.worldPosition;
 		}
 	};
 
@@ -101,6 +111,8 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 	protected void defineSynchedData() {
 		super.defineSynchedData();
 		entityData.define(HEAD, ItemStack.EMPTY);
+		entityData.define(GLOWING_TEXT, false);
+		entityData.define(TEXT_COLOR, DyeColor.BLACK.getId());
 		for (EntityDataAccessor<Component> sign : SIGN_TEXT)
 			entityData.define(sign, Component.literal(""));
 		entityData.define(PITCH, random.nextFloat() * 3.0F);
@@ -114,6 +126,16 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 	@Override
 	public int networkID() {
 		return getId();
+	}
+
+	@Override
+	public boolean glowingText() {
+		return getEntityData().get(GLOWING_TEXT);
+	}
+
+	@Override
+	public DyeColor getTextColor() {
+		return DyeColor.byId(getEntityData().get(TEXT_COLOR));
 	}
 
 	@Override
@@ -165,7 +187,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 
 	@Override
 	public int getAmbientSoundInterval() {
-		return MelonMod.SIGNS.contains(getHead().getItem()) ? 200 : super.getAmbientSoundInterval();
+		return getHead().is(ItemTags.SIGNS) ? 200 : super.getAmbientSoundInterval();
 	}
 
 	@Override
@@ -191,15 +213,32 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 			return InteractionResult.FAIL;
 		ItemStack stack = player.getItemInHand(hand);
 		if (!stack.isEmpty() && getHead().isEmpty()) {
-			if (Block.byItem(stack.getItem()) != Blocks.AIR || MelonMod.SIGNS.contains(stack.getItem())) {
+			if (Block.byItem(stack.getItem()) != Blocks.AIR || stack.is(ItemTags.SIGNS)) {
 				setHead(stack);
 				if (!player.isCreative())
 					player.getItemInHand(hand).shrink(1);
 				return InteractionResult.SUCCESS;
 			}
-		} else if (!getHead().isEmpty() && MelonMod.SIGNS.contains(getHead().getItem())) {
-			if (level.isClientSide) {
-				ClientListener.openSignHolderGui(this);
+		} else if (!getHead().isEmpty() && getHead().is(ItemTags.SIGNS)) {
+			if (stack.is(Items.GLOW_INK_SAC) && !getEntityData().get(GLOWING_TEXT)) {
+				getEntityData().set(GLOWING_TEXT, true);
+				playSound(SoundEvents.GLOW_INK_SAC_USE);
+				if (!player.isCreative())
+					player.getItemInHand(hand).shrink(1);
+			} else if (stack.is(Items.INK_SAC) && getEntityData().get(GLOWING_TEXT)) {
+				getEntityData().set(GLOWING_TEXT, false);
+				playSound(SoundEvents.INK_SAC_USE);
+				if (!player.isCreative())
+					player.getItemInHand(hand).shrink(1);
+			} else if (stack.getItem() instanceof DyeItem dye && getTextColor() != dye.getDyeColor()) {
+				getEntityData().set(TEXT_COLOR, dye.getDyeColor().getId());
+				playSound(SoundEvents.DYE_USE);
+				if (!player.isCreative())
+					player.getItemInHand(hand).shrink(1);
+			} else {
+				if (level.isClientSide) {
+					ClientListener.openSignHolderGui(this);
+				}
 			}
 			return InteractionResult.sidedSuccess(level.isClientSide);
 		}
@@ -255,6 +294,8 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 	@Override
 	public CompoundTag saveWithoutId(CompoundTag compound) {
 		compound.put("head", getHead().serializeNBT());
+		compound.putBoolean("glowingText", glowingText());
+		compound.putInt("textColor", getTextColor().getId());
 		for (int i = 0; i < 4; ++i) {
 			String s = Component.Serializer.toJson(getSignText(i));
 			compound.putString("Text" + (i + 1), s);
@@ -265,6 +306,8 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compound) {
 		setHead(ItemStack.of(compound.getCompound("head")));
+		getEntityData().set(GLOWING_TEXT, compound.getBoolean("glowingText"));
+		getEntityData().set(TEXT_COLOR, compound.getInt("textColor"));
 		for (int i = 0; i < 4; ++i) {
 			String s = compound.getString("Text" + (i + 1));
 			Component itextcomponent = Component.Serializer.fromJson(s);
@@ -362,7 +405,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 							if (parent.level.hasChunkAt(vertex)) {
 								BlockEntity te = parent.level.getBlockEntity(vertex);
 								if (te != null) {
-									te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP).ifPresent(cap -> {
+									te.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP).ifPresent(cap -> {
 										for (int i = 0; i < cap.getSlots(); i++) {
 											if (isMelon(cap.getStackInSlot(i))) {
 												foundMelon = parent.distanceToSqr(vertex.getX(), vertex.getY(), vertex.getZ()) < 4 || parent.getNavigation().moveTo(vertex.getX(), vertex.getY(), vertex.getZ(), 1.25F);
@@ -384,12 +427,12 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 					return;
 				}
 				BlockEntity te = parent.level.getBlockEntity(vertex);
-				if (te == null || !te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP).isPresent()) {
+				if (te == null || !te.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP).isPresent()) {
 					parent.getNavigation().stop();
 					foundMelon = false;
 					return;
 				}
-				LazyOptional<IItemHandler> handler = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP);
+				LazyOptional<IItemHandler> handler = te.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP);
 				if (handler.isPresent()) {
 					handler.ifPresent(cap -> {
 						boolean valid = false;

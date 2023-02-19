@@ -14,7 +14,7 @@ apply plugin: 'maven-publish'
 
 repositories {
     maven {
-        url = "https://dvs1.progwml6.com/files/maven/" // JEI
+        url = "https://maven.blamejared.com/" // JEI
     }
     maven {
         name 'tterrag\'s Maven' // Mappings

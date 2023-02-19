@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.font.TextFieldHelper;
@@ -15,17 +14,17 @@ import net.minecraft.client.renderer.blockentity.SignRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.StandingAndWallBlockItem;
 import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.WoodType;
+import org.joml.Matrix4f;
 import tamaized.melongolem.ISignHolder;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.EntityMelonGolem;
 import tamaized.melongolem.network.server.ServerPacketHandlerMelonSign;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
 
 public class GuiEditGolemSign extends Screen {
 
@@ -43,8 +42,7 @@ public class GuiEditGolemSign extends Screen {
 
 	@Override
 	protected void init() {
-		Objects.requireNonNull(minecraft).keyboardHandler.setSendRepeatsToGui(true);
-		this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120, 200, 20, Component.translatable("gui.done"), (p_214266_1_) -> this.onClose()));
+		this.addRenderableWidget(Button.builder(Component.translatable("gui.done"), (p_214266_1_) -> this.onClose()).bounds(this.width / 2 - 100, this.height / 4 + 120, 200, 20).build());
 		this.textInputUtil = new TextFieldHelper(
 
 				() -> golem.getSignText(this.editLine).getString(),
@@ -58,14 +56,13 @@ public class GuiEditGolemSign extends Screen {
 				(string) -> this.minecraft.font.width(string) <= 90
 
 		);
-		signModel = SignRenderer.createSignModel(minecraft.getEntityModels(), WoodType.OAK); //TODO: Only Oak, just to quiet errors
+		signModel = SignRenderer.createSignModel(minecraft.getEntityModels(), ((SignBlock)EntityMelonGolem.SIGN_TILE_BLOCKSTATE.getBlock()).type());
 	}
 
 	@Override
 	public void onClose() {
 		if (minecraft == null)
 			return;
-		Objects.requireNonNull(minecraft).keyboardHandler.setSendRepeatsToGui(false);
 		if (canSend)
 			MelonMod.network.sendToServer(new ServerPacketHandlerMelonSign(golem));
 		this.minecraft.setScreen(null);
@@ -125,7 +122,7 @@ public class GuiEditGolemSign extends Screen {
 		matrixStack.popPose();
 		matrixStack.translate(0.0D, 0.33333334F, 0.046666667F);
 		matrixStack.scale(0.010416667F, -0.010416667F, 0.010416667F);
-		int i = EntityMelonGolem.te.getColor().getTextColor();
+		int i = DyeColor.BLACK.getTextColor();
 		int j = this.textInputUtil.getCursorPos();
 		int k = this.textInputUtil.getSelectionPos();
 		int l = this.editLine * 10 - 4 * 5;

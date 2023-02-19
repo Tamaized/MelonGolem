@@ -14,6 +14,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -27,8 +28,7 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ShearsItem;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -51,6 +51,8 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearab
 	private static final EntityDataAccessor<ItemStack> HEAD = SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.ITEM_STACK);
 	private static final EntityDataAccessor<Boolean> ENABLED = SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Integer> COLOR = SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Boolean> GLOWING_TEXT = SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Integer> TEXT_COLOR = SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.INT);
 	private static final List<EntityDataAccessor<Component>> SIGN_TEXT = Lists.newArrayList(
 
 			SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.COMPONENT),
@@ -77,6 +79,8 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearab
 	protected void defineSynchedData() {
 		super.defineSynchedData();
 		entityData.define(HEAD, ItemStack.EMPTY);
+		entityData.define(GLOWING_TEXT, false);
+		entityData.define(TEXT_COLOR, DyeColor.BLACK.getId());
 		entityData.define(ENABLED, false);
 		entityData.define(COLOR, 0xFFFFFF);
 		for (EntityDataAccessor<Component> sign : SIGN_TEXT)
@@ -130,6 +134,16 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearab
 	}
 
 	@Override
+	public boolean glowingText() {
+		return getEntityData().get(GLOWING_TEXT);
+	}
+
+	@Override
+	public DyeColor getTextColor() {
+		return DyeColor.byId(getEntityData().get(TEXT_COLOR));
+	}
+
+	@Override
 	public Component getSignText(int index) {
 		return entityData.get(SIGN_TEXT.get(index));
 	}
@@ -177,15 +191,32 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearab
 			return InteractionResult.FAIL;
 		ItemStack stack = player.getItemInHand(hand);
 		if (!stack.isEmpty() && getHead().isEmpty()) {
-			if (Block.byItem(stack.getItem()) != Blocks.AIR || MelonMod.SIGNS.contains(stack.getItem())) {
+			if (Block.byItem(stack.getItem()) != Blocks.AIR || stack.is(ItemTags.SIGNS)) {
 				setHead(stack);
 				if (!player.isCreative())
 					player.getItemInHand(hand).shrink(1);
 				return InteractionResult.SUCCESS;
 			}
-		} else if (!getHead().isEmpty() && MelonMod.SIGNS.contains(getHead().getItem())) {
-			if (level.isClientSide) {
-				ClientListener.openSignHolderGui(this);
+		} else if (!getHead().isEmpty() && getHead().is(ItemTags.SIGNS)) {
+			if (stack.is(Items.GLOW_INK_SAC) && !getEntityData().get(GLOWING_TEXT)) {
+				getEntityData().set(GLOWING_TEXT, true);
+				playSound(SoundEvents.GLOW_INK_SAC_USE);
+				if (!player.isCreative())
+					player.getItemInHand(hand).shrink(1);
+			} else if (stack.is(Items.INK_SAC) && getEntityData().get(GLOWING_TEXT)) {
+				getEntityData().set(GLOWING_TEXT, false);
+				playSound(SoundEvents.INK_SAC_USE);
+				if (!player.isCreative())
+					player.getItemInHand(hand).shrink(1);
+			} else if (stack.getItem() instanceof DyeItem dye && getTextColor() != dye.getDyeColor()) {
+				getEntityData().set(TEXT_COLOR, dye.getDyeColor().getId());
+				playSound(SoundEvents.DYE_USE);
+				if (!player.isCreative())
+					player.getItemInHand(hand).shrink(1);
+			} else {
+				if (level.isClientSide) {
+					ClientListener.openSignHolderGui(this);
+				}
 			}
 			return InteractionResult.sidedSuccess(level.isClientSide);
 		}
@@ -241,6 +272,8 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearab
 	@Override
 	public CompoundTag saveWithoutId(CompoundTag compound) {
 		compound.put("head", getHead().serializeNBT());
+		compound.putBoolean("glowingText", glowingText());
+		compound.putInt("textColor", getTextColor().getId());
 		compound.putBoolean("donator_enabled", isEnabled());
 		compound.putInt("donator_color", getColor());
 		for (int i = 0; i < 4; ++i) {
@@ -257,7 +290,8 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearab
 		if (compound.contains("donator_color"))
 			entityData.set(COLOR, compound.getInt("donator_color"));
 		setHead(ItemStack.of(compound.getCompound("head")));
-
+		getEntityData().set(GLOWING_TEXT, compound.getBoolean("glowingText"));
+		getEntityData().set(TEXT_COLOR, compound.getInt("textColor"));
 		for (int i = 0; i < 4; ++i) {
 			String s = compound.getString("Text" + (i + 1));
 			Component itextcomponent = Component.Serializer.fromJson(s);
