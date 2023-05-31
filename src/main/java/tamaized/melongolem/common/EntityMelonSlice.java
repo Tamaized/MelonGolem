@@ -81,7 +81,7 @@ public class EntityMelonSlice extends ThrowableProjectile implements ItemSupplie
 		super.onHitEntity(result);
 		if (result.getEntity() == getOwner())
 			return;
-		result.getEntity().hurt(DamageSource.thrown(this, getOwner()), MelonMod.config.damage.get().floatValue() * (isGlistering() ? MelonMod.config.glisterDamageAmp.get().floatValue() : 1F));
+		result.getEntity().hurt(this.damageSources().thrown(this, getOwner()), MelonMod.config.damage.get().floatValue() * (isGlistering() ? MelonMod.config.glisterDamageAmp.get().floatValue() : 1F));
 
 	}
 

@@ -110,7 +110,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearab
 					if (cap.getPet() == null)
 						cap.setPet(this);
 					else
-						this.hurt(DamageSource.OUT_OF_WORLD, Float.MAX_VALUE);
+						this.hurt(this.damageSources().outOfWorld(), Float.MAX_VALUE);
 				}
 			});
 	}

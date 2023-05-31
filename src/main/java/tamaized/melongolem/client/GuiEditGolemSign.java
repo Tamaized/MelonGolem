@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.font.TextFieldHelper;
 import net.minecraft.client.gui.screens.Screen;
@@ -136,12 +137,12 @@ public class GuiEditGolemSign extends Screen {
 				}
 
 				float f3 = (float) (-this.minecraft.font.width(s) / 2);
-				this.minecraft.font.drawInBatch(s, f3, (float) (i1 * 10 - 4 * 5), i, false, matrix4f, irendertypebuffer$impl, false, 0, 15728880, false);
+				this.minecraft.font.drawInBatch(s, f3, (float) (i1 * 10 - 4 * 5), i, false, matrix4f, irendertypebuffer$impl, Font.DisplayMode.NORMAL, 0, 15728880, false);
 				if (i1 == this.editLine && j >= 0 && flag1) {
 					int j1 = this.minecraft.font.width(s.substring(0, Math.min(j, s.length())));
 					int k1 = j1 - this.minecraft.font.width(s) / 2;
 					if (j >= s.length()) {
-						this.minecraft.font.drawInBatch("_", (float) k1, (float) l, i, false, matrix4f, irendertypebuffer$impl, false, 0, 15728880, false);
+						this.minecraft.font.drawInBatch("_", (float) k1, (float) l, i, false, matrix4f, irendertypebuffer$impl, Font.DisplayMode.NORMAL, 0, 15728880, false);
 					}
 				}
 			}
@@ -150,9 +151,9 @@ public class GuiEditGolemSign extends Screen {
 		irendertypebuffer$impl.endBatch();
 
 		for (int i3 = 0; i3 < 4; ++i3) {
-			String s1 = golem.getSignText(i3).getString();
+			String s1 = this.golem.getSignText(i3).getString();
 			if (s1 != null && i3 == this.editLine && j >= 0) {
-				int j3 = this.minecraft.font.width(s1.substring(0, Math.min(j, s1.length())));
+				int j3 = this.minecraft.font.width(s1.substring(0, Math.max(Math.min(j, s1.length()), 0)));
 				int k3 = j3 - this.minecraft.font.width(s1) / 2;
 				if (flag1 && j < s1.length()) {
 					fill(matrixStack, k3, l - 1, k3 + 1, l + 9, -16777216 | i);
@@ -165,19 +166,10 @@ public class GuiEditGolemSign extends Screen {
 					int j2 = this.minecraft.font.width(s1.substring(0, l1)) - this.minecraft.font.width(s1) / 2;
 					int k2 = Math.min(i2, j2);
 					int l2 = Math.max(i2, j2);
-					Tesselator tessellator = Tesselator.getInstance();
-					BufferBuilder bufferbuilder = tessellator.getBuilder();
-					RenderSystem.disableTexture();
 					RenderSystem.enableColorLogicOp();
 					RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-					bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-					bufferbuilder.vertex(matrix4f, (float) k2, (float) (l + 9), 0.0F).color(0, 0, 255, 255).endVertex();
-					bufferbuilder.vertex(matrix4f, (float) l2, (float) (l + 9), 0.0F).color(0, 0, 255, 255).endVertex();
-					bufferbuilder.vertex(matrix4f, (float) l2, (float) l, 0.0F).color(0, 0, 255, 255).endVertex();
-					bufferbuilder.vertex(matrix4f, (float) k2, (float) l, 0.0F).color(0, 0, 255, 255).endVertex();
-					BufferUploader.draw(bufferbuilder.end());
+					fill(matrixStack, k2, l, l2, l + 9, -16776961);
 					RenderSystem.disableColorLogicOp();
-					RenderSystem.enableTexture();
 				}
 			}
 		}
@@ -186,6 +178,4 @@ public class GuiEditGolemSign extends Screen {
 		Lighting.setupFor3DItems();
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
 	}
-
-
 }

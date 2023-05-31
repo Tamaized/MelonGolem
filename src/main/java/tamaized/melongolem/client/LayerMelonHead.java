@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.StandingAndWallBlockItem;
 import tamaized.melongolem.ISignHolder;
@@ -45,7 +46,7 @@ public class LayerMelonHead<T extends LivingEntity & ISignHolder> extends Render
 				EntityMelonGolem.SIGN_TILE_BLOCKSTATE = item.wallBlock.defaultBlockState();
 				Objects.requireNonNull(Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(EntityMelonGolem.te)).render(EntityMelonGolem.te, partialTicks, stack, buffer, light, LivingEntityRenderer.getOverlayCoords(entity, 0F));
 			} else
-				Minecraft.getInstance().getItemRenderer().renderStatic(itemStack, ItemTransforms.TransformType.HEAD, light, OverlayTexture.NO_OVERLAY, stack, buffer, 0);
+				Minecraft.getInstance().getItemRenderer().renderStatic(itemStack, ItemDisplayContext.HEAD, light, OverlayTexture.NO_OVERLAY, stack, buffer, null, 0);
 			stack.popPose();
 		}
 	}
