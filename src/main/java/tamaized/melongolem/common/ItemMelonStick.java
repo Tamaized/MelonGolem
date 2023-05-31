@@ -102,7 +102,7 @@ public class ItemMelonStick extends Item {
 	}
 
 	public static void spawnVanillaParticleOnServer(Level world, ParticleOptions particle, double x, double y, double z, double xS, double yS, double zS) {
-		MelonMod.network.send(PacketDistributor.TRACKING_CHUNK.with(() -> world.getChunkAt(new BlockPos(x, y, z))), new ClientPacketHandlerParticle(ForgeRegistries.PARTICLE_TYPES.getKey(particle.getType()), new Vec3(x, y, z), new Vec3(xS, yS, zS)));
+		MelonMod.network.send(PacketDistributor.TRACKING_CHUNK.with(() -> world.getChunkAt(BlockPos.containing(x, y, z))), new ClientPacketHandlerParticle(ForgeRegistries.PARTICLE_TYPES.getKey(particle.getType()), new Vec3(x, y, z), new Vec3(xS, yS, zS)));
 	}
 
 	private static boolean isTeleportFriendlyBlock(Level world, Entity entity, int x, int z, int y, int xOffset, int zOffset) {
