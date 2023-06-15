@@ -21,7 +21,7 @@ public class ServerPacketHandlerMelonSign implements NetworkMessages.IMessage<Se
 
 	@Override
 	public void handle(Player player) {
-		Entity entity = player.level.getEntity(id);
+		Entity entity = player.level().getEntity(id);
 		if (entity instanceof EntityMelonGolem && entity.distanceTo(player) <= 6)
 			for (int i = 0; i < lines.length; ++i) {
 				String text = ChatFormatting.stripFormatting(lines[i]);

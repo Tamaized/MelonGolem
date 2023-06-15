@@ -1,8 +1,10 @@
 package tamaized.melongolem.client;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -49,18 +51,18 @@ public class MelonConfigScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		renderBackground(matrixStack);
-		drawCenteredString(matrixStack, font, Component.literal("Melon Golem Config"), (int) (Minecraft.getInstance().getWindow().getGuiScaledWidth() / 2F), 5, 0xFFFFFFFF);
+	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+		renderBackground(graphics);
+		graphics.drawCenteredString(font, Component.literal("Melon Golem Config"), (int) (Minecraft.getInstance().getWindow().getGuiScaledWidth() / 2F), 5, 0xFFFFFFFF);
 		int color = 0xFFFFFFFF;
 		try {
 			color = Integer.decode(input.getValue());
 		} catch (NumberFormatException e) {
 			// NO-OP
 		}
-		GlStateManager._enableBlend();
-		drawString(matrixStack, font, TEXT_DONATOR_COLOR, 5, 25 + font.lineHeight / 2 + 1, color);
-		GlStateManager._disableBlend();
-		super.render(matrixStack, mouseX, mouseY, partialTicks);
+		RenderSystem.enableBlend();
+		graphics.drawString(font, TEXT_DONATOR_COLOR, 5, 25 + font.lineHeight / 2 + 1, color, false);
+		RenderSystem.disableBlend();
+		super.render(graphics, mouseX, mouseY, partialTicks);
 	}
 }

@@ -6,6 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.font.TextFieldHelper;
 import net.minecraft.client.gui.screens.Screen;
@@ -100,34 +101,35 @@ public class GuiEditGolemSign extends Screen {
 	}
 
 	@Override
-	public void render(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
 		Lighting.setupForFlatItems();
-		this.renderBackground(matrixStack);
-		drawCenteredString(matrixStack, this.font, this.title, this.width / 2, 40, 16777215);
-		matrixStack.pushPose();
-		matrixStack.translate(this.width / 2, 0.0D, 50.0D);
-		matrixStack.scale(93.75F, -93.75F, 93.75F);
-		matrixStack.translate(0.0D, -1.3125D, 0.0D);
+		this.renderBackground(graphics);
+		graphics.drawCenteredString(this.font, this.title, this.width / 2, 40, 16777215);
+		PoseStack stack = graphics.pose();
+		stack.pushPose();
+		stack.translate(this.width / 2, 0.0D, 50.0D);
+		stack.scale(93.75F, -93.75F, 93.75F);
+		stack.translate(0.0D, -1.3125D, 0.0D);
 		BlockState blockstate = EntityMelonGolem.SIGN_TILE_BLOCKSTATE = ((StandingAndWallBlockItem) golem.getHead().getItem()).wallBlock.defaultBlockState();
-		matrixStack.translate(0.0D, -0.3125D, 0.0D);
+		stack.translate(0.0D, -0.3125D, 0.0D);
 
 		boolean flag1 = this.updateCounter / 6 % 2 == 0;
-		matrixStack.pushPose();
-		matrixStack.scale(0.6666667F, -0.6666667F, -0.6666667F);
+		stack.pushPose();
+		stack.scale(0.6666667F, -0.6666667F, -0.6666667F);
 		MultiBufferSource.BufferSource irendertypebuffer$impl = this.minecraft.renderBuffers().bufferSource();
 		Material rendermaterial = Sheets.getSignMaterial(((SignBlock)blockstate.getBlock()).type());
 		VertexConsumer ivertexbuilder = rendermaterial.buffer(irendertypebuffer$impl, this.signModel::renderType);
 		signModel.stick.visible = false;
-		this.signModel.root.render(matrixStack, ivertexbuilder, 15728880, OverlayTexture.NO_OVERLAY);
+		this.signModel.root.render(stack, ivertexbuilder, 15728880, OverlayTexture.NO_OVERLAY);
 
-		matrixStack.popPose();
-		matrixStack.translate(0.0D, 0.33333334F, 0.046666667F);
-		matrixStack.scale(0.010416667F, -0.010416667F, 0.010416667F);
+		stack.popPose();
+		stack.translate(0.0D, 0.33333334F, 0.046666667F);
+		stack.scale(0.010416667F, -0.010416667F, 0.010416667F);
 		int i = DyeColor.BLACK.getTextColor();
 		int j = this.textInputUtil.getCursorPos();
 		int k = this.textInputUtil.getSelectionPos();
 		int l = this.editLine * 10 - 4 * 5;
-		Matrix4f matrix4f = matrixStack.last().pose();
+		Matrix4f matrix4f = stack.last().pose();
 
 		for (int i1 = 0; i1 < 4; ++i1) {
 			String s = this.golem.getSignText(i1).getString();
@@ -156,7 +158,7 @@ public class GuiEditGolemSign extends Screen {
 				int j3 = this.minecraft.font.width(s1.substring(0, Math.max(Math.min(j, s1.length()), 0)));
 				int k3 = j3 - this.minecraft.font.width(s1) / 2;
 				if (flag1 && j < s1.length()) {
-					fill(matrixStack, k3, l - 1, k3 + 1, l + 9, -16777216 | i);
+					graphics.fill(k3, l - 1, k3 + 1, l + 9, -16777216 | i);
 				}
 
 				if (k != j) {
@@ -168,14 +170,14 @@ public class GuiEditGolemSign extends Screen {
 					int l2 = Math.max(i2, j2);
 					RenderSystem.enableColorLogicOp();
 					RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-					fill(matrixStack, k2, l, l2, l + 9, -16776961);
+					graphics.fill(k2, l, l2, l + 9, -16776961);
 					RenderSystem.disableColorLogicOp();
 				}
 			}
 		}
 
-		matrixStack.popPose();
+		stack.popPose();
 		Lighting.setupFor3DItems();
-		super.render(matrixStack, mouseX, mouseY, partialTicks);
+		super.render(graphics, mouseX, mouseY, partialTicks);
 	}
 }

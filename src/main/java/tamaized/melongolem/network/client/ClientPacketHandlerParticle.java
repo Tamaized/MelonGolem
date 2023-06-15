@@ -37,7 +37,7 @@ public class ClientPacketHandlerParticle implements NetworkMessages.IMessage<Cli
 
 	@Override
 	public void handle(Player player) {
-		spawnParticle(player.level, getRegisteredParticleTypes(id), vec, vel);
+		spawnParticle(player.level(), getRegisteredParticleTypes(id), vec, vel);
 	}
 
 	@Override

@@ -9,12 +9,13 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeSpawnEggItem;
-import net.minecraftforge.event.CreativeModeTabEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -71,7 +72,7 @@ public class MelonMod {
 			.register("melonstick", () -> new ItemMelonStick(new Item.Properties()));
 
 	public static final RegistryObject<Block> BLOCK_GLISTERING_MELON = BLOCK_REGISTRY
-			.register("glisteringmelonblock", () -> new Block(Block.Properties.of(Material.VEGETABLE, MaterialColor.COLOR_LIGHT_GREEN).strength(1.0F).sound(SoundType.WOOD).lightLevel(state -> 4)));
+			.register("glisteringmelonblock", () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_GREEN).pushReaction(PushReaction.DESTROY).strength(1.0F).sound(SoundType.WOOD).lightLevel(state -> 4)));
 	public static final RegistryObject<BlockItem> ITEMBLOCK_GLISTERING_MELON = ITEM_REGISTRY
 			.register("glisteringmelonblock", () -> new BlockItem(BLOCK_GLISTERING_MELON.get(), new Item.Properties().setNoRepair()));
 
@@ -117,12 +118,12 @@ public class MelonMod {
 	}
 
 	@SubscribeEvent
-	public static void addStuffToTab(CreativeModeTabEvent.BuildContents event) {
-		if (event.getTab() == CreativeModeTabs.NATURAL_BLOCKS) {
+	public static void addStuffToTab(BuildCreativeModeTabContentsEvent event) {
+		if (event.getTabKey() == CreativeModeTabs.NATURAL_BLOCKS) {
 			event.getEntries().putAfter(new ItemStack(Items.MELON), new ItemStack(ITEMBLOCK_GLISTERING_MELON.get()), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-		} else if (event.getTab() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
+		} else if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
 			event.getEntries().putAfter(new ItemStack(Items.WARPED_FUNGUS_ON_A_STICK), new ItemStack(ITEM_MELON_STICK.get()), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-		} else if (event.getTab() == CreativeModeTabs.SPAWN_EGGS) {
+		} else if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
 			event.getEntries().putAfter(new ItemStack(Items.MAGMA_CUBE_SPAWN_EGG), new ItemStack(ITEM_SPAWN_EGG_MELON_GOLEM.get()), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
 			event.getEntries().putBefore(new ItemStack(Items.GLOW_SQUID_SPAWN_EGG), new ItemStack(ITEM_SPAWN_EGG_GLISTERING_MELON_GOLEM.get()), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
 		}

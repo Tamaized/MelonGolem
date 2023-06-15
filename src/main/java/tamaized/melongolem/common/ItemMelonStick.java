@@ -44,9 +44,9 @@ public class ItemMelonStick extends Item {
 			return;
 		owner.getCapability(CapabilityList.TINY_GOLEM).ifPresent(cap -> {
 			if (cap.load(true)) {
-				if (!(world instanceof ServerLevel) || owner.level.getServer() == null)
+				if (!(world instanceof ServerLevel) || owner.level().getServer() == null)
 					return;
-				ServerLevel last = owner.level.getServer().getLevel(ResourceKey.create(Registries.DIMENSION, cap.getLoadDim()));
+				ServerLevel last = owner.level().getServer().getLevel(ResourceKey.create(Registries.DIMENSION, cap.getLoadDim()));
 				if (last != null && cap.getLoadPos() != null) {
 					last.getChunk(cap.getLoadPos()); // Ensure chunk is loaded
 					Entity entity = last.getEntity(cap.getLoadPetID());
@@ -79,8 +79,8 @@ public class ItemMelonStick extends Item {
 							double posy = (double) y + j;
 							double posz = (float) (z + i1) + 0.5F;
 							pet.moveTo(posx, posy, posz);
-							if (!pet.level.dimension().location().equals(owner.level.dimension().location())) {
-								pet = (EntityTinyMelonGolem) pet.changeDimension((ServerLevel) owner.level);
+							if (!pet.level().dimension().location().equals(owner.level().dimension().location())) {
+								pet = (EntityTinyMelonGolem) pet.changeDimension((ServerLevel) owner.level());
 								cap.setPet(pet);
 								if (pet == null)
 									return;
@@ -108,14 +108,14 @@ public class ItemMelonStick extends Item {
 	private static boolean isTeleportFriendlyBlock(Level world, Entity entity, int x, int z, int y, int xOffset, int zOffset) {
 		BlockPos blockpos = new BlockPos(x + xOffset, y - 1, z + zOffset);
 		BlockState iblockstate = world.getBlockState(blockpos);
-		return Block.canSupportCenter(world, blockpos, Direction.UP) && iblockstate.isValidSpawn(entity.level, entity.blockPosition(), entity.getType()) && world.isEmptyBlock(blockpos.above()) && world.isEmptyBlock(blockpos.above(2));
+		return Block.canSupportCenter(world, blockpos, Direction.UP) && iblockstate.isValidSpawn(entity.level(), entity.blockPosition(), entity.getType()) && world.isEmptyBlock(blockpos.above()) && world.isEmptyBlock(blockpos.above(2));
 	}
 
 	@Nonnull
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, @Nonnull InteractionHand handIn) {
 		playerIn.swing(handIn);
-		if (worldIn.isClientSide)
+		if (worldIn.isClientSide())
 			return new InteractionResultHolder<>(InteractionResult.PASS, playerIn.getItemInHand(handIn));
 		summonPet(worldIn, playerIn);
 		playerIn.getItemInHand(handIn).hurtAndBreak(1, playerIn, e -> e.broadcastBreakEvent(handIn));
