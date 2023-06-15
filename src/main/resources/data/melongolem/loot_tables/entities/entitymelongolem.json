@@ -1,4 +1,5 @@
 {
+    "type": "minecraft:entity",
     "pools": [
         {
 			"name": "melongolem",
@@ -20,5 +21,6 @@
                 }
             ]
         }
-    ]
+    ],
+    "random_sequence": "melongolem:entities/entitymelongolem"
 }

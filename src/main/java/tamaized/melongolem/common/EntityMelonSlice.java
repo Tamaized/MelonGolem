@@ -62,7 +62,7 @@ public class EntityMelonSlice extends ThrowableProjectile implements ItemSupplie
 	public void handleEntityEvent(byte id) {
 		if (id == 3) {
 			for (int i = 0; i < 8; ++i) {
-				this.level.addParticle(new ItemParticleOption(ParticleTypes.ITEM, random.nextInt() == 0 ? new ItemStack(Items.MELON_SEEDS) : new ItemStack(Items.MELON_SLICE)), this.getX(), this.getY(), this.getZ(), 0.0D, 0.0D, 0.0D);
+				this.level().addParticle(new ItemParticleOption(ParticleTypes.ITEM, random.nextInt() == 0 ? new ItemStack(Items.MELON_SEEDS) : new ItemStack(Items.MELON_SLICE)), this.getX(), this.getY(), this.getZ(), 0.0D, 0.0D, 0.0D);
 			}
 		}
 	}
@@ -70,8 +70,8 @@ public class EntityMelonSlice extends ThrowableProjectile implements ItemSupplie
 	@Override
 	protected void onHit(@Nonnull HitResult result) {
 		super.onHit(result);
-		if (!this.level.isClientSide) {
-			this.level.broadcastEntityEvent(this, (byte) 3);
+		if (!this.level().isClientSide()) {
+			this.level().broadcastEntityEvent(this, (byte) 3);
 			this.discard();
 		}
 	}

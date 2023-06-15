@@ -90,7 +90,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearab
 	@Override
 	public void tick() {
 		super.tick();
-		if (level.isClientSide || !isAlive())
+		if (level().isClientSide() || !isAlive())
 			return;
 		if (getOwner() != null && getOwner().isAlive() && DonatorHandler.donators.contains(getOwnerUUID())) {
 			DonatorHandler.DonatorSettings settings = DonatorHandler.settings.get(getOwnerUUID());
@@ -106,11 +106,11 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearab
 						discard();
 						return;
 					}
-					ItemMelonStick.summonPet(level, (Player) getOwner(), this);
+					ItemMelonStick.summonPet(level(), (Player) getOwner(), this);
 					if (cap.getPet() == null)
 						cap.setPet(this);
 					else
-						this.hurt(this.damageSources().outOfWorld(), Float.MAX_VALUE);
+						this.hurt(this.damageSources().genericKill(), Float.MAX_VALUE);
 				}
 			});
 	}
@@ -214,11 +214,11 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearab
 				if (!player.isCreative())
 					player.getItemInHand(hand).shrink(1);
 			} else {
-				if (level.isClientSide) {
+				if (level().isClientSide()) {
 					ClientListener.openSignHolderGui(this);
 				}
 			}
-			return InteractionResult.sidedSuccess(level.isClientSide);
+			return InteractionResult.sidedSuccess(level().isClientSide());
 		}
 		return InteractionResult.FAIL;
 	}
@@ -253,18 +253,18 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearab
 	public void die(@Nonnull DamageSource cause) {
 		super.die(cause);
 		ItemStack stack = getHead();
-		if (!level.isClientSide && !stack.isEmpty()) {
-			ItemEntity e = new ItemEntity(level, getX(), getY(), getZ(), stack);
+		if (!level().isClientSide() && !stack.isEmpty()) {
+			ItemEntity e = new ItemEntity(level(), getX(), getY(), getZ(), stack);
 			e.setDeltaMovement(e.getDeltaMovement().add(
 
-					random.nextFloat() * 0.05F,
+					getRandom().nextFloat() * 0.05F,
 
-					(random.nextFloat() - random.nextFloat()) * 0.1F,
+					(getRandom().nextFloat() - getRandom().nextFloat()) * 0.1F,
 
-					(random.nextFloat() - random.nextFloat()) * 0.1F
+					(getRandom().nextFloat() - getRandom().nextFloat()) * 0.1F
 
 			));
-			level.addFreshEntity(e);
+			level().addFreshEntity(e);
 		}
 	}
 

@@ -71,7 +71,7 @@ public class TinyGolemCapabilityHandler implements ITinyGolemCapability {
 		EntityTinyMelonGolem pet = this.getPet();
 		if (pet != null && pet.getOwnerUUID() != null) {
 			nbt.putLong("vertex", pet.blockPosition().asLong());
-			nbt.putString("dim", pet.level.dimension().location().toString());
+			nbt.putString("dim", pet.level().dimension().location().toString());
 			nbt.putUUID("uuid", pet.getUUID());
 		}
 		return nbt;

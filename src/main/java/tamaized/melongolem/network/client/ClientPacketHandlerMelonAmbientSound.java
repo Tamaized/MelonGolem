@@ -26,11 +26,11 @@ public class ClientPacketHandlerMelonAmbientSound implements NetworkMessages.IMe
 	private static void playAmbientSound(Player player, EntityMelonGolem golem) {
 		SoundEvent soundevent = getAmbientSound();
 		if (soundevent != null)
-			golem.level.playSound(player, golem.getX(), golem.getY(), golem.getZ(), soundevent, golem.getSoundSource(), golem.getSoundVolume(), getVoicePitch(golem));
+			golem.level().playSound(player, golem.getX(), golem.getY(), golem.getZ(), soundevent, golem.getSoundSource(), golem.getSoundVolume(), getVoicePitch(golem));
 	}
 
 	private static float getVoicePitch(EntityMelonGolem golem) {
-		return MelonMod.configClient.tehnutMode.get() ? golem.getPitch() + golem.level.random.nextFloat() * 0.25F - 0.50F : golem.getVoicePitch();
+		return MelonMod.configClient.tehnutMode.get() ? golem.getPitch() + golem.level().getRandom().nextFloat() * 0.25F - 0.50F : golem.getVoicePitch();
 	}
 
 	@Nullable
@@ -40,9 +40,8 @@ public class ClientPacketHandlerMelonAmbientSound implements NetworkMessages.IMe
 
 	@Override
 	public void handle(Player player) {
-		Entity entity = player.level.getEntity(id);
-		if (entity instanceof EntityMelonGolem) {
-			EntityMelonGolem golem = (EntityMelonGolem) entity;
+		Entity entity = player.level().getEntity(id);
+		if (entity instanceof EntityMelonGolem golem) {
 			if (golem.getHead().is(ItemTags.SIGNS)) {
 				if (MelonMod.configClient.tts.get() && golem.distanceToSqr(player) <= 225) {
 					if (narrator == null)

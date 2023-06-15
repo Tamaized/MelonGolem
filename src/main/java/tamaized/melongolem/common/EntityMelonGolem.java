@@ -115,7 +115,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 		entityData.define(TEXT_COLOR, DyeColor.BLACK.getId());
 		for (EntityDataAccessor<Component> sign : SIGN_TEXT)
 			entityData.define(sign, Component.literal(""));
-		entityData.define(PITCH, random.nextFloat() * 3.0F);
+		entityData.define(PITCH, getRandom().nextFloat() * 3.0F);
 	}
 
 	@Override
@@ -156,7 +156,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 
 	@Override
 	public void performRangedAttack(@Nonnull LivingEntity target, float distanceFactor) {
-		EntityMelonSlice slice = new EntityMelonSlice(this.level, this);
+		EntityMelonSlice slice = new EntityMelonSlice(this.level(), this);
 		double d0 = target.getY() + (double) target.getEyeHeight() - 1.100000023841858D;
 		double d1 = target.getX() - this.getX();
 		double d2 = d0 - slice.getY();
@@ -165,7 +165,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 		slice.shoot(d1, d2 + f, d3, 1.6F, 12.0F);
 		this.playSound(SoundEvents.SNOW_GOLEM_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
 		slice.teleportTo(slice.getX(), slice.getY(), slice.getZ());
-		level.addFreshEntity(slice);
+		level().addFreshEntity(slice);
 	}
 
 	@Override
@@ -202,7 +202,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 
 	@Override
 	public void playAmbientSound() {
-		if (level != null && !level.isClientSide)
+		if (level() != null && !level().isClientSide())
 			MelonMod.network.send(PacketDistributor.TRACKING_ENTITY.with(() -> this), new ClientPacketHandlerMelonAmbientSound(this));
 	}
 
@@ -236,11 +236,11 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 				if (!player.isCreative())
 					player.getItemInHand(hand).shrink(1);
 			} else {
-				if (level.isClientSide) {
+				if (level().isClientSide()) {
 					ClientListener.openSignHolderGui(this);
 				}
 			}
-			return InteractionResult.sidedSuccess(level.isClientSide);
+			return InteractionResult.sidedSuccess(level().isClientSide());
 		}
 		return InteractionResult.FAIL;
 	}
@@ -275,18 +275,18 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 	public void die(@Nonnull DamageSource cause) {
 		super.die(cause);
 		ItemStack stack = getHead();
-		if (!level.isClientSide && !stack.isEmpty()) {
-			ItemEntity e = new ItemEntity(level, getX(), getY(), getZ(), stack);
+		if (!level().isClientSide() && !stack.isEmpty()) {
+			ItemEntity e = new ItemEntity(level(), getX(), getY(), getZ(), stack);
 			e.setDeltaMovement(e.getDeltaMovement().add(
 
-					random.nextFloat() * 0.05F,
+					getRandom().nextFloat() * 0.05F,
 
-					(random.nextFloat() - random.nextFloat()) * 0.1F,
+					(getRandom().nextFloat() - getRandom().nextFloat()) * 0.1F,
 
-					(random.nextFloat() - random.nextFloat()) * 0.1F
+					(getRandom().nextFloat() - getRandom().nextFloat()) * 0.1F
 
 			));
-			level.addFreshEntity(e);
+			level().addFreshEntity(e);
 		}
 	}
 
@@ -381,7 +381,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 				cooldown--;
 			final int radius = 25;
 			AABB area = new AABB(parent.getX() - radius, parent.getY() - radius, parent.getZ() - radius, parent.getX() + radius, parent.getY() + radius, parent.getZ() + radius);
-			List<ItemEntity> items = parent.level.getEntitiesOfClass(ItemEntity.class, area);
+			List<ItemEntity> items = parent.level().getEntitiesOfClass(ItemEntity.class, area);
 			for (ItemEntity item : items) {
 				if (parent.getNavigation().isDone() && isMelon(item)) {
 					parent.getNavigation().moveTo(item, 1.25F);
@@ -402,8 +402,8 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 					for (int y = -radius; y < radius; y++)
 						for (int z = -radius; z < radius; z++) {
 							vertex.set(parent.blockPosition().offset(x, y, z));
-							if (parent.level.hasChunkAt(vertex)) {
-								BlockEntity te = parent.level.getBlockEntity(vertex);
+							if (parent.level().hasChunkAt(vertex)) {
+								BlockEntity te = parent.level().getBlockEntity(vertex);
 								if (te != null) {
 									te.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP).ifPresent(cap -> {
 										for (int i = 0; i < cap.getSlots(); i++) {
@@ -421,12 +421,12 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 			}
 			if (foundMelon) {
 				// Validate
-				if (!parent.level.hasChunkAt(vertex)) {
+				if (!parent.level().hasChunkAt(vertex)) {
 					parent.getNavigation().stop();
 					foundMelon = false;
 					return;
 				}
-				BlockEntity te = parent.level.getBlockEntity(vertex);
+				BlockEntity te = parent.level().getBlockEntity(vertex);
 				if (te == null || !te.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP).isPresent()) {
 					parent.getNavigation().stop();
 					foundMelon = false;
