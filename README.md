@@ -8,7 +8,7 @@ Adds a Melon Golem to Minecraft
 https://curseforge.com/minecraft/mc-mods/melon-golem
 
 ## Latest Development Download
-https://tamaized.com/artifacts/builds/Tamaized/MelonGolem/latest/
+https://artifactor.tamaized.com/repository/Tamaized/MelonGolem/artifact/latest
 
 ## Maven
 ```
