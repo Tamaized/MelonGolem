@@ -19,6 +19,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.TamableAnimal;
@@ -226,6 +227,11 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearab
 	@Override
 	public float getEyeHeightAccess(Pose pose, EntityDimensions dimensions) {
 		return 0.425F;
+	}
+
+	@Override
+	public float _distanceTo(Entity entityIn) {
+		return distanceTo(entityIn);
 	}
 
 	@Override
