@@ -11,3 +11,17 @@ authors="Tamaized"
 description='''
 Adds a Melon Golem
 '''
+
+[[dependencies.melongolem]]
+    modId="forge"
+    mandatory=true
+    versionRange="[46.0.1,47.1.3]"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.melongolem]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20,)"
+    ordering="NONE"
+    side="BOTH"
