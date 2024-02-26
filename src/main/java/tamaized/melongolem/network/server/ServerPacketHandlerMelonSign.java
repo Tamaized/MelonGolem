@@ -3,47 +3,46 @@ package tamaized.melongolem.network.server;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
+import net.neoforged.neoforge.network.handling.PlayPayloadContext;
 import tamaized.melongolem.ISignHolder;
+import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.EntityMelonGolem;
-import tamaized.melongolem.network.NetworkMessages;
 
-public class ServerPacketHandlerMelonSign implements NetworkMessages.IMessage<ServerPacketHandlerMelonSign> {
+public record ServerPacketHandlerMelonSign(int entityID, String[] lines) implements CustomPacketPayload {
 
-	private int id;
-	private String[] lines;
+	public static final ResourceLocation ID = new ResourceLocation(MelonMod.MODID, "edit_melon_sign");
 
 	public ServerPacketHandlerMelonSign(ISignHolder golem) {
-		id = golem.networkID();
-		lines = new String[]{golem.getSignText(0).getString(), golem.getSignText(1).getString(), golem.getSignText(2).getString(), golem.getSignText(3).getString()};
+		this(golem.networkID(), new String[]{golem.getSignText(0).getString(), golem.getSignText(1).getString(), golem.getSignText(2).getString(), golem.getSignText(3).getString()});
+	}
+
+	public ServerPacketHandlerMelonSign(FriendlyByteBuf buf) {
+		this(buf.readInt(), new String[]{ buf.readUtf(Short.MAX_VALUE), buf.readUtf(Short.MAX_VALUE), buf.readUtf(Short.MAX_VALUE), buf.readUtf(Short.MAX_VALUE)});
 	}
 
 	@Override
-	public void handle(Player player) {
-		Entity entity = player.level().getEntity(id);
-		if (entity instanceof EntityMelonGolem && entity.distanceTo(player) <= 6)
-			for (int i = 0; i < lines.length; ++i) {
-				String text = ChatFormatting.stripFormatting(lines[i]);
-				((EntityMelonGolem) entity).setSignText(i, Component.literal(text == null ? "" : text));
-			}
+	public ResourceLocation id() {
+		return ID;
+	}
+
+	public static void handle(final ServerPacketHandlerMelonSign packet, PlayPayloadContext context) {
+		context.workHandler().execute(() -> context.level().flatMap(level -> context.player()).ifPresent(player -> {
+			Entity entity = player.level().getEntity(packet.entityID());
+			if (entity instanceof EntityMelonGolem && entity.distanceTo(player) <= 6)
+				for (int i = 0; i < packet.lines.length; ++i) {
+					String text = ChatFormatting.stripFormatting(packet.lines[i]);
+					((EntityMelonGolem) entity).setSignText(i, Component.literal(text == null ? "" : text));
+				}
+		}));
 	}
 
 	@Override
-	public void toBytes(FriendlyByteBuf packet) {
-		packet.writeInt(id);
+	public void write(FriendlyByteBuf packet) {
+		packet.writeInt(entityID);
 		for (int i = 0; i < 4; ++i)
 			packet.writeUtf(lines[i]);
 	}
-
-	@Override
-	public ServerPacketHandlerMelonSign fromBytes(FriendlyByteBuf packet) {
-		id = packet.readInt();
-		lines = new String[4];
-		for (int i = 0; i < 4; ++i) {
-			this.lines[i] = packet.readUtf(Short.MAX_VALUE);
-		}
-		return this;
-	}
-
 }

@@ -1,16 +1,10 @@
-buildscript {
-    repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
-        jcenter()
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-    }
+plugins {
+    id 'java-library'
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.neoforged.gradle.userdev' version '7.0.80'
 }
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
 
 repositories {
     maven {
@@ -28,49 +22,38 @@ archivesBaseName = "MelonMod"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-minecraft {
-    mappings("${project.mapping_type}", "${project.mapping_version}")
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+runs {
+    minecraft.accessTransformers.file rootProject.file('src/main/resources/META-INF/accesstransformer.cfg')
 
-    runs {
-        client {
-            workingDirectory project.file('run')
+    configureEach {
+        modSource project.sourceSets.main
+    }
 
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+    client {
+        workingDirectory project.file('run')
 
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
+        // Recommended logging data for a userdev environment
+        systemProperty 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
 
-            mods {
-                melongolem {
-                    source sourceSets.main
-                }
-            }
-        }
+        // Recommended logging level for the console
+        systemProperty 'forge.logging.console.level', 'debug'
+    }
 
-        server {
-            workingDirectory project.file('run')
+    server {
+        workingDirectory project.file('run')
 
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+        // Recommended logging data for a userdev environment
+        systemProperty 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
 
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                melongolem {
-                    source sourceSets.main
-                }
-            }
-        }
+        // Recommended logging level for the console
+        systemProperty 'forge.logging.console.level', 'debug'
     }
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
+    implementation "net.neoforged:neoforge:${project.neoforge_version}"
 
-    implementation fg.deobf("mezz.jei:${project.jei_version}")
+    //implementation fg.deobf("mezz.jei:${project.jei_version}")
 }
 
 processResources {
@@ -139,5 +122,5 @@ publishing {
 
 task sourceJar(type: Jar, dependsOn: 'classes') {
     from sourceSets.main.allSource
-    classifier = 'sources'
+    archiveClassifier = 'sources'
 }

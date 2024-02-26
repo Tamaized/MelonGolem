@@ -2,7 +2,6 @@ package tamaized.melongolem.common;
 
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -34,12 +33,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.IForgeShearable;
-import net.minecraftforge.entity.IEntityAdditionalSpawnData;
+import net.neoforged.neoforge.common.IShearable;
+import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
 import tamaized.melongolem.ISignHolder;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.client.ClientListener;
 import tamaized.melongolem.common.capability.CapabilityList;
+import tamaized.melongolem.common.capability.TinyGolemAttachment;
 import tamaized.melongolem.network.DonatorHandler;
 
 import javax.annotation.Nonnull;
@@ -47,7 +47,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearable, IEntityAdditionalSpawnData, ISignHolder {
+public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, IEntityWithComplexSpawn, ISignHolder {
 
 	private static final EntityDataAccessor<ItemStack> HEAD = SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.ITEM_STACK);
 	private static final EntityDataAccessor<Boolean> ENABLED = SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.BOOLEAN);
@@ -100,20 +100,21 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearab
 				entityData.set(COLOR, settings.color);
 			}
 		}
-		if (getOwner() instanceof Player)
-			getOwner().getCapability(CapabilityList.TINY_GOLEM).ifPresent(cap -> {
-				if (cap.getPet() != this) {
-					if (cap.getPet() != null && cap.getPet().getUUID().equals(this.getUUID())) {
-						discard();
-						return;
-					}
-					ItemMelonStick.summonPet(level(), (Player) getOwner(), this);
-					if (cap.getPet() == null)
-						cap.setPet(this);
-					else
-						this.hurt(this.damageSources().genericKill(), Float.MAX_VALUE);
+		if (getOwner() instanceof Player) {
+			TinyGolemAttachment attachment = getOwner().getData(CapabilityList.TINY_GOLEM);
+
+			if (attachment.getPet() != this) {
+				if (attachment.getPet() != null && attachment.getPet().getUUID().equals(this.getUUID())) {
+					discard();
+					return;
 				}
-			});
+				ItemMelonStick.summonPet(level(), (Player) getOwner(), this);
+				if (attachment.getPet() == null)
+					attachment.setPet(this);
+				else
+					this.hurt(this.damageSources().genericKill(), Float.MAX_VALUE);
+			}
+		}
 	}
 
 	public boolean isEnabled() {
@@ -277,7 +278,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearab
 	@Nonnull
 	@Override
 	public CompoundTag saveWithoutId(CompoundTag compound) {
-		compound.put("head", getHead().serializeNBT());
+		compound.put("head", getHead().save(new CompoundTag()));
 		compound.putBoolean("glowingText", glowingText());
 		compound.putInt("textColor", getTextColor().getId());
 		compound.putBoolean("donator_enabled", isEnabled());
@@ -304,7 +305,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IForgeShearab
 
 			try {
 				setSignText(i, itextcomponent == null ? Component.literal("") : ComponentUtils.updateForEntity(createCommandSourceStack(), itextcomponent, null, 0));
-			} catch (CommandRuntimeException | CommandSyntaxException var7) {
+			} catch (CommandSyntaxException var7) {
 				setSignText(i, itextcomponent);
 			}
 		}

@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -21,10 +22,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.registries.ForgeRegistries;
-import tamaized.melongolem.MelonMod;
+import net.neoforged.neoforge.network.PacketDistributor;
 import tamaized.melongolem.common.capability.CapabilityList;
+import tamaized.melongolem.common.capability.TinyGolemAttachment;
 import tamaized.melongolem.network.client.ClientPacketHandlerParticle;
 
 import javax.annotation.Nonnull;
@@ -42,14 +42,16 @@ public class ItemMelonStick extends Item {
 	public static void summonPet(Level world, Player owner, EntityTinyMelonGolem golem) {
 		if (golem != null && !golem.isAlive())
 			return;
-		owner.getCapability(CapabilityList.TINY_GOLEM).ifPresent(cap -> {
-			if (cap.load(true)) {
-				if (!(world instanceof ServerLevel) || owner.level().getServer() == null)
-					return;
-				ServerLevel last = owner.level().getServer().getLevel(ResourceKey.create(Registries.DIMENSION, cap.getLoadDim()));
-				if (last != null && cap.getLoadPos() != null) {
-					last.getChunk(cap.getLoadPos()); // Ensure chunk is loaded
-					Entity entity = last.getEntity(cap.getLoadPetID());
+		TinyGolemAttachment attachment = owner.getData(CapabilityList.TINY_GOLEM);
+
+		if (attachment.load(true)) {
+			if (!(world instanceof ServerLevel) || owner.level().getServer() == null)
+				return;
+			ServerLevel last = owner.level().getServer().getLevel(ResourceKey.create(Registries.DIMENSION, attachment.getLoadDim()));
+			if (last != null && attachment.getLoadPos().isPresent()) {
+				last.getChunk(attachment.getLoadPos().get()); // Ensure chunk is loaded
+				if (attachment.getLoadPetID().isPresent()) {
+					Entity entity = last.getEntity(attachment.getLoadPetID().get());
 					if (entity instanceof EntityTinyMelonGolem melon) {
 						if (!world.dimension().location().equals(last.dimension().location()))
 							melon.changeDimension((ServerLevel) world);
@@ -58,51 +60,51 @@ public class ItemMelonStick extends Item {
 					}
 				}
 			}
-			EntityTinyMelonGolem oldPet = golem != null ? golem : cap.getPet();
-			if (oldPet != null && !oldPet.isAlive())
-				oldPet = null;
-			EntityTinyMelonGolem pet = oldPet == null ? new EntityTinyMelonGolem(world) : oldPet;
-			pet.tame(owner);
-			if (oldPet == null)
-				cap.setPet(pet);
+		}
+		EntityTinyMelonGolem oldPet = golem != null ? golem : attachment.getPet();
+		if (oldPet != null && !oldPet.isAlive())
+			oldPet = null;
+		EntityTinyMelonGolem pet = oldPet == null ? new EntityTinyMelonGolem(world) : oldPet;
+		pet.tame(owner);
+		if (oldPet == null)
+			attachment.setPet(pet);
 
-			int x = Mth.floor(owner.getX()) - 2;
-			int z = Mth.floor(owner.getZ()) - 2;
-			int y = Mth.floor(owner.getBoundingBox().minY);
+		int x = Mth.floor(owner.getX()) - 2;
+		int z = Mth.floor(owner.getZ()) - 2;
+		int y = Mth.floor(owner.getBoundingBox().minY);
 
-			loop:
-			for (int l = pet.getRandom().nextInt(6); l <= 8; ++l) {
-				for (int i1 = pet.getRandom().nextInt(6); i1 <= 8; ++i1) {
-					for (int j = 3; j > -3; j--) {
-						if (isTeleportFriendlyBlock(world, pet, x, z, y + j, l, i1)) {
-							double posx = (float) (x + l) + 0.5F;
-							double posy = (double) y + j;
-							double posz = (float) (z + i1) + 0.5F;
+		loop:
+		for (int l = pet.getRandom().nextInt(6); l <= 8; ++l) {
+			for (int i1 = pet.getRandom().nextInt(6); i1 <= 8; ++i1) {
+				for (int j = 3; j > -3; j--) {
+					if (isTeleportFriendlyBlock(world, pet, x, z, y + j, l, i1)) {
+						double posx = (float) (x + l) + 0.5F;
+						double posy = (double) y + j;
+						double posz = (float) (z + i1) + 0.5F;
+						pet.moveTo(posx, posy, posz);
+						if (!pet.level().dimension().location().equals(owner.level().dimension().location())) {
+							pet = (EntityTinyMelonGolem) pet.changeDimension((ServerLevel) owner.level());
+							attachment.setPet(pet);
+							if (pet == null)
+								return;
 							pet.moveTo(posx, posy, posz);
-							if (!pet.level().dimension().location().equals(owner.level().dimension().location())) {
-								pet = (EntityTinyMelonGolem) pet.changeDimension((ServerLevel) owner.level());
-								cap.setPet(pet);
-								if (pet == null)
-									return;
-								pet.moveTo(posx, posy, posz);
-							}
-							for (int i = 0; i < 25; i++) {
-								Vec3 result = pet.getViewVector(1F).yRot(pet.getRandom().nextFloat() * 360F).xRot(pet.getRandom().nextFloat() * 360F).scale(0.35F);
-								spawnVanillaParticleOnServer(world, ParticleTypes.END_ROD, pet.getX() + result.x, pet.getY() + pet.getBbHeight() / 2F + result.y, pet.getZ() + result.z, 0, 0, 0);
-							}
-							if (oldPet == null)
-								world.addFreshEntity(pet);
-							world.playSound(null, pet.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 1.0F, pet.getRandom().nextFloat() + 0.5F);
-							break loop;
 						}
+						for (int i = 0; i < 25; i++) {
+							Vec3 result = pet.getViewVector(1F).yRot(pet.getRandom().nextFloat() * 360F).xRot(pet.getRandom().nextFloat() * 360F).scale(0.35F);
+							spawnVanillaParticleOnServer(world, ParticleTypes.END_ROD, pet.getX() + result.x, pet.getY() + pet.getBbHeight() / 2F + result.y, pet.getZ() + result.z, 0, 0, 0);
+						}
+						if (oldPet == null)
+							world.addFreshEntity(pet);
+						world.playSound(null, pet.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 1.0F, pet.getRandom().nextFloat() + 0.5F);
+						break loop;
 					}
 				}
 			}
-		});
+		}
 	}
 
 	public static void spawnVanillaParticleOnServer(Level world, ParticleOptions particle, double x, double y, double z, double xS, double yS, double zS) {
-		MelonMod.network.send(PacketDistributor.TRACKING_CHUNK.with(() -> world.getChunkAt(BlockPos.containing(x, y, z))), new ClientPacketHandlerParticle(ForgeRegistries.PARTICLE_TYPES.getKey(particle.getType()), new Vec3(x, y, z), new Vec3(xS, yS, zS)));
+		PacketDistributor.TRACKING_CHUNK.with(world.getChunkAt(BlockPos.containing(x, y, z))).send(new ClientPacketHandlerParticle(BuiltInRegistries.PARTICLE_TYPE.getKey(particle.getType()), new Vec3(x, y, z), new Vec3(xS, yS, zS)));
 	}
 
 	private static boolean isTeleportFriendlyBlock(Level world, Entity entity, int x, int z, int y, int xOffset, int zOffset) {
