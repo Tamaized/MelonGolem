@@ -73,16 +73,16 @@ public class MelonMod {
 	public static final DeferredItem<BlockItem> ITEMBLOCK_GLISTERING_MELON = ITEM_REGISTRY
 			.register("glisteringmelonblock", () -> new BlockItem(BLOCK_GLISTERING_MELON.get(), new Item.Properties().setNoRepair()));
 
-	public static final DeferredHolder<EntityType<?>, EntityType<? extends AbstractGolem>> ENTITY_TYPE_MELON_GOLEM = ENTITY_REGISTRY
+	public static final DeferredHolder<EntityType<?>, EntityType<EntityMelonGolem>> ENTITY_TYPE_MELON_GOLEM = ENTITY_REGISTRY
 			.register("entitymelongolem", () -> assign(EntityMelonGolem.class, 0.7F, 1.9F, 128, 1, true, MobCategory.CREATURE, EntityMelonGolem::_registerAttributes));
 
-	public static final DeferredHolder<EntityType<?>, EntityType<? extends AbstractGolem>> ENTITY_TYPE_GLISTERING_MELON_GOLEM = ENTITY_REGISTRY
+	public static final DeferredHolder<EntityType<?>, EntityType<EntityGlisteringMelonGolem>> ENTITY_TYPE_GLISTERING_MELON_GOLEM = ENTITY_REGISTRY
 			.register("entityglisteringmelongolem", () -> assign(EntityGlisteringMelonGolem.class, 0.7F, 1.9F, 128, 1, true, MobCategory.CREATURE, EntityMelonGolem::_registerAttributes));
 
-	public static final DeferredHolder<EntityType<?>, EntityType<? extends EntityMelonSlice>> ENTITY_TYPE_MELON_SLICE = ENTITY_REGISTRY
+	public static final DeferredHolder<EntityType<?>, EntityType<EntityMelonSlice>> ENTITY_TYPE_MELON_SLICE = ENTITY_REGISTRY
 			.register("entitymelonslice", () -> assign(EntityMelonSlice.class, 0.25F, 0.25F, 128, 1, true, MobCategory.MISC));
 
-	public static final DeferredHolder<EntityType<?>, EntityType<? extends TamableAnimal>> ENTITY_TYPE_TINY_MELON_GOLEM = ENTITY_REGISTRY
+	public static final DeferredHolder<EntityType<?>, EntityType<EntityTinyMelonGolem>> ENTITY_TYPE_TINY_MELON_GOLEM = ENTITY_REGISTRY
 			.register("entitytinymelongolem", () -> assign(EntityTinyMelonGolem.class, 0.175F, 0.475F, 128, 1, true, MobCategory.CREATURE, EntityMelonGolem::_registerAttributes));
 
 	public static final DeferredItem<Item> ITEM_SPAWN_EGG_MELON_GOLEM = ITEM_REGISTRY

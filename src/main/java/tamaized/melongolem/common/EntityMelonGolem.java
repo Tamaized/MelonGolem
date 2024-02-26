@@ -5,6 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -200,7 +201,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 
 	@Override
 	public void playAmbientSound() {
-		if (level() != null && !level().isClientSide())
+		if (!level().isClientSide())
 			PacketDistributor.TRACKING_ENTITY.with(this).send(new ClientPacketHandlerMelonAmbientSound(this));
 	}
 
@@ -344,7 +345,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 		private final Item melon;
 		private final Block melonblock;
 		private int cooldown;
-		private BlockPos.MutableBlockPos vertex = new BlockPos.MutableBlockPos();
+		private final BlockPos.MutableBlockPos vertex = new BlockPos.MutableBlockPos();
 		private boolean foundMelon = false;
 
 		EntityAISearchAndEatMelons(Mob entity) {
@@ -405,7 +406,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 					for (int y = -radius; y < radius; y++)
 						for (int z = -radius; z < radius; z++) {
 							vertex.set(parent.blockPosition().offset(x, y, z));
-							if (parent.level().hasChunkAt(vertex)) {
+							if (parent.level().hasChunk(SectionPos.blockToSectionCoord(vertex.getX()), SectionPos.blockToSectionCoord(vertex.getZ()))) {
 								BlockEntity te = parent.level().getBlockEntity(vertex);
 								if (te != null) {
 									IItemHandler cap = parent.level().getCapability(Capabilities.ItemHandler.BLOCK, vertex, Direction.UP);
@@ -425,7 +426,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 			}
 			if (foundMelon) {
 				// Validate
-				if (!parent.level().hasChunkAt(vertex)) {
+				if (!parent.level().hasChunk(SectionPos.blockToSectionCoord(vertex.getX()), SectionPos.blockToSectionCoord(vertex.getZ()))) {
 					parent.getNavigation().stop();
 					foundMelon = false;
 					return;

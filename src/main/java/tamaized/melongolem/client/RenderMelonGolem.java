@@ -15,6 +15,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Mob;
 import tamaized.melongolem.ISignHolder;
 import tamaized.melongolem.MelonMod;
+import tamaized.melongolem.common.EntityGlisteringMelonGolem;
+import tamaized.melongolem.common.EntityMelonGolem;
 import tamaized.melongolem.common.EntityTinyMelonGolem;
 
 import javax.annotation.Nonnull;
@@ -79,18 +81,17 @@ public class RenderMelonGolem<T extends Mob & ISignHolder> extends MobRenderer<T
 		private float blue = 1F;
 	}
 
-	@SuppressWarnings("rawtypes")
 	public static class Factory {
 
-		public static RenderMelonGolem normal(EntityRendererProvider.Context renderManager) {
+		public static RenderMelonGolem<EntityMelonGolem> normal(EntityRendererProvider.Context renderManager) {
 			return new RenderMelonGolem<>(renderManager, Type.NORMAL);
 		}
 
-		public static RenderMelonGolem tiny(EntityRendererProvider.Context renderManager) {
+		public static RenderMelonGolem<EntityTinyMelonGolem> tiny(EntityRendererProvider.Context renderManager) {
 			return new RenderMelonGolem<>(renderManager, Type.TINY);
 		}
 
-		public static RenderMelonGolem glister(EntityRendererProvider.Context renderManager) {
+		public static RenderMelonGolem<EntityGlisteringMelonGolem> glister(EntityRendererProvider.Context renderManager) {
 			return new RenderMelonGolem<>(renderManager, Type.GLISTER);
 		}
 

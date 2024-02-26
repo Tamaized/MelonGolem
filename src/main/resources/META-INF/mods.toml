@@ -5,7 +5,7 @@ license="All Rights Reserved"
 
 [[mods]]
     modId="melongolem"
-    version="${version}"
+    version="${file.jarVersion}"
     displayName="Melon Golem"
     credits=""
     authors="Tamaized"
