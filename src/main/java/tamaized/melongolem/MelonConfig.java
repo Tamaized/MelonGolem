@@ -1,13 +1,13 @@
 package tamaized.melongolem;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.AirItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.Objects;
 
@@ -15,10 +15,10 @@ import java.util.Objects;
 public class MelonConfig {
 
 	public static class Client {
-		public ForgeConfigSpec.BooleanValue tehnutMode;
-		public ForgeConfigSpec.BooleanValue tts;
+		public ModConfigSpec.BooleanValue tehnutMode;
+		public ModConfigSpec.BooleanValue tts;
 
-		public Client(ForgeConfigSpec.Builder builder) {
+		public Client(ModConfigSpec.Builder builder) {
 			tehnutMode = builder.
 					translation("TehNut Mode").
 					comment(":^)").
@@ -35,16 +35,16 @@ public class MelonConfig {
 	public static boolean dirty = true;
 	public static Item stabItem = Items.STICK;
 	public final DonatorSettings DONATOR_SETTINGS = new DonatorSettings();
-	public ForgeConfigSpec.DoubleValue health;
-	public ForgeConfigSpec.DoubleValue damage;
-	public ForgeConfigSpec.DoubleValue glisterDamageAmp;
-	public ForgeConfigSpec.BooleanValue hats;
-	public ForgeConfigSpec.BooleanValue shear;
-	public ForgeConfigSpec.BooleanValue eats;
-	public ForgeConfigSpec.DoubleValue heal;
-	public ForgeConfigSpec.ConfigValue<String> stabby;
+	public ModConfigSpec.DoubleValue health;
+	public ModConfigSpec.DoubleValue damage;
+	public ModConfigSpec.DoubleValue glisterDamageAmp;
+	public ModConfigSpec.BooleanValue hats;
+	public ModConfigSpec.BooleanValue shear;
+	public ModConfigSpec.BooleanValue eats;
+	public ModConfigSpec.DoubleValue heal;
+	public ModConfigSpec.ConfigValue<String> stabby;
 
-	public MelonConfig(ForgeConfigSpec.Builder builder) {
+	public MelonConfig(ModConfigSpec.Builder builder) {
 		builder.
 				comment("Donator Settings").
 				push("Donator Settings");
@@ -101,7 +101,7 @@ public class MelonConfig {
 		stabby = builder.
 				translation("Stabby Life Item").
 				comment("The item used to spawn a melon golem\n\n[domain:name] domain will default to `minecraft`").
-				define("stabby", Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(Items.STICK)).getPath());
+				define("stabby", Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(Items.STICK)).getPath());
 	}
 
 	public static void setupStabby() {
@@ -112,7 +112,7 @@ public class MelonConfig {
 			domain = split[0];
 			regname = split[1];
 		}
-		Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(domain, regname));
+		Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(domain, regname));
 		if (item == null || item instanceof AirItem)
 			return;
 		stabItem = item;
@@ -143,8 +143,8 @@ public class MelonConfig {
 	}
 
 	public static class DonatorSettings {
-		public ForgeConfigSpec.BooleanValue enable;
-		public ForgeConfigSpec.ConfigValue<String> color;
+		public ModConfigSpec.BooleanValue enable;
+		public ModConfigSpec.ConfigValue<String> color;
 		public int colorint = 0xFFFFFF;
 	}
 

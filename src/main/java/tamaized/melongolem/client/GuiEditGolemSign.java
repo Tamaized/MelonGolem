@@ -20,9 +20,9 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.StandingAndWallBlockItem;
 import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.joml.Matrix4f;
 import tamaized.melongolem.ISignHolder;
-import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.EntityMelonGolem;
 import tamaized.melongolem.network.server.ServerPacketHandlerMelonSign;
 
@@ -66,7 +66,7 @@ public class GuiEditGolemSign extends Screen {
 		if (minecraft == null)
 			return;
 		if (canSend)
-			MelonMod.network.sendToServer(new ServerPacketHandlerMelonSign(golem));
+			PacketDistributor.SERVER.noArg().send(new ServerPacketHandlerMelonSign(golem));
 		this.minecraft.setScreen(null);
 	}
 
@@ -103,7 +103,7 @@ public class GuiEditGolemSign extends Screen {
 	@Override
 	public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
 		Lighting.setupForFlatItems();
-		this.renderBackground(graphics);
+		this.renderBackground(graphics, mouseX, mouseY, partialTicks);
 		graphics.drawCenteredString(this.font, this.title, this.width / 2, 40, 16777215);
 		PoseStack stack = graphics.pose();
 		stack.pushPose();

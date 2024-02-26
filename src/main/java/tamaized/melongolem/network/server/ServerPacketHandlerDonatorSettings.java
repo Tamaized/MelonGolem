@@ -1,33 +1,36 @@
 package tamaized.melongolem.network.server;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.network.DonatorHandler;
-import tamaized.melongolem.network.NetworkMessages;
 
-public class ServerPacketHandlerDonatorSettings implements NetworkMessages.IMessage<ServerPacketHandlerDonatorSettings> {
+public record ServerPacketHandlerDonatorSettings(DonatorHandler.DonatorSettings settings) implements CustomPacketPayload {
 
-	private DonatorHandler.DonatorSettings settings;
+	public static final ResourceLocation ID = new ResourceLocation(MelonMod.MODID, "donator_settings");
 
-	public ServerPacketHandlerDonatorSettings(DonatorHandler.DonatorSettings settings) {
-		this.settings = settings;
+	public ServerPacketHandlerDonatorSettings(FriendlyByteBuf buf) {
+		this(new DonatorHandler.DonatorSettings(buf.readBoolean(), buf.readInt()));
 	}
 
 	@Override
-	public void handle(Player player) {
-		if (DonatorHandler.donators.contains(player.getUUID()))
-			DonatorHandler.settings.put(player.getUUID(), settings);
+	public ResourceLocation id() {
+		return ID;
+	}
+
+	public static void handle(final ServerPacketHandlerDonatorSettings packet, PlayPayloadContext context) {
+		context.workHandler().execute(() ->
+				context.player().ifPresent(player -> {
+					if (DonatorHandler.donators.contains(player.getUUID()))
+						DonatorHandler.settings.put(player.getUUID(), packet.settings());
+				}));
 	}
 
 	@Override
-	public void toBytes(FriendlyByteBuf packet) {
-		packet.writeBoolean(settings.enabled);
-		packet.writeInt(settings.color);
-	}
-
-	@Override
-	public ServerPacketHandlerDonatorSettings fromBytes(FriendlyByteBuf packet) {
-		settings = new DonatorHandler.DonatorSettings(packet.readBoolean(), packet.readInt());
-		return this;
+	public void write(FriendlyByteBuf packet) {
+		packet.writeBoolean(settings().enabled);
+		packet.writeInt(settings().color);
 	}
 }

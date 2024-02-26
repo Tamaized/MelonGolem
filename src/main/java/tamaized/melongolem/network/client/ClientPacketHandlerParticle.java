@@ -2,24 +2,32 @@ package tamaized.melongolem.network.client;
 
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.ForgeRegistries;
-import tamaized.melongolem.network.NetworkMessages;
+import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import tamaized.melongolem.MelonMod;
 
-public class ClientPacketHandlerParticle implements NetworkMessages.IMessage<ClientPacketHandlerParticle> {
+public record ClientPacketHandlerParticle(ResourceLocation location, Vec3 vec, Vec3 vel) implements CustomPacketPayload {
 
-	private ResourceLocation id;
-	private Vec3 vec;
-	private Vec3 vel;
+	public static final ResourceLocation ID = new ResourceLocation(MelonMod.MODID, "spawn_particle");
 
-	public ClientPacketHandlerParticle(ResourceLocation particle, Vec3 vertex, Vec3 vel) {
-		id = particle;
-		vec = vertex;
-		this.vel = vel;
+	public ClientPacketHandlerParticle(FriendlyByteBuf buf) {
+		this(buf.readResourceLocation(),
+				new Vec3(buf.readDouble(), buf.readDouble(), buf.readDouble()),
+				new Vec3(buf.readDouble(), buf.readDouble(), buf.readDouble()));
+	}
+
+	@Override
+	public ResourceLocation id() {
+		return ID;
+	}
+
+	public static void handle(final ClientPacketHandlerParticle packet, PlayPayloadContext context) {
+		context.workHandler().execute(() -> context.player().ifPresent(player -> spawnParticle(player.level(), getRegisteredParticleTypes(packet.location()), packet.vec(), packet.vel())));
 	}
 
 	public static void spawnParticle(Level world, ParticleOptions particle, Vec3 vertex, Vec3 vel) {
@@ -27,7 +35,7 @@ public class ClientPacketHandlerParticle implements NetworkMessages.IMessage<Cli
 	}
 
 	private static ParticleOptions getRegisteredParticleTypes(ResourceLocation location) {
-		ParticleType<?> t = ForgeRegistries.PARTICLE_TYPES.getValue(location);
+		ParticleType<?> t = BuiltInRegistries.PARTICLE_TYPE.get(location);
 		if (!(t instanceof ParticleOptions)) {
 			throw new IllegalStateException("Invalid or unknown particle type: " + location);
 		} else {
@@ -36,26 +44,13 @@ public class ClientPacketHandlerParticle implements NetworkMessages.IMessage<Cli
 	}
 
 	@Override
-	public void handle(Player player) {
-		spawnParticle(player.level(), getRegisteredParticleTypes(id), vec, vel);
-	}
-
-	@Override
-	public void toBytes(FriendlyByteBuf packet) {
-		packet.writeResourceLocation(id);
+	public void write(FriendlyByteBuf packet) {
+		packet.writeResourceLocation(location);
 		packet.writeDouble(vec.x);
 		packet.writeDouble(vec.y);
 		packet.writeDouble(vec.z);
 		packet.writeDouble(vel.x);
 		packet.writeDouble(vel.y);
 		packet.writeDouble(vel.z);
-	}
-
-	@Override
-	public ClientPacketHandlerParticle fromBytes(FriendlyByteBuf packet) {
-		id = packet.readResourceLocation();
-		vec = new Vec3(packet.readDouble(), packet.readDouble(), packet.readDouble());
-		vel = new Vec3(packet.readDouble(), packet.readDouble(), packet.readDouble());
-		return this;
 	}
 }

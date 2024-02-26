@@ -3,7 +3,6 @@ package tamaized.melongolem.common;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.Minecraft;
-import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -38,14 +37,13 @@ import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.IForgeShearable;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.entity.IEntityAdditionalSpawnData;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.common.IShearable;
+import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.network.PacketDistributor;
 import tamaized.melongolem.ISignHolder;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.client.ClientListener;
@@ -57,7 +55,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 
-public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, IForgeShearable, IEntityAdditionalSpawnData, ISignHolder {
+public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, IShearable, IEntityWithComplexSpawn, ISignHolder {
 
 	private static final EntityDataAccessor<ItemStack> HEAD = SynchedEntityData.defineId(EntityMelonGolem.class, EntityDataSerializers.ITEM_STACK);
 	private static final EntityDataAccessor<Boolean> GLOWING_TEXT = SynchedEntityData.defineId(EntityMelonGolem.class, EntityDataSerializers.BOOLEAN);
@@ -203,7 +201,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 	@Override
 	public void playAmbientSound() {
 		if (level() != null && !level().isClientSide())
-			MelonMod.network.send(PacketDistributor.TRACKING_ENTITY.with(() -> this), new ClientPacketHandlerMelonAmbientSound(this));
+			PacketDistributor.TRACKING_ENTITY.with(this).send(new ClientPacketHandlerMelonAmbientSound(this));
 	}
 
 	@Nonnull
@@ -298,7 +296,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 	@Nonnull
 	@Override
 	public CompoundTag saveWithoutId(CompoundTag compound) {
-		compound.put("head", getHead().serializeNBT());
+		compound.put("head", getHead().save(new CompoundTag()));
 		compound.putBoolean("glowingText", glowingText());
 		compound.putInt("textColor", getTextColor().getId());
 		for (int i = 0; i < 4; ++i) {
@@ -319,7 +317,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 
 			try {
 				setSignText(i, itextcomponent == null ? Component.literal("") : ComponentUtils.updateForEntity(createCommandSourceStack(), itextcomponent, null, 0));
-			} catch (CommandRuntimeException | CommandSyntaxException var7) {
+			} catch (CommandSyntaxException var7) {
 				setSignText(i, itextcomponent);
 			}
 		}
@@ -410,14 +408,15 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 							if (parent.level().hasChunkAt(vertex)) {
 								BlockEntity te = parent.level().getBlockEntity(vertex);
 								if (te != null) {
-									te.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP).ifPresent(cap -> {
+									IItemHandler cap = parent.level().getCapability(Capabilities.ItemHandler.BLOCK, vertex, Direction.UP);
+									if (cap != null) {
 										for (int i = 0; i < cap.getSlots(); i++) {
 											if (isMelon(cap.getStackInSlot(i))) {
 												foundMelon = parent.distanceToSqr(vertex.getX(), vertex.getY(), vertex.getZ()) < 4 || parent.getNavigation().moveTo(vertex.getX(), vertex.getY(), vertex.getZ(), 1.25F);
 												break;
 											}
 										}
-									});
+									}
 									if (foundMelon)
 										break search;
 								}
@@ -432,36 +431,34 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 					return;
 				}
 				BlockEntity te = parent.level().getBlockEntity(vertex);
-				if (te == null || !te.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP).isPresent()) {
+				if (te == null || parent.level().getCapability(Capabilities.ItemHandler.BLOCK, vertex, Direction.UP) == null) {
 					parent.getNavigation().stop();
 					foundMelon = false;
 					return;
 				}
-				LazyOptional<IItemHandler> handler = te.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP);
-				if (handler.isPresent()) {
-					handler.ifPresent(cap -> {
-						boolean valid = false;
-						int i;
-						for (i = 0; i < cap.getSlots(); i++) {
-							if (isMelon(cap.getStackInSlot(i))) {
-								valid = true;
-								break;
-							}
+				IItemHandler handler = parent.level().getCapability(Capabilities.ItemHandler.BLOCK, vertex, Direction.UP);
+				if (handler != null) {
+					boolean valid = false;
+					int i;
+					for (i = 0; i < handler.getSlots(); i++) {
+						if (isMelon(handler.getStackInSlot(i))) {
+							valid = true;
+							break;
 						}
-						if (!valid) {
-							parent.getNavigation().stop();
-							foundMelon = false;
-							return;
-						}
+					}
+					if (!valid) {
+						parent.getNavigation().stop();
+						foundMelon = false;
+						return;
+					}
 
-						if (cooldown <= 0 && parent.distanceToSqr(vertex.getX(), vertex.getY(), vertex.getZ()) < 4) {
-							boolean flag = cap.getStackInSlot(i).getItem() == melonblock.asItem();
-							cap.getStackInSlot(i).shrink(1);
-							parent.playSound(SoundEvents.PLAYER_BURP, 1F, 1F);
-							parent.heal(MelonMod.config.heal.get().floatValue() * (flag ? 9 : 1));
-							cooldown = 10 + parent.getRandom().nextInt(40);
-						}
-					});
+					if (cooldown <= 0 && parent.distanceToSqr(vertex.getX(), vertex.getY(), vertex.getZ()) < 4) {
+						boolean flag = handler.getStackInSlot(i).getItem() == melonblock.asItem();
+						handler.getStackInSlot(i).shrink(1);
+						parent.playSound(SoundEvents.PLAYER_BURP, 1F, 1F);
+						parent.heal(MelonMod.config.heal.get().floatValue() * (flag ? 9 : 1));
+						cooldown = 10 + parent.getRandom().nextInt(40);
+					}
 				} else {
 					parent.getNavigation().stop();
 					foundMelon = false;

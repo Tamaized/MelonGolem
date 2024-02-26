@@ -1,15 +1,13 @@
 package tamaized.melongolem.client;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.gui.widget.ExtendedButton;
+import net.neoforged.neoforge.client.gui.widget.ExtendedButton;
 import tamaized.melongolem.MelonConfig;
 import tamaized.melongolem.MelonMod;
 
@@ -36,8 +34,11 @@ public class MelonConfigScreen extends Screen {
 		int ix = font.width(TEXT_DONATOR_COLOR) + 10;
 		addRenderableWidget(input = new EditBox(font, ix, 25, Minecraft.getInstance().getWindow().getGuiScaledWidth() - ix - 15, 20, Component.literal("")));
 		input.setValue(MelonMod.config.DONATOR_SETTINGS.color.get());
-		addRenderableWidget(enabled = new Checkbox(ix, 50, 20, 20, Component.literal("Enabled"), MelonMod.config.DONATOR_SETTINGS.enable.get()));
-
+		Checkbox checkbox = Checkbox.builder(Component.literal("Enabled"), font)
+				.pos(ix, 50)
+				.selected(MelonMod.config.DONATOR_SETTINGS.enable.get())
+				.build();
+		addRenderableWidget(enabled = checkbox);
 	}
 
 	@Override
@@ -52,7 +53,7 @@ public class MelonConfigScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-		renderBackground(graphics);
+		renderBackground(graphics, mouseX, mouseY, partialTicks);
 		graphics.drawCenteredString(font, Component.literal("Melon Golem Config"), (int) (Minecraft.getInstance().getWindow().getGuiScaledWidth() / 2F), 5, 0xFFFFFFFF);
 		int color = 0xFFFFFFFF;
 		try {
