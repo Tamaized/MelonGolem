@@ -1,27 +1,21 @@
 modLoader="javafml"
-loaderVersion="[46,)"
+loaderVersion="[1,)"
 issueTrackerURL="https://github.com/Tamaized/MelonGolem/issues"
 license="All Rights Reserved"
+
 [[mods]]
-modId="melongolem"
-version="${version}"
-displayName="Melon Golem"
-credits=""
-authors="Tamaized"
-description='''
-Adds a Melon Golem
-'''
+    modId="melongolem"
+    version="${version}"
+    displayName="Melon Golem"
+    credits=""
+    authors="Tamaized"
+    description='''
+    Adds a Melon Golem
+    '''
 
 [[dependencies.melongolem]]
-    modId="forge"
-    mandatory=true
-    versionRange="[46.0.1,)"
-    ordering="NONE"
-    side="BOTH"
-
-[[dependencies.melongolem]]
-    modId="minecraft"
-    mandatory=true
-    versionRange="[1.20,)"
+    modId="neoforge"
+    type="required"
+    versionRange="[20,)"
     ordering="NONE"
     side="BOTH"
