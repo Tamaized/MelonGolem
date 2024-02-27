@@ -6,12 +6,14 @@ import net.minecraft.world.item.AirItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.config.ModConfigEvent;
+import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.Objects;
 
-@Mod.EventBusSubscriber(modid = MelonMod.MODID)
 public class MelonConfig {
 
 	public static class Client {
@@ -122,14 +124,18 @@ public class MelonConfig {
 		return stack.getItem() == stabItem;
 	}
 
-	/*@SubscribeEvent TODO
-	public static void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
-		if (event.getModID().equals(MelonMod.MODID)) {
-			ConfigManager.sync(MelonMod.MODID, Config.Type.INSTANCE);
+	public static void init(IEventBus modBus) {
+		modBus.addListener(ModConfigEvent.Reloading.class, event -> {
+			if (event.getConfig().getModId().equals(MelonMod.MODID)) {
+				setupStabby();
+				setupColor();
+			}
+		});
+		modBus.addListener(FMLLoadCompleteEvent.class, event -> {
 			setupStabby();
 			setupColor();
-		}
-	}*/
+		});
+	}
 
 	public static void setupColor() {
 		try {

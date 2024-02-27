@@ -17,11 +17,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgeableMob;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
-import net.minecraft.world.entity.Pose;
-import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.goal.FollowOwnerGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
@@ -41,6 +37,7 @@ import tamaized.melongolem.client.ClientListener;
 import tamaized.melongolem.common.capability.CapabilityList;
 import tamaized.melongolem.common.capability.TinyGolemAttachment;
 import tamaized.melongolem.network.DonatorHandler;
+import tamaized.melongolem.registry.ModEntities;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -66,8 +63,12 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 
 	);
 
-	public EntityTinyMelonGolem(Level worldIn) {
-		super(Objects.requireNonNull(MelonMod.ENTITY_TYPE_TINY_MELON_GOLEM.get()), worldIn);
+	public EntityTinyMelonGolem(Level level) {
+		this(ModEntities.TINY_MELON_GOLEM.get(), level);
+	}
+
+	public EntityTinyMelonGolem(EntityType<EntityTinyMelonGolem> type, Level level) {
+		super(type, level);
 	}
 
 	@Nullable

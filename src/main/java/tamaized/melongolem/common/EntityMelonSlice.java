@@ -5,6 +5,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ItemSupplier;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
@@ -14,6 +15,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import tamaized.melongolem.MelonMod;
+import tamaized.melongolem.registry.ModEntities;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -23,20 +25,22 @@ public class EntityMelonSlice extends ThrowableProjectile implements ItemSupplie
 	private static final EntityDataAccessor<Boolean> GLIST = SynchedEntityData.defineId(EntityMelonSlice.class, EntityDataSerializers.BOOLEAN);
 	private static ItemStack cacheRenderStack = ItemStack.EMPTY;
 
-	@SuppressWarnings("unused")
-	public EntityMelonSlice(Level worldIn) {
-		super(Objects.requireNonNull(MelonMod.ENTITY_TYPE_MELON_SLICE.get()), worldIn);
+	public EntityMelonSlice(Level level) {
+		this(ModEntities.MELON_SLICE.get(), level);
 	}
 
-	public EntityMelonSlice(Level worldIn, LivingEntity throwerIn) {
-		super(Objects.requireNonNull(MelonMod.ENTITY_TYPE_MELON_SLICE.get()), throwerIn, worldIn);
-		if (throwerIn instanceof EntityGlisteringMelonGolem)
+	public EntityMelonSlice(EntityType<? extends EntityMelonSlice> type, Level level) {
+		super(type, level);
+	}
+
+	public EntityMelonSlice(Level level, LivingEntity thrower) {
+		super(ModEntities.MELON_SLICE.get(), thrower, level);
+		if (thrower instanceof EntityGlisteringMelonGolem)
 			setGlist();
 	}
 
-	@SuppressWarnings("unused")
-	public EntityMelonSlice(Level worldIn, double x, double y, double z) {
-		super(Objects.requireNonNull(MelonMod.ENTITY_TYPE_MELON_SLICE.get()), x, y, z, worldIn);
+	public EntityMelonSlice(Level level, double x, double y, double z) {
+		super(ModEntities.MELON_SLICE.get(), x, y, z, level);
 	}
 
 	@Override

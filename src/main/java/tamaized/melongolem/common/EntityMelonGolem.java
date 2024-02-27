@@ -49,6 +49,8 @@ import tamaized.melongolem.ISignHolder;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.client.ClientListener;
 import tamaized.melongolem.network.client.ClientPacketHandlerMelonAmbientSound;
+import tamaized.melongolem.registry.ModBlocks;
+import tamaized.melongolem.registry.ModEntities;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -90,17 +92,14 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 	};
 
 	public EntityMelonGolem(Level level) {
-		this(Objects.requireNonNull(MelonMod.ENTITY_TYPE_MELON_GOLEM.get()), level);
+		this(ModEntities.MELON_GOLEM.get(), level);
 	}
 
-	protected EntityMelonGolem(EntityType<? extends AbstractGolem> entity, Level level) {
-		super(entity, level);
+	public EntityMelonGolem(EntityType<? extends EntityMelonGolem> type, Level level) {
+		super(type, level);
 	}
 
-	/*
-	 * underscore required due to a bad reobf catch causing calls to this method to be obfuscated while the method remains the same
-	 */
-	public static AttributeSupplier.Builder _registerAttributes() {
+	public static AttributeSupplier.Builder createAttributes() {
 		return Mob.createMobAttributes().
 				add(Attributes.MAX_HEALTH, 8.0F).
 				add(Attributes.MOVEMENT_SPEED, 0.2F);
@@ -352,7 +351,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 			parent = entity;
 			setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
 			melon = entity instanceof EntityGlisteringMelonGolem ? Items.GLISTERING_MELON_SLICE : Items.MELON_SLICE;
-			melonblock = entity instanceof EntityGlisteringMelonGolem ? MelonMod.BLOCK_GLISTERING_MELON.get() : Blocks.MELON;
+			melonblock = entity instanceof EntityGlisteringMelonGolem ? ModBlocks.GLISTERING_MELON.get() : Blocks.MELON;
 		}
 
 		@Override
