@@ -9,11 +9,7 @@ public interface ISignHolder {
 
     ItemStack getHead();
 
-	default float distanceTo(Entity entity) {
-		return _distanceTo(entity);
-	}
-
-    float _distanceTo(Entity entityIn); // Cannot share a name with mojmap
+	float distanceTo(Entity entity);
 
     Component getSignText(int index);
 

@@ -235,11 +235,6 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 	}
 
 	@Override
-	public float _distanceTo(Entity entityIn) {
-		return distanceTo(entityIn);
-	}
-
-	@Override
 	public ItemStack getHead() {
 		return entityData.get(HEAD);
 	}

@@ -20,7 +20,7 @@ public record ServerPacketHandlerMelonSign(int entityID, String[] lines) impleme
 	}
 
 	public ServerPacketHandlerMelonSign(FriendlyByteBuf buf) {
-		this(buf.readInt(), new String[]{ buf.readUtf(Short.MAX_VALUE), buf.readUtf(Short.MAX_VALUE), buf.readUtf(Short.MAX_VALUE), buf.readUtf(Short.MAX_VALUE)});
+		this(buf.readInt(), new String[]{buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readUtf()});
 	}
 
 	@Override
@@ -29,7 +29,7 @@ public record ServerPacketHandlerMelonSign(int entityID, String[] lines) impleme
 	}
 
 	public static void handle(final ServerPacketHandlerMelonSign packet, PlayPayloadContext context) {
-		context.workHandler().execute(() -> context.level().flatMap(level -> context.player()).ifPresent(player -> {
+		context.workHandler().execute(() -> context.player().ifPresent(player -> {
 			Entity entity = player.level().getEntity(packet.entityID());
 			if (entity instanceof EntityMelonGolem && entity.distanceTo(player) <= 6)
 				for (int i = 0; i < packet.lines.length; ++i) {
