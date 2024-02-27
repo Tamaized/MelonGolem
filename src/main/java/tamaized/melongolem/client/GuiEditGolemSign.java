@@ -24,7 +24,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import org.joml.Matrix4f;
 import tamaized.melongolem.ISignHolder;
 import tamaized.melongolem.common.EntityMelonGolem;
-import tamaized.melongolem.network.server.ServerPacketHandlerMelonSign;
+import tamaized.melongolem.network.server.ServerPacketMelonSign;
 
 import javax.annotation.Nonnull;
 
@@ -66,7 +66,7 @@ public class GuiEditGolemSign extends Screen {
 		if (minecraft == null)
 			return;
 		if (canSend)
-			PacketDistributor.SERVER.noArg().send(new ServerPacketHandlerMelonSign(golem));
+			PacketDistributor.SERVER.noArg().send(new ServerPacketMelonSign(golem));
 		this.minecraft.setScreen(null);
 	}
 

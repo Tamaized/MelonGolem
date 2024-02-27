@@ -7,7 +7,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import tamaized.melongolem.MelonConfig;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.network.DonatorHandler;
-import tamaized.melongolem.network.server.ServerPacketHandlerDonatorSettings;
+import tamaized.melongolem.network.server.ServerPacketDonatorSettings;
 
 public class ClientListener {
 
@@ -19,7 +19,7 @@ public class ClientListener {
 			}
 			if (event.phase == TickEvent.Phase.START) {
 				if (MelonConfig.dirty && DonatorHandler.donators.contains(Minecraft.getInstance().player.getUUID())) {
-					PacketDistributor.SERVER.noArg().send(new ServerPacketHandlerDonatorSettings(new DonatorHandler.DonatorSettings(MelonMod.config.DONATOR_SETTINGS.enable.get(), MelonMod.config.DONATOR_SETTINGS.colorint)));
+					PacketDistributor.SERVER.noArg().send(new ServerPacketDonatorSettings(new DonatorHandler.DonatorSettings(MelonMod.config.DONATOR_SETTINGS.enable.get(), MelonMod.config.DONATOR_SETTINGS.colorint)));
 					MelonConfig.dirty = false;
 				}
 			}

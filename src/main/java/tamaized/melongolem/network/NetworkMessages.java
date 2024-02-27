@@ -4,10 +4,10 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlerEvent;
 import net.neoforged.neoforge.network.registration.IPayloadRegistrar;
 import tamaized.melongolem.MelonMod;
-import tamaized.melongolem.network.client.ClientPacketHandlerMelonAmbientSound;
-import tamaized.melongolem.network.client.ClientPacketHandlerParticle;
-import tamaized.melongolem.network.server.ServerPacketHandlerDonatorSettings;
-import tamaized.melongolem.network.server.ServerPacketHandlerMelonSign;
+import tamaized.melongolem.network.client.ClientPacketMelonAmbientSound;
+import tamaized.melongolem.network.client.ClientPacketSendParticles;
+import tamaized.melongolem.network.server.ServerPacketDonatorSettings;
+import tamaized.melongolem.network.server.ServerPacketMelonSign;
 
 public class NetworkMessages {
 
@@ -19,11 +19,11 @@ public class NetworkMessages {
 
 			final IPayloadRegistrar registrar = event.registrar(MelonMod.MODID).versioned("1").optional();
 
-			registrar.play(ServerPacketHandlerMelonSign.ID, ServerPacketHandlerMelonSign::new, payload -> payload.server(ServerPacketHandlerMelonSign::handle));
-			registrar.play(ServerPacketHandlerDonatorSettings.ID, ServerPacketHandlerDonatorSettings::new, payload -> payload.server(ServerPacketHandlerDonatorSettings::handle));
+			registrar.play(ServerPacketMelonSign.ID, ServerPacketMelonSign::new, payload -> payload.server(ServerPacketMelonSign::handle));
+			registrar.play(ServerPacketDonatorSettings.ID, ServerPacketDonatorSettings::new, payload -> payload.server(ServerPacketDonatorSettings::handle));
 
-			registrar.play(ClientPacketHandlerMelonAmbientSound.ID, ClientPacketHandlerMelonAmbientSound::new, payload -> payload.client(ClientPacketHandlerMelonAmbientSound::handle));
-			registrar.play(ClientPacketHandlerParticle.ID, ClientPacketHandlerParticle::new, payload -> payload.client(ClientPacketHandlerParticle::handle));
+			registrar.play(ClientPacketMelonAmbientSound.ID, ClientPacketMelonAmbientSound::new, payload -> payload.client(ClientPacketMelonAmbientSound::handle));
+			registrar.play(ClientPacketSendParticles.ID, ClientPacketSendParticles::new, payload -> payload.client(ClientPacketSendParticles::handle));
 		});
 	}
 

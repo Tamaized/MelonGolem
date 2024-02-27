@@ -111,7 +111,8 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 					discard();
 					return;
 				}
-				ItemMelonStick.summonPet(level(), (Player) getOwner(), this);
+				if (level() instanceof ServerLevel serverLevel && getOwner() instanceof Player player)
+					ItemMelonStick.summonPet(serverLevel, player, this);
 				if (attachment.getPet() == null)
 					attachment.setPet(this);
 				else

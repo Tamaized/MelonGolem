@@ -7,11 +7,11 @@ import net.neoforged.neoforge.network.handling.PlayPayloadContext;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.network.DonatorHandler;
 
-public record ServerPacketHandlerDonatorSettings(DonatorHandler.DonatorSettings settings) implements CustomPacketPayload {
+public record ServerPacketDonatorSettings(DonatorHandler.DonatorSettings settings) implements CustomPacketPayload {
 
-	public static final ResourceLocation ID = new ResourceLocation(MelonMod.MODID, "donator_settings");
+	public static final ResourceLocation ID = new ResourceLocation(MelonMod.MODID, "c2s_donator_settings");
 
-	public ServerPacketHandlerDonatorSettings(FriendlyByteBuf buf) {
+	public ServerPacketDonatorSettings(FriendlyByteBuf buf) {
 		this(new DonatorHandler.DonatorSettings(buf.readBoolean(), buf.readInt()));
 	}
 
@@ -20,7 +20,7 @@ public record ServerPacketHandlerDonatorSettings(DonatorHandler.DonatorSettings 
 		return ID;
 	}
 
-	public static void handle(final ServerPacketHandlerDonatorSettings packet, PlayPayloadContext context) {
+	public static void handle(final ServerPacketDonatorSettings packet, PlayPayloadContext context) {
 		context.workHandler().execute(() ->
 				context.player().ifPresent(player -> {
 					if (DonatorHandler.donators.contains(player.getUUID()))

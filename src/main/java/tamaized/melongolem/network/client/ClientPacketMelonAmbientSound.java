@@ -16,16 +16,16 @@ import tamaized.melongolem.registry.ModSounds;
 
 import javax.annotation.Nullable;
 
-public record ClientPacketHandlerMelonAmbientSound(int entityID) implements CustomPacketPayload {
+public record ClientPacketMelonAmbientSound(int entityID) implements CustomPacketPayload {
 
-	public static final ResourceLocation ID = new ResourceLocation(MelonMod.MODID, "melon_ambient_sound");
+	public static final ResourceLocation ID = new ResourceLocation(MelonMod.MODID, "s2c_melon_ambient_sound");
 	private static Narrator narrator;
 
-	public ClientPacketHandlerMelonAmbientSound(EntityMelonGolem golem) {
+	public ClientPacketMelonAmbientSound(EntityMelonGolem golem) {
 		this(golem.getId());
 	}
 
-	public ClientPacketHandlerMelonAmbientSound(FriendlyByteBuf buf) {
+	public ClientPacketMelonAmbientSound(FriendlyByteBuf buf) {
 		this(buf.readInt());
 	}
 
@@ -34,7 +34,7 @@ public record ClientPacketHandlerMelonAmbientSound(int entityID) implements Cust
 		return ID;
 	}
 
-	public static void handle(final ClientPacketHandlerMelonAmbientSound packet, PlayPayloadContext context) {
+	public static void handle(final ClientPacketMelonAmbientSound packet, PlayPayloadContext context) {
 		context.workHandler().execute(() ->
 				context.player().ifPresent(player -> {
 					Entity entity = player.level().getEntity(packet.entityID);

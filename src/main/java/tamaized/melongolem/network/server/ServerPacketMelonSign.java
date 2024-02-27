@@ -11,15 +11,15 @@ import tamaized.melongolem.ISignHolder;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.EntityMelonGolem;
 
-public record ServerPacketHandlerMelonSign(int entityID, String[] lines) implements CustomPacketPayload {
+public record ServerPacketMelonSign(int entityID, String[] lines) implements CustomPacketPayload {
 
-	public static final ResourceLocation ID = new ResourceLocation(MelonMod.MODID, "edit_melon_sign");
+	public static final ResourceLocation ID = new ResourceLocation(MelonMod.MODID, "c2s_edit_melon_sign");
 
-	public ServerPacketHandlerMelonSign(ISignHolder golem) {
+	public ServerPacketMelonSign(ISignHolder golem) {
 		this(golem.networkID(), new String[]{golem.getSignText(0).getString(), golem.getSignText(1).getString(), golem.getSignText(2).getString(), golem.getSignText(3).getString()});
 	}
 
-	public ServerPacketHandlerMelonSign(FriendlyByteBuf buf) {
+	public ServerPacketMelonSign(FriendlyByteBuf buf) {
 		this(buf.readInt(), new String[]{buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readUtf()});
 	}
 
@@ -28,7 +28,7 @@ public record ServerPacketHandlerMelonSign(int entityID, String[] lines) impleme
 		return ID;
 	}
 
-	public static void handle(final ServerPacketHandlerMelonSign packet, PlayPayloadContext context) {
+	public static void handle(final ServerPacketMelonSign packet, PlayPayloadContext context) {
 		context.workHandler().execute(() -> context.player().ifPresent(player -> {
 			Entity entity = player.level().getEntity(packet.entityID());
 			if (entity instanceof EntityMelonGolem && entity.distanceTo(player) <= 6)

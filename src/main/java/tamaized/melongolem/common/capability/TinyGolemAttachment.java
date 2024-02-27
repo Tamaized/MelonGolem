@@ -9,6 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import tamaized.melongolem.common.EntityTinyMelonGolem;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -36,6 +37,7 @@ public class TinyGolemAttachment {
 		this(Optional.empty(), Level.OVERWORLD.location(), Optional.empty());
 	}
 
+	@Nullable
 	public EntityTinyMelonGolem getPet() {
 		return pet;
 	}
