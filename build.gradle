@@ -4,9 +4,24 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id 'net.neoforged.gradle.userdev' version '7.0.+'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+configurations {
+    shade
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    configurations = [project.configurations.shade]
+    relocate 'tamaized.regutil', 'tamaized.melongolem.regutil'
 }
 
 repositories {
+    maven {
+        name 'RegUtil'
+        url 'https://maven.tamaized.com/releases/'
+    }
     maven {
         name 'JEI'
         url 'https://maven.blamejared.com/'
@@ -107,6 +122,10 @@ dependencies {
     implementation "net.neoforged:neoforge:${project.neoforge_version}"
 
     runtimeOnly "mezz.jei:${project.jei_version}"
+
+    def reg = "tamaized:regutil:" + project.regutil_version
+    implementation reg
+    shade reg
 }
 
 def mavenUser = hasProperty("CIMUser") ? CIMUser : secrets.getProperty("maven_username")
@@ -116,7 +135,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             afterEvaluate {
-                artifact project.jar
+                artifact project.shadowJar
                 artifact project.sourceJar
             }
             setGroupId 'tamaized'
@@ -149,5 +168,7 @@ task incrBuildNum doLast {
         entry(key: "mod_version", value: Integer.parseInt(project.mod_version) + 1)
     }
 }
+
+build.dependsOn shadowJar
 
 build.finalizedBy(incrBuildNum)
