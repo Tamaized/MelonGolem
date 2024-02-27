@@ -20,7 +20,7 @@ public class ModBlocks implements RegistryClass {
 
 	private static final DeferredRegister<Block> REGISTRY = RegUtil.create(Registries.BLOCK);
 
-	public static final DeferredHolder<Block, Block> GLISTERING_MELON = REGISTRY.register("glisteringmelonblock", () -> new Block(BlockBehaviour.Properties.of()
+	public static final DeferredHolder<Block, Block> GLISTERING_MELON = REGISTRY.register("glistering_melon", () -> new Block(BlockBehaviour.Properties.of()
 			.mapColor(MapColor.COLOR_LIGHT_GREEN)
 			.pushReaction(PushReaction.DESTROY)
 			.strength(1.0F)

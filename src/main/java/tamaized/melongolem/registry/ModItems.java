@@ -14,7 +14,7 @@ public class ModItems implements RegistryClass {
 
 	static final DeferredRegister<Item> REGISTRY = RegUtil.create(Registries.ITEM);
 
-	public static final Supplier<Item> MELON_STICK = REGISTRY.register("melonstick", () -> new ItemMelonStick(new Item.Properties()));
+	public static final Supplier<Item> MELON_STICK = REGISTRY.register("melon_stick", () -> new ItemMelonStick(new Item.Properties()));
 
 	@Override
 	public void init(IEventBus bus) {

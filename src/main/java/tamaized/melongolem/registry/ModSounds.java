@@ -14,7 +14,7 @@ public class ModSounds implements RegistryClass {
 
 	private static final DeferredRegister<SoundEvent> REGISTRY = RegUtil.create(Registries.SOUND_EVENT);
 
-	public static final DeferredHolder<SoundEvent, SoundEvent> DADDY = REGISTRY.register("melonmedaddy", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MelonMod.MODID, "melonmedaddy")));
+	public static final DeferredHolder<SoundEvent, SoundEvent> DADDY = REGISTRY.register("melon_me_daddy", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MelonMod.MODID, "melon_me_daddy")));
 
 	@Override
 	public void init(IEventBus bus) {
