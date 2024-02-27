@@ -1,28 +1,29 @@
 package tamaized.melongolem.client;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.ThrownItemRenderer;
-import net.minecraft.tags.ItemTags;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import tamaized.melongolem.ISignHolder;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.event.TickEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
+import tamaized.melongolem.MelonConfig;
 import tamaized.melongolem.MelonMod;
+import tamaized.melongolem.network.DonatorHandler;
+import tamaized.melongolem.network.server.ServerPacketHandlerDonatorSettings;
 
-@Mod.EventBusSubscriber(modid = MelonMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientListener {
 
-    @SubscribeEvent
-    public static void registerEntityRenders(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(MelonMod.ENTITY_TYPE_MELON_GOLEM.get(), RenderMelonGolem.Factory::normal);
-        event.registerEntityRenderer(MelonMod.ENTITY_TYPE_MELON_SLICE.get(), ThrownItemRenderer::new);
-        event.registerEntityRenderer(MelonMod.ENTITY_TYPE_TINY_MELON_GOLEM.get(), RenderMelonGolem.Factory::tiny);
-        event.registerEntityRenderer(MelonMod.ENTITY_TYPE_GLISTERING_MELON_GOLEM.get(), RenderMelonGolem.Factory::glister);
-    }
+	static void init(IEventBus modBus) {
+		modBus.addListener(TickEvent.ClientTickEvent.class, event -> {
+			if (Minecraft.getInstance().level == null) {
+				MelonConfig.dirty = true;
+				return;
+			}
+			if (event.phase == TickEvent.Phase.START) {
+				if (MelonConfig.dirty && DonatorHandler.donators.contains(Minecraft.getInstance().player.getUUID())) {
+					PacketDistributor.SERVER.noArg().send(new ServerPacketHandlerDonatorSettings(new DonatorHandler.DonatorSettings(MelonMod.config.DONATOR_SETTINGS.enable.get(), MelonMod.config.DONATOR_SETTINGS.colorint)));
+					MelonConfig.dirty = false;
+				}
+			}
+		});
+	}
 
-    public static void openSignHolderGui(ISignHolder golem) {
-        if (golem.getHead().is(ItemTags.SIGNS) && golem.distanceTo(Minecraft.getInstance().player) <= 6)
-            Minecraft.getInstance().setScreen(new GuiEditGolemSign(golem));
-    }
 }

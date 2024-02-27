@@ -3,6 +3,7 @@ package tamaized.melongolem.common;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
@@ -48,6 +49,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import tamaized.melongolem.ISignHolder;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.client.ClientListener;
+import tamaized.melongolem.client.GuiEditGolemSign;
 import tamaized.melongolem.network.client.ClientPacketHandlerMelonAmbientSound;
 import tamaized.melongolem.registry.ModBlocks;
 import tamaized.melongolem.registry.ModEntities;
@@ -235,7 +237,8 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 					player.getItemInHand(hand).shrink(1);
 			} else {
 				if (level().isClientSide()) {
-					ClientListener.openSignHolderGui(this);
+					if (getHead().is(ItemTags.SIGNS) && distanceTo(player) <= 6)
+						Minecraft.getInstance().setScreen(new GuiEditGolemSign(this));
 				}
 			}
 			return InteractionResult.sidedSuccess(level().isClientSide());

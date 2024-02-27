@@ -2,6 +2,7 @@ package tamaized.melongolem.common;
 
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -34,6 +35,7 @@ import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
 import tamaized.melongolem.ISignHolder;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.client.ClientListener;
+import tamaized.melongolem.client.GuiEditGolemSign;
 import tamaized.melongolem.common.capability.CapabilityList;
 import tamaized.melongolem.common.capability.TinyGolemAttachment;
 import tamaized.melongolem.network.DonatorHandler;
@@ -218,7 +220,8 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 					player.getItemInHand(hand).shrink(1);
 			} else {
 				if (level().isClientSide()) {
-					ClientListener.openSignHolderGui(this);
+					if (getHead().is(ItemTags.SIGNS) && distanceTo(player) <= 6)
+						Minecraft.getInstance().setScreen(new GuiEditGolemSign(this));
 				}
 			}
 			return InteractionResult.sidedSuccess(level().isClientSide());

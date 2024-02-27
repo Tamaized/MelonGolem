@@ -1,6 +1,7 @@
 package tamaized.melongolem.registry;
 
 import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -16,6 +17,7 @@ import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import tamaized.melongolem.MelonMod;
+import tamaized.melongolem.client.RenderMelonGolem;
 import tamaized.melongolem.common.EntityGlisteringMelonGolem;
 import tamaized.melongolem.common.EntityMelonGolem;
 import tamaized.melongolem.common.EntityMelonSlice;
@@ -94,7 +96,10 @@ public class ModEntities implements RegistryClass {
 
 	@OnlyIn(Dist.CLIENT)
 	public void registerEntityRenderer(EntityRenderersEvent.RegisterRenderers event) {
-
+		event.registerEntityRenderer(MELON_GOLEM.get(), RenderMelonGolem.Factory::normal);
+		event.registerEntityRenderer(TINY_MELON_GOLEM.get(), RenderMelonGolem.Factory::tiny);
+		event.registerEntityRenderer(GLISTERING_MELON_GOLEM.get(), RenderMelonGolem.Factory::glister);
+		event.registerEntityRenderer(MELON_SLICE.get(), ThrownItemRenderer::new);
 	}
 
 	@Override

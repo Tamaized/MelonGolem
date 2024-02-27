@@ -1,14 +1,17 @@
 package tamaized.melongolem;
 
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.ConfigScreenHandler;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tamaized.melongolem.client.ClientInitiator;
 import tamaized.melongolem.client.MelonConfigScreen;
 import tamaized.melongolem.registry.*;
 import tamaized.melongolem.network.DonatorHandler;
@@ -26,9 +29,12 @@ public class MelonMod {
 	public static final Logger logger = LogManager.getLogger(MODID);
 
 	public MelonMod(IEventBus busMod) {
-		MelonConfig.init(busMod);
+		if (FMLEnvironment.dist == Dist.CLIENT)
+			ClientInitiator.call(busMod);
+
 		DonatorHandler.start();
 
+		MelonConfig.init(busMod);
 		{
 			final Pair<MelonConfig, ModConfigSpec> specPair = new ModConfigSpec.Builder().configure(MelonConfig::new);
 			ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, specPair.getRight());
