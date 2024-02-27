@@ -51,6 +51,7 @@ public class MelonMod {
 		ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory(MelonConfigScreen::new));
 
 		RegUtil.setup(MODID, busMod,
+				ModDataAttachments::new,
 				ModBlocks::new,
 				ModItems::new,
 				ModEntities::new,

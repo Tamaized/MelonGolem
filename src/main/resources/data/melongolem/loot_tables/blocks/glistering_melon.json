@@ -24,7 +24,7 @@
                   }
                 }
               ],
-              "name": "melongolem:glisteringmelonblock"
+              "name": "melongolem:glistering_melon"
             },
             {
               "type": "minecraft:item",
@@ -62,5 +62,5 @@
       ]
     }
   ],
-  "random_sequence": "melongolem:blocks/glisteringmelonblock"
+  "random_sequence": "melongolem:blocks/glistering_melon"
 }

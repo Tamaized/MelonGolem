@@ -3,8 +3,6 @@ package tamaized.melongolem.common;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -21,13 +19,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
-import tamaized.melongolem.common.capability.CapabilityList;
 import tamaized.melongolem.common.capability.TinyGolemAttachment;
 import tamaized.melongolem.network.client.ClientPacketSendParticles;
+import tamaized.melongolem.registry.ModDataAttachments;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Objects;
 
 public class ItemMelonStick extends Item {
 
@@ -36,38 +32,12 @@ public class ItemMelonStick extends Item {
 	}
 
 	public static void summonPet(ServerLevel level, Player owner) {
-		summonPet(level, owner, null);
-	}
+		TinyGolemAttachment attachment = owner.getData(ModDataAttachments.TINY_GOLEM);
 
-	public static void summonPet(ServerLevel level, Player owner, @Nullable EntityTinyMelonGolem golem) {
-		if (golem != null && !golem.isAlive())
-			return;
-		TinyGolemAttachment attachment = owner.getData(CapabilityList.TINY_GOLEM);
-
-		if (attachment.load(true)) {
-			if (owner.level().getServer() == null)
-				return;
-			ServerLevel last = Objects.requireNonNull(owner.level().getServer()).getLevel(ResourceKey.create(Registries.DIMENSION, attachment.getLoadDim()));
-			if (last != null && attachment.getLoadPos().isPresent()) {
-				last.getChunk(attachment.getLoadPos().get()); // Ensure chunk is loaded
-				if (attachment.getLoadPetID().isPresent()) {
-					Entity entity = last.getEntity(attachment.getLoadPetID().get());
-					if (entity instanceof EntityTinyMelonGolem melon) {
-						if (!level.dimension().location().equals(last.dimension().location()))
-							melon.changeDimension(level);
-						summonPet(level, owner, melon);
-						return;
-					}
-				}
-			}
-		}
-		EntityTinyMelonGolem oldPet = golem != null ? golem : attachment.getPet();
-		if (oldPet != null && !oldPet.isAlive())
-			oldPet = null;
-		EntityTinyMelonGolem pet = oldPet == null ? new EntityTinyMelonGolem(level) : oldPet;
+		boolean shouldSpawn = attachment.getPet().isEmpty();
+		EntityTinyMelonGolem pet = attachment.getPet().orElse(new EntityTinyMelonGolem(level));
 		pet.tame(owner);
-		if (oldPet == null)
-			attachment.setPet(pet);
+		attachment.changePet(pet);
 
 		int x = Mth.floor(owner.getX()) - 2;
 		int z = Mth.floor(owner.getZ()) - 2;
@@ -82,17 +52,13 @@ public class ItemMelonStick extends Item {
 						double posy = (double) y + j;
 						double posz = (float) (z + i1) + 0.5F;
 						pet.moveTo(posx, posy, posz);
-						if (!pet.level().dimension().location().equals(owner.level().dimension().location()) && pet.changeDimension((ServerLevel) owner.level()) instanceof EntityTinyMelonGolem p) {
-							attachment.setPet(p);
-							pet.moveTo(posx, posy, posz);
-						}
 						ClientPacketSendParticles particles = new ClientPacketSendParticles();
 						for (int i = 0; i < 25; i++) {
 							Vec3 result = pet.getViewVector(1F).yRot(pet.getRandom().nextFloat() * 360F).xRot(pet.getRandom().nextFloat() * 360F).scale(0.35F);
 							particles.queueParticle(ParticleTypes.END_ROD, false, pet.getX() + result.x, pet.getY() + pet.getBbHeight() / 2F + result.y, pet.getZ() + result.z, 0, 0, 0);
 						}
 						PacketDistributor.TRACKING_CHUNK.with(level.getChunkAt(BlockPos.containing(x, y, z))).send(particles);
-						if (oldPet == null)
+						if (shouldSpawn)
 							level.addFreshEntity(pet);
 						level.playSound(null, pet.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 1.0F, pet.getRandom().nextFloat() + 0.5F);
 						break loop;

@@ -18,6 +18,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.goal.FollowOwnerGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
@@ -34,17 +35,16 @@ import net.neoforged.neoforge.common.IShearable;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
 import tamaized.melongolem.ISignHolder;
 import tamaized.melongolem.MelonMod;
-import tamaized.melongolem.client.ClientListener;
 import tamaized.melongolem.client.GuiEditGolemSign;
-import tamaized.melongolem.common.capability.CapabilityList;
 import tamaized.melongolem.common.capability.TinyGolemAttachment;
 import tamaized.melongolem.network.DonatorHandler;
+import tamaized.melongolem.registry.ModDataAttachments;
 import tamaized.melongolem.registry.ModEntities;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 
 public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, IEntityWithComplexSpawn, ISignHolder {
 
@@ -96,28 +96,20 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 		super.tick();
 		if (level().isClientSide() || !isAlive())
 			return;
-		if (getOwner() != null && getOwner().isAlive() && DonatorHandler.donators.contains(getOwnerUUID())) {
+		LivingEntity owner = getOwner();
+		if (owner == null || !owner.isAlive())
+			return;
+		if (DonatorHandler.donators.contains(getOwnerUUID())) {
 			DonatorHandler.DonatorSettings settings = DonatorHandler.settings.get(getOwnerUUID());
 			if (settings != null) {
 				entityData.set(ENABLED, settings.enabled);
 				entityData.set(COLOR, settings.color);
 			}
 		}
-		if (getOwner() instanceof Player) {
-			TinyGolemAttachment attachment = getOwner().getData(CapabilityList.TINY_GOLEM);
-
-			if (attachment.getPet() != this) {
-				if (attachment.getPet() != null && attachment.getPet().getUUID().equals(this.getUUID())) {
-					discard();
-					return;
-				}
-				if (level() instanceof ServerLevel serverLevel && getOwner() instanceof Player player)
-					ItemMelonStick.summonPet(serverLevel, player, this);
-				if (attachment.getPet() == null)
-					attachment.setPet(this);
-				else
-					this.hurt(this.damageSources().genericKill(), Float.MAX_VALUE);
-			}
+		TinyGolemAttachment attachment = owner.getData(ModDataAttachments.TINY_GOLEM);
+		Optional<EntityTinyMelonGolem> pet = attachment.getPet();
+		if (attachment.isLoaded() && pet.map(p -> p != this).orElse(true)) {
+			hurt(level().damageSources().fellOutOfWorld(), 1024F);
 		}
 	}
 
@@ -170,12 +162,6 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 	@Override
 	public float getVoicePitch() {
 		return random.nextFloat() * 0.5F + 2F;
-	}
-
-	@Nullable
-	@Override
-	protected SoundEvent getAmbientSound() {
-		return null;
 	}
 
 	@Nullable

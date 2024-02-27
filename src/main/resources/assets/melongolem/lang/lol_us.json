@@ -1,12 +1,12 @@
 {
-  "entity.melongolem.entitymelongolem": "Mewon Gowem",
-  "entity.melongolem.entitymelonslice": "Mewon Swice",
-  "entity.melongolem.entitytinymelongolem": "Smol Mewon Gowem",
-  "entity.melongolem.entityglisteringmelongolem": "Gwistewing Mwlon Gowem",
+  "entity.melongolem.melon_golem": "Mewon Gowem",
+  "entity.melongolem.melon_slice": "Mewon Swice",
+  "entity.melongolem.tiny_melon_golem": "Smol Mewon Gowem",
+  "entity.melongolem.glistering_melon_golem": "Gwistewing Mwlon Gowem",
 
-  "item.melongolem.melonstick": "Mewon un ah Stik",
-  "item.melongolem.melongolemspawnegg": "Mak Mewon Gowem",
-  "item.melongolem.glisteringmelongolemspawnegg": "Mak Gwistewing Mewon Gowem",
+  "item.melongolem.melon_stick": "Mewon un ah Stik",
+  "item.melongolem.melon_golem_spawn_egg": "Mak Mewon Gowem",
+  "item.melongolem.glistering_melon_golem_spawn_egg": "Mak Gwistewing Mewon Gowem",
 
-  "block.melongolem.glisteringmelonblock": "Gwistewing Mewon"
+  "block.melongolem.glistering_melon": "Gwistewing Mewon"
 }

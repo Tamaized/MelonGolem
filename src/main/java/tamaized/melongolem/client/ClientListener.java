@@ -2,6 +2,7 @@ package tamaized.melongolem.client;
 
 import net.minecraft.client.Minecraft;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.TickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import tamaized.melongolem.MelonConfig;
@@ -12,7 +13,7 @@ import tamaized.melongolem.network.server.ServerPacketDonatorSettings;
 public class ClientListener {
 
 	static void init(IEventBus modBus) {
-		modBus.addListener(TickEvent.ClientTickEvent.class, event -> {
+		NeoForge.EVENT_BUS.addListener(TickEvent.ClientTickEvent.class, event -> {
 			if (Minecraft.getInstance().level == null) {
 				MelonConfig.dirty = true;
 				return;

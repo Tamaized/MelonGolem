@@ -37,8 +37,7 @@ public record ClientPacketMelonAmbientSound(int entityID) implements CustomPacke
 	public static void handle(final ClientPacketMelonAmbientSound packet, PlayPayloadContext context) {
 		context.workHandler().execute(() ->
 				context.player().ifPresent(player -> {
-					Entity entity = player.level().getEntity(packet.entityID);
-					if (entity instanceof EntityMelonGolem golem) {
+					if (player.level().getEntity(packet.entityID) instanceof EntityMelonGolem golem) {
 						if (golem.getHead().is(ItemTags.SIGNS)) {
 							if (MelonMod.configClient.tts.get() && golem.distanceToSqr(player) <= 225) {
 								if (narrator == null)

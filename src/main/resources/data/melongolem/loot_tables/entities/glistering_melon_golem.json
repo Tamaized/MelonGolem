@@ -2,12 +2,12 @@
     "type": "minecraft:entity",
     "pools": [
         {
-			"name": "melongolem",
+			"name": "glistering_melon_golem",
             "rolls": 1,
             "entries": [
                 {
                     "type": "item",
-                    "name": "minecraft:melon_slice",
+                    "name": "minecraft:glistering_melon_slice",
                     "weight": 1,
                     "functions": [
                         {
@@ -22,5 +22,5 @@
             ]
         }
     ],
-    "random_sequence": "melongolem:entities/entitymelongolem"
+    "random_sequence": "melongolem:entities/glistering_melon_golem"
 }

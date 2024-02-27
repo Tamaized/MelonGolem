@@ -1,12 +1,12 @@
 {
-  "entity.melongolem.entitymelongolem": "Melon Golem",
-  "entity.melongolem.entitymelonslice": "Melon Slice",
-  "entity.melongolem.entitytinymelongolem": "Tiny Melon Golem",
-  "entity.melongolem.entityglisteringmelongolem": "Glistering Melon Golem",
+  "entity.melongolem.melon_golem": "Melon Golem",
+  "entity.melongolem.melon_slice": "Melon Slice",
+  "entity.melongolem.tiny_melon_golem": "Tiny Melon Golem",
+  "entity.melongolem.glistering_melon_golem": "Glistering Melon Golem",
 
-  "item.melongolem.melonstick": "Melon on a Stick",
-  "item.melongolem.melongolemspawnegg": "Melon Golem Spawn Egg",
-  "item.melongolem.glisteringmelongolemspawnegg": "Glistering Melon Golem Spawn Egg",
+  "item.melongolem.melon_stick": "Melon on a Stick",
+  "item.melongolem.melon_golem_spawn_egg": "Melon Golem Spawn Egg",
+  "item.melongolem.glistering_melon_golem_spawn_egg": "Glistering Melon Golem Spawn Egg",
 
-  "block.melongolem.glisteringmelonblock": "Glistering Melon"
+  "block.melongolem.glistering_melon": "Glistering Melon"
 }

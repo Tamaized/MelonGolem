@@ -1,81 +1,68 @@
 package tamaized.melongolem.common.capability;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.neoforged.neoforge.common.util.INBTSerializable;
 import tamaized.melongolem.common.EntityTinyMelonGolem;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.UUID;
 
-public class TinyGolemAttachment {
+public class TinyGolemAttachment implements INBTSerializable<CompoundTag> {
 
-	public static final Codec<TinyGolemAttachment> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			BlockPos.CODEC.optionalFieldOf("vertex").forGetter(obj -> obj.vertex),
-			ResourceLocation.CODEC.fieldOf("dim").forGetter(obj -> obj.dim),
-			UUIDUtil.CODEC.optionalFieldOf("uuid").forGetter(obj -> obj.petID)
-	).apply(instance, TinyGolemAttachment::new));
-
-	private EntityTinyMelonGolem pet;
-
-	private Optional<BlockPos> vertex;
-	private ResourceLocation dim;
-	private Optional<UUID> petID;
-
-	public TinyGolemAttachment(Optional<BlockPos> vertex, ResourceLocation dim, Optional<UUID> id) {
-		this.vertex = vertex;
-		this.dim = dim;
-		this.petID = id;
-	}
-
-	public TinyGolemAttachment() {
-		this(Optional.empty(), Level.OVERWORLD.location(), Optional.empty());
-	}
+	private boolean loaded = false;
 
 	@Nullable
-	public EntityTinyMelonGolem getPet() {
-		return pet;
+	private EntityTinyMelonGolem pet;
+
+	@Nullable
+	private UUID petId;
+
+	private int check;
+
+	public TinyGolemAttachment() {
+
 	}
 
-	public void setPet(EntityTinyMelonGolem golem) {
-		pet = golem;
+	public boolean isLoaded() {
+		return loaded;
 	}
 
-	public void markDirty(Optional<BlockPos> vertex, ResourceLocation dim, Optional<UUID> petID) {
-		this.vertex = vertex;
-		this.dim = dim;
-		this.petID = petID;
+	public void changePet(EntityTinyMelonGolem pet) {
+		this.pet = pet;
 	}
 
-	public ResourceLocation getLoadDim() {
-		return dim;
+	public Optional<EntityTinyMelonGolem> getPet() {
+		return Optional.ofNullable(pet);
 	}
 
-	public Optional<BlockPos> getLoadPos() {
-		return vertex;
-	}
-
-	public Optional<UUID> getLoadPetID() {
-		return petID;
-	}
-
-	public boolean load(boolean clear) {
-		boolean flag = pet == null && vertex.isPresent() && petID.isPresent();
-		if (clear) {
-			dim = Level.OVERWORLD.location();
-			vertex = Optional.empty();
-			petID = Optional.empty();
+	public void tick(Entity owner) {
+		if (pet == null && petId != null && check-- <= 0 && owner.level() instanceof ServerLevel level) {
+			if (level.getEntity(petId) instanceof EntityTinyMelonGolem tinyMelonGolem) {
+				pet = tinyMelonGolem;
+				petId = null;
+			} else {
+				check = 30;
+			}
+		} else if (pet != null && owner.level() instanceof ServerLevel serverLevel && !pet.level().dimension().equals(owner.level().dimension()) && pet.changeDimension(serverLevel) instanceof EntityTinyMelonGolem newPet) {
+			newPet.moveTo(owner.position());
+			pet = newPet;
 		}
-		return flag;
+		loaded = true;
 	}
 
-	public void copyFrom(TinyGolemAttachment cap) {
-		setPet(cap.getPet());
-		markDirty(cap.getLoadPos(), cap.getLoadDim(), cap.getLoadPetID());
+	@Override
+	public CompoundTag serializeNBT() {
+		CompoundTag nbt = new CompoundTag();
+		if (pet != null)
+			nbt.putUUID("pet", pet.getUUID());
+		return nbt;
+	}
+
+	@Override
+	public void deserializeNBT(CompoundTag nbt) {
+		petId = nbt.getUUID("pet");
 	}
 }
