@@ -37,6 +37,7 @@ import org.apache.logging.log4j.Logger;
 import tamaized.melongolem.client.MelonConfigScreen;
 import tamaized.melongolem.common.*;
 import tamaized.melongolem.network.DonatorHandler;
+import tamaized.melongolem.network.NetworkMessages;
 import tamaized.melongolem.network.client.ClientPacketHandlerMelonAmbientSound;
 import tamaized.melongolem.network.client.ClientPacketHandlerParticle;
 import tamaized.melongolem.network.server.ServerPacketHandlerDonatorSettings;
@@ -94,11 +95,11 @@ public class MelonMod {
 	public static final DeferredHolder<SoundEvent, SoundEvent> DADDY = SOUND_REGISTRY
 			.register("melonmedaddy", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MelonMod.MODID, "melonmedaddy")));
 
-	public MelonMod(IEventBus modBus) {
-		ITEM_REGISTRY.register(modBus);
-		BLOCK_REGISTRY.register(modBus);
-		ENTITY_REGISTRY.register(modBus);
-		SOUND_REGISTRY.register(modBus);
+	public MelonMod(IEventBus busMod) {
+		ITEM_REGISTRY.register(busMod);
+		BLOCK_REGISTRY.register(busMod);
+		ENTITY_REGISTRY.register(busMod);
+		SOUND_REGISTRY.register(busMod);
 		{
 			final Pair<MelonConfig, ModConfigSpec> specPair = new ModConfigSpec.Builder().configure(MelonConfig::new);
 			ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, specPair.getRight());
@@ -111,6 +112,7 @@ public class MelonMod {
 		}
 		DonatorHandler.start();
 		ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory(MelonConfigScreen::new));
+		NetworkMessages.register(busMod);
 	}
 
 	@SubscribeEvent
@@ -152,17 +154,6 @@ public class MelonMod {
 				setShouldReceiveVelocityUpdates(updates).
 				sized(w, h).
 				build(name);
-	}
-
-	@SubscribeEvent
-	public static void registerPayloads(final RegisterPayloadHandlerEvent event) {
-		final IPayloadRegistrar registrar = event.registrar(MelonMod.MODID).versioned("1").optional();
-
-		registrar.play(ServerPacketHandlerMelonSign.ID, ServerPacketHandlerMelonSign::new, payload -> payload.server(ServerPacketHandlerMelonSign::handle));
-		registrar.play(ServerPacketHandlerDonatorSettings.ID, ServerPacketHandlerDonatorSettings::new, payload -> payload.server(ServerPacketHandlerDonatorSettings::handle));
-
-		registrar.play(ClientPacketHandlerMelonAmbientSound.ID, ClientPacketHandlerMelonAmbientSound::new, payload -> payload.client(ClientPacketHandlerMelonAmbientSound::handle));
-		registrar.play(ClientPacketHandlerParticle.ID, ClientPacketHandlerParticle::new, payload -> payload.client(ClientPacketHandlerParticle::handle));
 	}
 
 	@SubscribeEvent
