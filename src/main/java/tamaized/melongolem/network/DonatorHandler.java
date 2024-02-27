@@ -9,21 +9,18 @@ import tamaized.melongolem.MelonMod;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 
 public class DonatorHandler {
 
-	public static final Map<UUID, DonatorSettings> settings = Maps.newHashMap();
-	private static final String URL_DONATORS = "https://raw.githubusercontent.com/Tamaized/MelonGolem/{BRANCH}/donator.properties";
-	public static volatile List<UUID> donators = Lists.newArrayList();
+	public static final Map<UUID, DonatorSettings> settings = new HashMap<>();
+	private static final String URL_DONATORS = "https://gh.tamaized.com/Tamaized/MelonGolem/donator.properties";
+	public static volatile List<UUID> donators = new ArrayList<>();
 	private static boolean started = false;
 
 	public static void start() {
 		if (!started) {
-			MelonMod.logger.info("Starting Donator Handler");
+			MelonMod.LOGGER.info("Starting Donator Handler");
 			started = true;
 			new ThreadDonators();
 		}
@@ -34,7 +31,7 @@ public class DonatorHandler {
 		for (String s : props.stringPropertyNames()) {
 			donators.add(UUID.fromString(s));
 		}
-		MelonMod.logger.debug(donators);
+		MelonMod.LOGGER.debug(donators);
 	}
 
 	public static final class DonatorSettings {
@@ -57,18 +54,14 @@ public class DonatorHandler {
 
 		@Override
 		public void run() {
-			MelonMod.logger.info("Loading Data");
-			try (InputStreamReader json = new InputStreamReader(new URL("https://api.github.com/repos/Tamaized/MelonGolem").openConnection().getInputStream())) {
-				String branch = new Gson().fromJson(json, JsonObject.class).get("default_branch").getAsString();
-				URL url = new URL(URL_DONATORS.replace("{BRANCH}", branch));
-				MelonMod.logger.debug(url);
+			MelonMod.LOGGER.info("Loading donor data");
+			try (InputStreamReader data = new InputStreamReader(new URL(URL_DONATORS).openConnection().getInputStream())) {
 				Properties props = new Properties();
-				InputStreamReader reader = new InputStreamReader(url.openStream());
-				props.load(reader);
+				props.load(data);
 				loadData(props);
-				MelonMod.logger.info("Data Loaded");
+				MelonMod.LOGGER.info("Donor data loaded");
 			} catch (IOException e) {
-				MelonMod.logger.error("Could not load data");
+				MelonMod.LOGGER.error("Could not load donor data");
 			}
 		}
 

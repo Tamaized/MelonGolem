@@ -27,7 +27,7 @@ public class MelonMod {
 	public static MelonConfig config;
 	public static MelonConfig.Client configClient;
 
-	public static final Logger logger = LogManager.getLogger(MODID);
+	public static final Logger LOGGER = LogManager.getLogger(MODID);
 
 	public MelonMod(IEventBus busMod) {
 		IEventBus forgeBus = NeoForge.EVENT_BUS;
