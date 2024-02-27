@@ -8,6 +8,7 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.ConfigScreenHandler;
 import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.NeoForge;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,6 +30,8 @@ public class MelonMod {
 	public static final Logger logger = LogManager.getLogger(MODID);
 
 	public MelonMod(IEventBus busMod) {
+		IEventBus forgeBus = NeoForge.EVENT_BUS;
+
 		if (FMLEnvironment.dist == Dist.CLIENT)
 			ClientInitiator.call(busMod);
 
@@ -56,6 +59,8 @@ public class MelonMod {
 				);
 
 		NetworkMessages.register(busMod);
+
+		ModEventListener.init(forgeBus);
 	}
 
 }

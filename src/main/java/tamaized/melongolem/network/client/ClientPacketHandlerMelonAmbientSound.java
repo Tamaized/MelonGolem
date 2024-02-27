@@ -12,6 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.handling.PlayPayloadContext;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.EntityMelonGolem;
+import tamaized.melongolem.registry.ModSounds;
 
 import javax.annotation.Nullable;
 
@@ -64,7 +65,7 @@ public record ClientPacketHandlerMelonAmbientSound(int entityID) implements Cust
 
 	@Nullable
 	private static SoundEvent getAmbientSound() {
-		return MelonMod.configClient.tehnutMode.get() ? MelonMod.DADDY.get() : null;
+		return MelonMod.configClient.tehnutMode.get() ? ModSounds.DADDY.get() : null;
 	}
 
 	private static float getVoicePitch(EntityMelonGolem golem) {
