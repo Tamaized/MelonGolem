@@ -109,6 +109,11 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 		}
 	}
 
+	@Override
+	public boolean isNoAi() {
+		return super.isNoAi() || getOwner() == null;
+	}
+
 	public boolean isEnabled() {
 		return entityData.get(ENABLED);
 	}
