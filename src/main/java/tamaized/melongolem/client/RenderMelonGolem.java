@@ -34,7 +34,7 @@ public class RenderMelonGolem<T extends Mob & ISignHolder> extends MobRenderer<T
 		super(renderManagerIn, new SnowGolemModel<>(renderManagerIn.bakeLayer(ModelLayers.SNOW_GOLEM)) {
 			@Override
 			public void renderToBuffer(@Nonnull PoseStack stack, @Nonnull VertexConsumer buffer, int light, int overlay, float red, float green, float blue, float alpha) {
-				super.renderToBuffer(stack, buffer, light, overlay, COLOR_STATE.red, COLOR_STATE.green, COLOR_STATE.blue, alpha);
+				super.renderToBuffer(stack, buffer, light, overlay, COLOR_STATE.enabled ? COLOR_STATE.red : red, COLOR_STATE.enabled ? COLOR_STATE.green : green, COLOR_STATE.enabled ? COLOR_STATE.blue : blue, alpha);
 			}
 		}, type == Type.TINY ? 0.125F : 0.5F);
 		addLayer(new LayerMelonHead<>(this));
@@ -49,6 +49,7 @@ public class RenderMelonGolem<T extends Mob & ISignHolder> extends MobRenderer<T
 		if (type == Type.TINY) {
 			EntityTinyMelonGolem golem = (EntityTinyMelonGolem) entity;
 			if (golem.isEnabled()) {
+				COLOR_STATE.enabled = true;
 				int color = golem.getColor();
 				COLOR_STATE.red = ((color >> 16) & 0xFF) / 255F;
 				COLOR_STATE.green = ((color >> 8) & 0xFF) / 255F;
@@ -56,6 +57,7 @@ public class RenderMelonGolem<T extends Mob & ISignHolder> extends MobRenderer<T
 			}
 		}
 		super.render(entity, rotation, partialTicks, stack, buffer, light);
+		COLOR_STATE.enabled = false;
 		stack.popPose();
 	}
 
@@ -76,6 +78,7 @@ public class RenderMelonGolem<T extends Mob & ISignHolder> extends MobRenderer<T
 	}
 
 	private static class ColorHack {
+		private boolean enabled = false;
 		private float red = 1F;
 		private float green = 1F;
 		private float blue = 1F;

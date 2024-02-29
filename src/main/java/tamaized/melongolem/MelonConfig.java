@@ -17,10 +17,30 @@ import java.util.Objects;
 public class MelonConfig {
 
 	public static class Client {
+		public static boolean dirty = true;
+		public final DonatorSettings DONATOR_SETTINGS = new DonatorSettings();
+
 		public ModConfigSpec.BooleanValue tehnutMode;
 		public ModConfigSpec.BooleanValue tts;
 
 		public Client(ModConfigSpec.Builder builder) {
+			builder.
+					comment("Donator Settings").
+					push("Donator Settings");
+			{
+				DONATOR_SETTINGS.enable = builder.
+						translation(translation("enable")).
+						comment("Enables donator settings for yourself").
+						define("enable", true);
+
+				DONATOR_SETTINGS.color = builder.
+						translation(translation("color")).
+						comment("Changes the Tiny Melon Golem Color").
+						defineInRange("color", 0xFFA4EA, Integer.MIN_VALUE, Integer.MAX_VALUE);
+
+			}
+			builder.pop();
+
 			tehnutMode = builder.
 					translation("TehNut Mode").
 					comment(":^)").
@@ -32,11 +52,14 @@ public class MelonConfig {
 					define("tts", true);
 		}
 
+		public static class DonatorSettings {
+			public ModConfigSpec.BooleanValue enable;
+			public ModConfigSpec.IntValue color;
+		}
+
 	}
 
-	public static boolean dirty = true;
 	public static Item stabItem = Items.STICK;
-	public final DonatorSettings DONATOR_SETTINGS = new DonatorSettings();
 	public ModConfigSpec.DoubleValue health;
 	public ModConfigSpec.DoubleValue damage;
 	public ModConfigSpec.DoubleValue glisterDamageAmp;
@@ -47,22 +70,6 @@ public class MelonConfig {
 	public ModConfigSpec.ConfigValue<String> stabby;
 
 	public MelonConfig(ModConfigSpec.Builder builder) {
-		builder.
-				comment("Donator Settings").
-				push("Donator Settings");
-		{
-			DONATOR_SETTINGS.enable = builder.
-					translation("Enable").
-					comment("Enables donator settings for yourself").
-					define("enable", true);
-
-			DONATOR_SETTINGS.color = builder.
-					translation("Color").
-					comment("Sets the mini-golem color for yourself (0xRRGGBB)").
-					define("color", "0xFFFFFF");
-
-		}
-		builder.pop();
 
 		health = builder.
 				translation("Base Golem Health").
@@ -128,30 +135,15 @@ public class MelonConfig {
 		modBus.addListener(ModConfigEvent.Reloading.class, event -> {
 			if (event.getConfig().getModId().equals(MelonMod.MODID)) {
 				setupStabby();
-				setupColor();
 			}
 		});
 		modBus.addListener(FMLLoadCompleteEvent.class, event -> {
 			setupStabby();
-			setupColor();
 		});
 	}
 
-	public static void setupColor() {
-		try {
-			MelonMod.config.DONATOR_SETTINGS.colorint = Integer.decode(MelonMod.config.DONATOR_SETTINGS.color.get());
-		} catch (Throwable e) {
-			MelonMod.config.DONATOR_SETTINGS.color.set("0xFFFFFF");
-			MelonMod.config.DONATOR_SETTINGS.color.save();
-			MelonMod.config.DONATOR_SETTINGS.colorint = 0xFFFFFF;
-		}
-		dirty = true;
-	}
-
-	public static class DonatorSettings {
-		public ModConfigSpec.BooleanValue enable;
-		public ModConfigSpec.ConfigValue<String> color;
-		public int colorint = 0xFFFFFF;
+	private static String translation(String key) {
+		return MelonMod.MODID + ".config." + key;
 	}
 
 }

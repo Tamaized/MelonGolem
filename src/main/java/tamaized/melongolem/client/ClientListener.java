@@ -15,13 +15,13 @@ public class ClientListener {
 	static void init(IEventBus modBus) {
 		NeoForge.EVENT_BUS.addListener(TickEvent.ClientTickEvent.class, event -> {
 			if (Minecraft.getInstance().level == null) {
-				MelonConfig.dirty = true;
+				MelonConfig.Client.dirty = true;
 				return;
 			}
 			if (event.phase == TickEvent.Phase.START) {
-				if (MelonConfig.dirty && DonatorHandler.donators.contains(Minecraft.getInstance().player.getUUID())) {
-					PacketDistributor.SERVER.noArg().send(new ServerPacketDonatorSettings(new DonatorHandler.DonatorSettings(MelonMod.config.DONATOR_SETTINGS.enable.get(), MelonMod.config.DONATOR_SETTINGS.colorint)));
-					MelonConfig.dirty = false;
+				if (MelonConfig.Client.dirty && Minecraft.getInstance().player != null && DonatorHandler.donators.contains(Minecraft.getInstance().player.getUUID())) {
+					PacketDistributor.SERVER.noArg().send(new ServerPacketDonatorSettings(new DonatorHandler.DonatorSettings(MelonMod.configClient.DONATOR_SETTINGS.enable.get(), MelonMod.configClient.DONATOR_SETTINGS.color.get())));
+					MelonConfig.Client.dirty = false;
 				}
 			}
 		});
