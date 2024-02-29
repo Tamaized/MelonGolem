@@ -327,7 +327,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 		private final Item melon;
 		private final Block melonblock;
 		private int cooldown;
-		private final BlockPos.MutableBlockPos vertex = new BlockPos.MutableBlockPos();
+		private final BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 		private boolean foundMelon = false;
 
 		EntityAISearchAndEatMelons(Mob entity) {
@@ -387,15 +387,15 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 				for (int x = -radius; x < radius; x++)
 					for (int y = -radius; y < radius; y++)
 						for (int z = -radius; z < radius; z++) {
-							vertex.set(parent.blockPosition().offset(x, y, z));
-							if (parent.level().hasChunk(SectionPos.blockToSectionCoord(vertex.getX()), SectionPos.blockToSectionCoord(vertex.getZ()))) {
-								BlockEntity te = parent.level().getBlockEntity(vertex);
+							mutableBlockPos.set(parent.blockPosition().getX() + x, parent.blockPosition().getY() + y, parent.blockPosition().getZ() + z);
+							if (parent.level().hasChunk(SectionPos.blockToSectionCoord(mutableBlockPos.getX()), SectionPos.blockToSectionCoord(mutableBlockPos.getZ()))) {
+								BlockEntity te = parent.level().getBlockEntity(mutableBlockPos);
 								if (te != null) {
-									IItemHandler cap = parent.level().getCapability(Capabilities.ItemHandler.BLOCK, vertex, Direction.UP);
+									IItemHandler cap = parent.level().getCapability(Capabilities.ItemHandler.BLOCK, mutableBlockPos, Direction.UP);
 									if (cap != null) {
 										for (int i = 0; i < cap.getSlots(); i++) {
 											if (isMelon(cap.getStackInSlot(i))) {
-												foundMelon = parent.distanceToSqr(vertex.getX(), vertex.getY(), vertex.getZ()) < 4 || parent.getNavigation().moveTo(vertex.getX(), vertex.getY(), vertex.getZ(), 1.25F);
+												foundMelon = parent.distanceToSqr(mutableBlockPos.getX(), mutableBlockPos.getY(), mutableBlockPos.getZ()) < 4 || parent.getNavigation().moveTo(mutableBlockPos.getX(), mutableBlockPos.getY(), mutableBlockPos.getZ(), 1.25F);
 												break;
 											}
 										}
@@ -408,18 +408,18 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 			}
 			if (foundMelon) {
 				// Validate
-				if (!parent.level().hasChunk(SectionPos.blockToSectionCoord(vertex.getX()), SectionPos.blockToSectionCoord(vertex.getZ()))) {
+				if (!parent.level().hasChunk(SectionPos.blockToSectionCoord(mutableBlockPos.getX()), SectionPos.blockToSectionCoord(mutableBlockPos.getZ()))) {
 					parent.getNavigation().stop();
 					foundMelon = false;
 					return;
 				}
-				BlockEntity te = parent.level().getBlockEntity(vertex);
-				if (te == null || parent.level().getCapability(Capabilities.ItemHandler.BLOCK, vertex, Direction.UP) == null) {
+				BlockEntity te = parent.level().getBlockEntity(mutableBlockPos);
+				if (te == null || parent.level().getCapability(Capabilities.ItemHandler.BLOCK, mutableBlockPos, Direction.UP) == null) {
 					parent.getNavigation().stop();
 					foundMelon = false;
 					return;
 				}
-				IItemHandler handler = parent.level().getCapability(Capabilities.ItemHandler.BLOCK, vertex, Direction.UP);
+				IItemHandler handler = parent.level().getCapability(Capabilities.ItemHandler.BLOCK, mutableBlockPos, Direction.UP);
 				if (handler != null) {
 					boolean valid = false;
 					int i;
@@ -435,7 +435,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 						return;
 					}
 
-					if (cooldown <= 0 && parent.distanceToSqr(vertex.getX(), vertex.getY(), vertex.getZ()) < 4) {
+					if (cooldown <= 0 && parent.distanceToSqr(mutableBlockPos.getX(), mutableBlockPos.getY(), mutableBlockPos.getZ()) < 4) {
 						boolean flag = handler.getStackInSlot(i).getItem() == melonblock.asItem();
 						handler.getStackInSlot(i).shrink(1);
 						parent.playSound(SoundEvents.PLAYER_BURP, 1F, 1F);
