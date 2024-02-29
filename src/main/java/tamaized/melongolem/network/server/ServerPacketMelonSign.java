@@ -31,10 +31,10 @@ public record ServerPacketMelonSign(int entityID, String[] lines) implements Cus
 	public static void handle(final ServerPacketMelonSign packet, PlayPayloadContext context) {
 		context.workHandler().execute(() -> context.player().ifPresent(player -> {
 			Entity entity = player.level().getEntity(packet.entityID());
-			if (entity instanceof EntityMelonGolem && entity.distanceTo(player) <= 6)
+			if (entity instanceof ISignHolder && entity.distanceTo(player) <= 6)
 				for (int i = 0; i < packet.lines.length; ++i) {
 					String text = ChatFormatting.stripFormatting(packet.lines[i]);
-					((EntityMelonGolem) entity).setSignText(i, Component.literal(text == null ? "" : text));
+					((ISignHolder) entity).setSignText(i, Component.literal(text == null ? "" : text));
 				}
 		}));
 	}

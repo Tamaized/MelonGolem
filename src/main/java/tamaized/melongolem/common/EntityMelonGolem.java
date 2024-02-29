@@ -292,7 +292,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 		compound.put("head", getHead().save(new CompoundTag()));
 		compound.putBoolean("glowingText", glowingText());
 		compound.putInt("textColor", getTextColor().getId());
-		for (int i = 0; i < 4; ++i) {
+		for (int i = 0; i < 4; i++) {
 			String s = Component.Serializer.toJson(getSignText(i));
 			compound.putString("Text" + (i + 1), s);
 		}

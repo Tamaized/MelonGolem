@@ -182,6 +182,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 	public InteractionResult interactAt(Player player, Vec3 vec, InteractionHand hand) {
 		if (!MelonMod.config.hats.get() || player.getMainHandItem().getItem() instanceof ShearsItem || player.getOffhandItem().getItem() instanceof ShearsItem)
 			return InteractionResult.FAIL;
+		// TODO abstract this into a static helper method in EntityMelonGolem
 		ItemStack stack = player.getItemInHand(hand);
 		if (!stack.isEmpty() && getHead().isEmpty()) {
 			if (Block.byItem(stack.getItem()) != Blocks.AIR || stack.is(ItemTags.SIGNS)) {
@@ -228,7 +229,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 	}
 
 	public void setHead(ItemStack stack) {
-		for (int i = 0; i < 4; ++i)
+		for (int i = 0; i < 4; i++)
 			setSignText(i, Component.literal(""));
 		ItemStack newstack = stack.copy();
 		newstack.setCount(1);
@@ -246,6 +247,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 	@Override
 	public void die(@Nonnull DamageSource cause) {
 		super.die(cause);
+		// TODO abstract this into a static helper method in EntityMelonGolem
 		ItemStack stack = getHead();
 		if (!level().isClientSide() && !stack.isEmpty()) {
 			ItemEntity e = new ItemEntity(level(), getX(), getY(), getZ(), stack);
@@ -270,7 +272,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 		compound.putInt("textColor", getTextColor().getId());
 		compound.putBoolean("donator_enabled", isEnabled());
 		compound.putInt("donator_color", getColor());
-		for (int i = 0; i < 4; ++i) {
+		for (int i = 0; i < 4; i++) {
 			String s = Component.Serializer.toJson(getSignText(i));
 			compound.putString("Text" + (i + 1), s);
 		}
@@ -279,6 +281,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compound) {
+		super.readAdditionalSaveData(compound);
 		if (compound.contains("donator_enabled"))
 			entityData.set(ENABLED, compound.getBoolean("donator_enabled"));
 		if (compound.contains("donator_color"))
@@ -286,7 +289,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 		setHead(ItemStack.of(compound.getCompound("head")));
 		getEntityData().set(GLOWING_TEXT, compound.getBoolean("glowingText"));
 		getEntityData().set(TEXT_COLOR, compound.getInt("textColor"));
-		for (int i = 0; i < 4; ++i) {
+		for (int i = 0; i < 4; i++) {
 			String s = compound.getString("Text" + (i + 1));
 			Component itextcomponent = Component.Serializer.fromJson(s);
 
@@ -296,7 +299,6 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 				setSignText(i, itextcomponent);
 			}
 		}
-		super.readAdditionalSaveData(compound);
 	}
 
 }
