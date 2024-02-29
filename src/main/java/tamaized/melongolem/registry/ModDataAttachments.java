@@ -6,7 +6,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
-import tamaized.melongolem.common.capability.TinyGolemAttachment;
+import tamaized.melongolem.common.TinyGolemAttachment;
 import tamaized.regutil.RegUtil;
 import tamaized.regutil.RegistryClass;
 

@@ -32,7 +32,6 @@ import net.neoforged.neoforge.common.IShearable;
 import tamaized.melongolem.ISignHolder;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.client.ClientUtil;
-import tamaized.melongolem.common.capability.TinyGolemAttachment;
 import tamaized.melongolem.network.DonatorHandler;
 import tamaized.melongolem.registry.ModDataAttachments;
 import tamaized.melongolem.registry.ModEntities;
@@ -92,6 +91,9 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 		super.tick();
 		if (level().isClientSide() || !isAlive())
 			return;
+		if (getOwnerUUID() == null) {
+			hurt(level().damageSources().fellOutOfWorld(), 1024F);
+		}
 		LivingEntity owner = getOwner();
 		if (owner == null || !owner.isAlive())
 			return;
@@ -112,6 +114,10 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 	@Override
 	public boolean isNoAi() {
 		return super.isNoAi() || getOwner() == null;
+	}
+
+	public boolean isNoAiEntityDataFlagSet() {
+		return super.isNoAi();
 	}
 
 	public boolean isEnabled() {

@@ -19,11 +19,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
-import tamaized.melongolem.common.capability.TinyGolemAttachment;
 import tamaized.melongolem.network.client.ClientPacketSendParticles;
 import tamaized.melongolem.registry.ModDataAttachments;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
 public class ItemMelonStick extends Item {
 
@@ -37,40 +37,34 @@ public class ItemMelonStick extends Item {
 		EntityTinyMelonGolem pet = attachment.getPet().orElse(new EntityTinyMelonGolem(level));
 		pet.tame(owner);
 
-		int x = Mth.floor(owner.getX()) - 2;
-		int z = Mth.floor(owner.getZ()) - 2;
-		int y = Mth.floor(owner.getBoundingBox().minY);
+		findTeleportFriendlyBlock(level, pet, owner.blockPosition()).ifPresent(pos -> {
+			pet.moveTo(pos.getCenter());
+			ClientPacketSendParticles particles = new ClientPacketSendParticles();
+			for (int i = 0; i < 25; i++) {
+				Vec3 result = pet.getViewVector(1F).yRot(pet.getRandom().nextFloat() * 360F).xRot(pet.getRandom().nextFloat() * 360F).scale(0.35F);
+				particles.queueParticle(ParticleTypes.END_ROD, false, pet.getX() + result.x, pet.getY() + pet.getBbHeight() / 2F + result.y, pet.getZ() + result.z, 0, 0, 0);
+			}
+			PacketDistributor.TRACKING_CHUNK.with(level.getChunkAt(owner.blockPosition())).send(particles);
+			if (attachment.getPet().isEmpty())
+				level.addFreshEntity(pet);
+			attachment.changePet(pet);
+			level.playSound(null, pet.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 1.0F, pet.getRandom().nextFloat() + 0.5F);
+		});
+	}
 
-		loop:
-		for (int l = pet.getRandom().nextInt(6); l <= 8; ++l) {
-			for (int i1 = pet.getRandom().nextInt(6); i1 <= 8; ++i1) {
+	public static Optional<BlockPos> findTeleportFriendlyBlock(Level world, Entity entity, BlockPos blockPos) {
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		for (int l = world.getRandom().nextInt(6); l <= 8; ++l) {
+			for (int i1 = world.getRandom().nextInt(6); i1 <= 8; ++i1) {
 				for (int j = 3; j > -3; j--) {
-					if (isTeleportFriendlyBlock(level, pet, x, z, y + j, l, i1)) {
-						double posx = (float) (x + l) + 0.5F;
-						double posy = (double) y + j;
-						double posz = (float) (z + i1) + 0.5F;
-						pet.moveTo(posx, posy, posz);
-						ClientPacketSendParticles particles = new ClientPacketSendParticles();
-						for (int i = 0; i < 25; i++) {
-							Vec3 result = pet.getViewVector(1F).yRot(pet.getRandom().nextFloat() * 360F).xRot(pet.getRandom().nextFloat() * 360F).scale(0.35F);
-							particles.queueParticle(ParticleTypes.END_ROD, false, pet.getX() + result.x, pet.getY() + pet.getBbHeight() / 2F + result.y, pet.getZ() + result.z, 0, 0, 0);
-						}
-						PacketDistributor.TRACKING_CHUNK.with(level.getChunkAt(BlockPos.containing(x, y, z))).send(particles);
-						if (attachment.getPet().isEmpty())
-							level.addFreshEntity(pet);
-						attachment.changePet(pet);
-						level.playSound(null, pet.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 1.0F, pet.getRandom().nextFloat() + 0.5F);
-						break loop;
-					}
+					pos.set(blockPos.getX() + l, (blockPos.getY() + j) - 1, blockPos.getZ() + i1);
+					BlockState iblockstate = world.getBlockState(pos);
+					if (Block.canSupportCenter(world, pos, Direction.UP) && iblockstate.isValidSpawn(world, pos, entity.getType()) && world.isEmptyBlock(pos.above()) && world.isEmptyBlock(pos.above(2)))
+						return Optional.of(pos.above());
 				}
 			}
 		}
-	}
-
-	private static boolean isTeleportFriendlyBlock(Level world, Entity entity, int x, int z, int y, int xOffset, int zOffset) {
-		BlockPos blockpos = new BlockPos(x + xOffset, y - 1, z + zOffset);
-		BlockState iblockstate = world.getBlockState(blockpos);
-		return Block.canSupportCenter(world, blockpos, Direction.UP) && iblockstate.isValidSpawn(entity.level(), entity.blockPosition(), entity.getType()) && world.isEmptyBlock(blockpos.above()) && world.isEmptyBlock(blockpos.above(2));
+		return Optional.empty();
 	}
 
 	@Nonnull
