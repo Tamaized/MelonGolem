@@ -24,32 +24,30 @@ public class MelonConfig {
 		public ModConfigSpec.BooleanValue tts;
 
 		public Client(ModConfigSpec.Builder builder) {
-			builder.
-					comment("Donator Settings").
-					push("Donator Settings");
+			builder.comment("Donator Settings").push("Donator Settings");
 			{
-				DONATOR_SETTINGS.enable = builder.
-						translation(translation("enable")).
-						comment("Enables donator settings for yourself").
-						define("enable", true);
+				DONATOR_SETTINGS.enable = builder
+						.translation(translation("enable"))
+						.comment("Enables donator settings for yourself")
+						.define("enable", true);
 
-				DONATOR_SETTINGS.color = builder.
-						translation(translation("color")).
-						comment("Changes the Tiny Melon Golem Color").
-						defineInRange("color", 0xFFA4EA, Integer.MIN_VALUE, Integer.MAX_VALUE);
+				DONATOR_SETTINGS.color = builder
+						.translation(translation("color"))
+						.comment("Changes the Tiny Melon Golem Color")
+						.defineInRange("color", 0xFFA4EA, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
 			}
 			builder.pop();
 
-			tehnutMode = builder.
-					translation("TehNut Mode").
-					comment(":^)").
-					define("tehnutMode", false);
+			tehnutMode = builder
+					.translation("TehNut Mode")
+					.comment(":^)")
+					.define("tehnutMode", false);
 
-			tts = builder.
-					translation("TTS Signs").
-					comment("When enabled, written signs on a golem's head will play text to speech audio").
-					define("tts", true);
+			tts = builder
+					.translation("TTS Signs")
+					.comment("When enabled, written signs on a golem's head will play text to speech audio")
+					.define("tts", true);
 		}
 
 		public static class DonatorSettings {
@@ -71,46 +69,46 @@ public class MelonConfig {
 
 	public MelonConfig(ModConfigSpec.Builder builder) {
 
-		health = builder.
-				translation("Base Golem Health").
-				comment("").
-				defineInRange("health", 8.0F, 0.5F, Float.MAX_VALUE);
+		health = builder
+				.translation(translation("health"))
+				.comment("Base Golem Health")
+				.defineInRange("health", 8.0F, 0.5F, Float.MAX_VALUE);
 
-		damage = builder.
-				translation("Melon Slice Damage").
-				comment("").
-				defineInRange("damage", 4.0F, 0.5F, Float.MAX_VALUE);
+		damage = builder
+				.translation(translation("damage"))
+				.comment("Melon Slice Damage")
+				.defineInRange("damage", 4.0F, 0.5F, Float.MAX_VALUE);
 
-		glisterDamageAmp = builder.
-				translation("Glistering Melon Slice Damage Amplification").
-				comment("").
-				defineInRange("damage", 1.5F, 1F, Float.MAX_VALUE);
+		glisterDamageAmp = builder
+				.translation(translation("glister_damage_amp"))
+				.comment("Glistering Melon Slice Damage Amplification")
+				.defineInRange("damage", 1.5F, 1F, Float.MAX_VALUE);
 
-		hats = builder.
-				translation("Enable Golem Block Heads").
-				comment("Enables the placement of blocks on golems' heads").
-				define("hats", true);
+		hats = builder
+				.translation(translation("hats"))
+				.comment("Enables the ability to place Blocks onto a Melon Golem's head")
+				.define("hats", true);
 
-		shear = builder.
-				translation("Shears Spawn Block").
-				comment("If disabled, shearing a golem destroys the block").
-				define("shear", true);
+		shear = builder
+				.translation(translation("shear"))
+				.comment("If disabled, shearing a Melon Golem will destroy the Block on its head.")
+				.define("shear", true);
 
-		eats = builder.
-				translation("Golem Eats Melons").
-				comment("If enabled, golems will hunt for nearby melon slices to replensih health").
-				define("eats", true);
+		eats = builder
+				.translation(translation("eats"))
+				.comment("If enabled, Melon Golems will hunt for nearby melon slices to replenish health")
+				.define("eats", true);
 
-		heal = builder.
-				translation("Melon Heal Amount").
-				comment("The amount a golem will heal for after consuming a melon slice").
-				defineInRange("heal", 1.0F, 0.5F, Float.MAX_VALUE);
+		heal = builder
+				.translation(translation("heal"))
+				.comment("The amount health a Melon Golem will gain when consuming a melon slice")
+				.defineInRange("heal", 1.0F, 0.5F, Float.MAX_VALUE);
 
 
-		stabby = builder.
-				translation("Stabby Life Item").
-				comment("The item used to spawn a melon golem\n\n[domain:name] domain will default to `minecraft`").
-				define("stabby", Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(Items.STICK)).getPath());
+		stabby = builder
+				.translation(translation("stabby"))
+				.comment("The item used in each hand to spawn a melon golem. Format as `namepsace:name`")
+				.define("stabby", Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(Items.STICK)).toString());
 	}
 
 	public static void setupStabby() {
@@ -122,9 +120,7 @@ public class MelonConfig {
 			regname = split[1];
 		}
 		Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(domain, regname));
-		if (item == null || item instanceof AirItem)
-			return;
-		stabItem = item;
+		stabItem = item instanceof AirItem ? Items.STICK : item;
 	}
 
 	public static boolean compareStabbyItem(ItemStack stack) {
