@@ -49,6 +49,8 @@ public class TinyGolemAttachment implements INBTSerializable<CompoundTag> {
 		} else if (pet != null && owner.level() instanceof ServerLevel serverLevel && !pet.level().dimension().equals(owner.level().dimension()) && pet.changeDimension(serverLevel) instanceof EntityTinyMelonGolem newPet) {
 			newPet.moveTo(owner.position());
 			pet = newPet;
+		} else if (pet != null && !pet.isAlive()) {
+			pet = null;
 		}
 		loaded = true;
 	}

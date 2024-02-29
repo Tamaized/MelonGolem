@@ -45,7 +45,7 @@ import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
 import tamaized.melongolem.ISignHolder;
 import tamaized.melongolem.MelonMod;
-import tamaized.melongolem.client.GuiEditGolemSign;
+import tamaized.melongolem.client.ClientUtil;
 import tamaized.melongolem.network.client.ClientPacketMelonAmbientSound;
 import tamaized.melongolem.registry.ModBlocks;
 import tamaized.melongolem.registry.ModEntities;
@@ -233,7 +233,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 			} else {
 				if (level().isClientSide()) {
 					if (getHead().is(ItemTags.SIGNS) && distanceTo(player) <= 6)
-						Minecraft.getInstance().setScreen(new GuiEditGolemSign(this));
+						ClientUtil.openGolemSignScreen(this);
 				}
 			}
 			return InteractionResult.sidedSuccess(level().isClientSide());

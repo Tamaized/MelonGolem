@@ -34,10 +34,8 @@ public class ItemMelonStick extends Item {
 	public static void summonPet(ServerLevel level, Player owner) {
 		TinyGolemAttachment attachment = owner.getData(ModDataAttachments.TINY_GOLEM);
 
-		boolean shouldSpawn = attachment.getPet().isEmpty();
 		EntityTinyMelonGolem pet = attachment.getPet().orElse(new EntityTinyMelonGolem(level));
 		pet.tame(owner);
-		attachment.changePet(pet);
 
 		int x = Mth.floor(owner.getX()) - 2;
 		int z = Mth.floor(owner.getZ()) - 2;
@@ -58,8 +56,9 @@ public class ItemMelonStick extends Item {
 							particles.queueParticle(ParticleTypes.END_ROD, false, pet.getX() + result.x, pet.getY() + pet.getBbHeight() / 2F + result.y, pet.getZ() + result.z, 0, 0, 0);
 						}
 						PacketDistributor.TRACKING_CHUNK.with(level.getChunkAt(BlockPos.containing(x, y, z))).send(particles);
-						if (shouldSpawn)
+						if (attachment.getPet().isEmpty())
 							level.addFreshEntity(pet);
+						attachment.changePet(pet);
 						level.playSound(null, pet.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 1.0F, pet.getRandom().nextFloat() + 0.5F);
 						break loop;
 					}
