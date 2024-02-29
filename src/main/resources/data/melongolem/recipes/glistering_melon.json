@@ -1,19 +1,17 @@
 {
   "result": {
-	"item": "melongolem:melonstick"
+	"item": "melongolem:glistering_melon"
   },
   "pattern": [
-	" M",
-	"S "
+	"MMM",
+	"MMM",
+	"MMM"
   ],
   "type": "minecraft:crafting_shaped",
   "key": {
 	"M": {
 	  "item": "minecraft:glistering_melon_slice"
-	},
-	"S": {
-	  "item": "minecraft:stick"
 	}
   },
-	"show_notification": true
+  "show_notification": true
 }

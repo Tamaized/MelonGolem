@@ -63,6 +63,7 @@ public class TinyGolemAttachment implements INBTSerializable<CompoundTag> {
 
 	@Override
 	public void deserializeNBT(CompoundTag nbt) {
-		petId = nbt.getUUID("pet");
+		if (nbt.contains("pet"))
+			petId = nbt.getUUID("pet");
 	}
 }
