@@ -18,7 +18,6 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.goal.FollowOwnerGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
@@ -46,7 +45,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, IEntityWithComplexSpawn, ISignHolder {
+public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, ISignHolder {
 
 	private static final EntityDataAccessor<ItemStack> HEAD = SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.ITEM_STACK);
 	private static final EntityDataAccessor<Boolean> ENABLED = SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.BOOLEAN);
@@ -296,16 +295,6 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 			}
 		}
 		super.readAdditionalSaveData(compound);
-	}
-
-	@Override
-	public void writeSpawnData(FriendlyByteBuf buffer) {
-		buffer.writeItem(getHead());
-	}
-
-	@Override
-	public void readSpawnData(FriendlyByteBuf additionalData) {
-		setHead(additionalData.readItem());
 	}
 
 }

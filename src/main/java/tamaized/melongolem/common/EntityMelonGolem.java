@@ -57,7 +57,7 @@ import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.List;
 
-public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, IShearable, IEntityWithComplexSpawn, ISignHolder {
+public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, IShearable, ISignHolder {
 
 	private static final EntityDataAccessor<ItemStack> HEAD = SynchedEntityData.defineId(EntityMelonGolem.class, EntityDataSerializers.ITEM_STACK);
 	private static final EntityDataAccessor<Boolean> GLOWING_TEXT = SynchedEntityData.defineId(EntityMelonGolem.class, EntityDataSerializers.BOOLEAN);
@@ -254,7 +254,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 	}
 
 	public void setHead(ItemStack stack) {
-		for (int i = 0; i < 4; ++i)
+		for (int i = 0; i < 4; i++)
 			setSignText(i, Component.literal(""));
 		ItemStack newstack = stack.copy();
 		newstack.setCount(1);
@@ -303,10 +303,11 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compound) {
+		super.readAdditionalSaveData(compound);
 		setHead(ItemStack.of(compound.getCompound("head")));
 		getEntityData().set(GLOWING_TEXT, compound.getBoolean("glowingText"));
 		getEntityData().set(TEXT_COLOR, compound.getInt("textColor"));
-		for (int i = 0; i < 4; ++i) {
+		for (int i = 0; i < 4; i++) {
 			String s = compound.getString("Text" + (i + 1));
 			Component itextcomponent = Component.Serializer.fromJson(s);
 
@@ -316,17 +317,6 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 				setSignText(i, itextcomponent);
 			}
 		}
-		super.readAdditionalSaveData(compound);
-	}
-
-	@Override
-	public void writeSpawnData(FriendlyByteBuf buffer) {
-		buffer.writeItem(getHead());
-	}
-
-	@Override
-	public void readSpawnData(FriendlyByteBuf additionalData) {
-		setHead(additionalData.readItem());
 	}
 
 	public float getPitch() {
