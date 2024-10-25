@@ -1,10 +1,14 @@
+import org.jetbrains.gradle.ext.JUnit
+
 plugins {
     id 'java-library'
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.0.+'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    // Version List: https://projects.neoforged.net/neoforged/ModDevGradle
+    id 'net.neoforged.moddev' version "${mdg_version}"
+    id "com.dorongold.task-tree" version "4.0.0"
+    id 'com.gradleup.shadow' version '8.3.3'
 }
 
 configurations {
@@ -14,27 +18,9 @@ configurations {
 shadowJar {
     archiveClassifier.set('')
     configurations = [project.configurations.shade]
+    relocate 'tamaized.beanification', 'tamaized.melongolem.beanification'
     relocate 'tamaized.regutil', 'tamaized.melongolem.regutil'
 }
-
-repositories {
-    maven {
-        name 'RegUtil'
-        url 'https://maven.tamaized.com/releases/'
-    }
-    maven {
-        name 'JEI'
-        url 'https://maven.blamejared.com/'
-    }
-}
-
-version = "${project.minecraft_version}-${project.mod_major_version}." + (hasProperty("CIVersion") ? CIVersion : mod_version)
-group = "tamaized.melongolem"
-archivesBaseName = "MelonGolem"
-
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-minecraft.accessTransformers.file rootProject.file('src/main/resources/META-INF/accesstransformer.cfg')
-compileJava.options.compilerArgs << "-Xlint:all,-classfile,-processing,-deprecation" << "-Werror"
 
 def secrets = new Properties()
 def secretsFile = file('secrets.properties')
@@ -53,79 +39,152 @@ if (secretsFile.exists()) {
     }
 }
 
-def mod_id = 'voidfog'
-runs {
-    configureEach {
-        workingDirectory project.file('run')
-        systemProperty 'forge.logging.console.level', 'debug'
-        systemProperty 'fml.earlyprogresswindow', 'false'
-        systemProperty 'mixin.env.disableRefMap', 'true'
-
-        modSource project.sourceSets.main
-    }
-
-    client {
-//        taskName "Minecraft_Client_${project.minecraft_version}"
-        systemProperty 'forge.enabledGameTestNamespaces', mod_id
-        programArguments.addAll '--username', secrets.getProperty("username")?: 'Dev', secrets.getProperty("uuid") ? '--uuid' : '', secrets.getProperty("uuid")?: ''
-    }
-
-    server {
-//        taskName "Minecraft_Server_${project.minecraft_version}"
-        systemProperty 'forge.enabledGameTestNamespaces', mod_id
-        programArgument '--nogui'
-    }
-
-    gameTestServer {
-//        taskName "Minecraft_GameTestServer_${project.minecraft_version}"
-        systemProperty 'forge.enabledGameTestNamespaces', mod_id
-    }
-
-    data {
-//        taskName "Minecraft_Data_${project.minecraft_version}"
-        workingDirectory project.file('run-data')
-        programArguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
     }
 }
 
-subsystems {
-    parchment {
-        minecraftVersion = "1.20.3" //parchment doesnt support 1.20.4 yet
-        mappingsVersion = project.parchment_version
+version = "${project.minecraft_version}-${project.mod_major_version}." + (hasProperty("CIVersion") ? CIVersion : mod_version)
+group = "tamaized.melongolem"
+
+base {
+    archivesName = "MelonGolem"
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
+compileJava.options.compilerArgs << "-Xlint:all,-classfile,-processing,-deprecation,-this-escape" << "-Werror"
+
+neoForge {
+    version = project.neoforge_version
+
+    validateAccessTransformers = true
+
+    mods {
+        melongolem {
+            sourceSet this.sourceSets.main
+        }
+    }
+
+    unitTest {
+        enable()
+        testedMod = mods.melongolem
+        project.afterEvaluate {
+            idea {
+                project {
+                    settings {
+                        runConfigurations {
+                            defaults(JUnit) {
+                                vmParameters += " -Dforge.logging.console.level=debug"
+                                vmParameters += " -Dforge.logging.marker.scan=ACCEPT"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    runs {
+        configureEach {
+            gameDirectory = project.file('run')
+            systemProperty 'forge.logging.console.level', 'debug'
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+
+        client {
+            client()
+            systemProperty 'forge.enabledGameTestNamespaces', mod_id
+            programArguments.addAll '--username', secrets.getProperty("username") ?: 'Dev', secrets.getProperty("uuid") ? '--uuid' : '', secrets.getProperty("uuid") ?: ''
+        }
+
+        server {
+            server()
+            systemProperty 'forge.enabledGameTestNamespaces', mod_id
+            programArgument '--nogui'
+        }
+
+        data {
+            data()
+            gameDirectory = project.file('run-data')
+            programArguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+    }
+}
+
+repositories {
+    maven {
+        name 'Tama\'s Maven' // Beanification, RegUtil
+        url 'https://maven.tamaized.com/releases/'
+    }
+    maven {
+        name 'Jared\'s Maven' // JEI
+        url 'https://maven.blamejared.com/'
+    }
+}
+
+dependencies {
+    runtimeOnly "mezz.jei:jei-${project.base_minecraft_version}-neoforge:${project.jei_version}"
+
+    def beanification = "tamaized:beanification:${project.minecraft_version}-${project.beanification_version}"
+    implementation beanification
+    shade beanification
+    testImplementation "${beanification}:tests"
+    compileOnly "${beanification}:test-sources"
+
+    def reg = "tamaized:regutil:${project.minecraft_version}-${project.regutil_version}"
+    implementation reg
+    shade reg
+
+    testImplementation group: 'net.neoforged', name: 'testframework', version: project.neoforge_version
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.10.3'
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.10.3'
+    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '5.12.0'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "failed"
+
+        showExceptions true
+        exceptionFormat "full"
+        showCauses true
+        showStackTraces true
+
+        showStandardStreams = false
     }
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 processResources {
-    filesMatching("META-INF/mods.toml") {
+    def version = project.version
+    filesMatching("META-INF/neoforge.mods.toml") {
         expand([
-                'file': ['jarVersion': "${project.version}"]
+                'file': ['jarVersion': "${version}"]
         ])
     }
 }
 
-tasks.named('jar', Jar).configure {
-    //noinspection GroovyAssignabilityCheck
+jar {
     manifest {
-        attributes(["Specification-Title"     : "Melon Golem",
-                    "Specification-Vendor"    : "Tamaized",
-                    "Specification-Version"   : "${version}",
-                    "Implementation-Title"    : project.name,
-                    "Implementation-Version"  : "${version}",
-                    "Implementation-Vendor"   : "Tamaized",
-                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
+        attributes([
+                "Specification-Title"     : "Melon Golem",
+                "Specification-Vendor"    : "Tamaized",
+                "Specification-Version"   : "${version}",
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : "${version}",
+                "Implementation-Vendor"   : "Tamaized",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
     }
-}
-
-dependencies {
-    implementation "net.neoforged:neoforge:${project.neoforge_version}"
-
-    runtimeOnly "mezz.jei:${project.jei_version}"
-
-    def reg = "tamaized:regutil:" + project.regutil_version
-    implementation reg
-    shade reg
 }
 
 def mavenUser = hasProperty("CIMUser") ? CIMUser : secrets.getProperty("maven_username")
@@ -133,13 +192,13 @@ def mavenToken = hasProperty("CIMToken") ? CIMToken : secrets.getProperty("maven
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        create('mavenJava', MavenPublication) {
             afterEvaluate {
-                artifact project.shadowJar
-                artifact project.sourceJar
+                artifact this.project.jar
+                artifact this.project.sourceJar
             }
-            setGroupId 'tamaized'
-            setArtifactId 'melongolem'
+            groupId 'tamaized'
+            artifactId this.project.mod_id
         }
     }
     repositories {
@@ -163,12 +222,4 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
-task incrBuildNum doLast {
-    ant.propertyfile(file: "gradle.properties") {
-        entry(key: "mod_version", value: Integer.parseInt(project.mod_version) + 1)
-    }
-}
-
 build.dependsOn shadowJar
-
-build.finalizedBy(incrBuildNum)
