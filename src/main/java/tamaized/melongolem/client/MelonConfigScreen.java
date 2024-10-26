@@ -8,10 +8,9 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.client.gui.widget.ExtendedButton;
-import tamaized.melongolem.MelonConfig;
 import tamaized.melongolem.MelonMod;
 
-public class MelonConfigScreen extends Screen {
+public class MelonConfigScreen {/*extends Screen {
 
 	private final Screen parent;
 	private EditBox input;
@@ -68,5 +67,5 @@ public class MelonConfigScreen extends Screen {
 		graphics.drawString(font, TEXT_DONATOR_COLOR, 5, 25 + font.lineHeight / 2 + 1, color);
 		RenderSystem.disableBlend();
 		super.render(graphics, mouseX, mouseY, partialTicks);
-	}
+	}*/
 }
