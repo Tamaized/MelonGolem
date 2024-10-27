@@ -7,51 +7,69 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.common.util.Lazy;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import tamaized.beanification.Autowired;
+import tamaized.beanification.Component;
+import tamaized.beanification.PostConstruct;
 import tamaized.melongolem.common.EntityGlisteringMelonGolem;
 import tamaized.melongolem.common.EntityMelonGolem;
+import tamaized.melongolem.config.common.CommonConfig;
 import tamaized.melongolem.registry.ModBlocks;
 
 import java.util.Set;
+import java.util.stream.StreamSupport;
 
+@Component
 public class ModEventListener {
 
-	private static Set<Block> MELONS;
+	@Autowired
+	private ModBlocks modBlocks;
 
-	public static void init(IEventBus bus) {
-		bus.addListener(PlayerInteractEvent.RightClickBlock.class, event -> {
-			Player player = event.getEntity();
-			Level world = event.getLevel();
-			BlockPos vertex = event.getPos();
-			if (MELONS == null)
-				MELONS = ImmutableSet.of(
+	@Autowired
+	private CommonConfig config;
 
-						Blocks.MELON,
+	private final Lazy<Set<Block>> MELONS = Lazy.of(() -> ImmutableSet.of(
+		Blocks.MELON,
+		modBlocks.GLISTERING_MELON.get()
+	));
 
-						ModBlocks.GLISTERING_MELON.get()
+	@PostConstruct(PostConstruct.Bus.GAME)
+	public void init(IEventBus bus) {
+		bus.addListener(PlayerInteractEvent.RightClickBlock.class, this::onRightClickBlock);
+	}
 
-				);
-			for (Block melonCheck : MELONS) {
-				if (!world.isClientSide && world.getBlockState(vertex).getBlock() == melonCheck && MelonConfig.compareStabbyItem(player.getItemInHand(InteractionHand.MAIN_HAND)) && MelonConfig.compareStabbyItem(player.getItemInHand(InteractionHand.OFF_HAND))) {
-					if (world.getBlockState(vertex.below()).getBlock() == melonCheck && world.getBlockState(vertex.above()).getBlock() == melonCheck) {
-						if (!player.isCreative()) {
-							player.getItemInHand(InteractionHand.MAIN_HAND).shrink(1);
-							player.getItemInHand(InteractionHand.OFF_HAND).shrink(1);
-						}
-						world.removeBlock(vertex.below(), false);
-						world.removeBlock(vertex, false);
-						world.removeBlock(vertex.above(), false);
-						EntityMelonGolem melon = melonCheck == ModBlocks.GLISTERING_MELON.get() ? new EntityGlisteringMelonGolem(world) : new EntityMelonGolem(world);
-						melon.teleportTo(vertex.getX() + 0.5F, vertex.getY() - 0.5F, vertex.getZ() + 0.5F);
-						world.addFreshEntity(melon);
-						break;
+	private void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
+		Player player = event.getEntity();
+		Level level = event.getLevel();
+		BlockPos pos = event.getPos();
+		BlockState state = level.getBlockState(pos);
+
+		if (level.isClientSide())
+			return;
+
+		if (!config.compareStabbyItem(player.getItemInHand(InteractionHand.MAIN_HAND)) || !config.compareStabbyItem(player.getItemInHand(InteractionHand.OFF_HAND)))
+			return;
+
+		for (Block melonCheck : MELONS.get()) {
+			if (state.is(melonCheck)) {
+				if (level.getBlockState(pos.below()).getBlock() == melonCheck && level.getBlockState(pos.above()).getBlock() == melonCheck) {
+					if (!player.isCreative()) {
+						player.getItemInHand(InteractionHand.MAIN_HAND).shrink(1);
+						player.getItemInHand(InteractionHand.OFF_HAND).shrink(1);
 					}
+					level.removeBlock(pos.below(), false);
+					level.removeBlock(pos, false);
+					level.removeBlock(pos.above(), false);
+					EntityMelonGolem melon = melonCheck == modBlocks.GLISTERING_MELON.get() ? new EntityGlisteringMelonGolem(level) : new EntityMelonGolem(level);
+					melon.teleportTo(pos.getX() + 0.5F, pos.getY() - 0.5F, pos.getZ() + 0.5F);
+					level.addFreshEntity(melon);
+					break;
 				}
 			}
-		});
+		}
 	}
 
 }

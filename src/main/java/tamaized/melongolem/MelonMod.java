@@ -4,7 +4,6 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.common.NeoForge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import tamaized.beanification.BeanContext;
@@ -27,8 +26,6 @@ public class MelonMod {
 	public MelonMod(IEventBus busMod) {
 		BeanContext.enableMainModClassInjections(this);
 
-		IEventBus forgeBus = NeoForge.EVENT_BUS;
-
 		if (FMLEnvironment.dist == Dist.CLIENT)
 			ClientInitiator.call(busMod);
 
@@ -39,8 +36,6 @@ public class MelonMod {
 		RegUtil.setup(MODID, busMod);
 
 		NetworkMessages.register(busMod);
-
-		ModEventListener.init(forgeBus);
 	}
 
 }
