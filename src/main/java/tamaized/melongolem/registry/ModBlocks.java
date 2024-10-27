@@ -8,31 +8,32 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
-import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import tamaized.beanification.Autowired;
+import tamaized.beanification.Component;
 import tamaized.regutil.RegUtil;
-import tamaized.regutil.RegistryClass;
 
 import java.util.function.Supplier;
 
-public class ModBlocks implements RegistryClass {
+@Component
+public class ModBlocks {
 
-	private static final DeferredRegister<Block> REGISTRY = RegUtil.create(Registries.BLOCK);
+	@Autowired
+	private ModItems modItems;
 
-	public static final DeferredHolder<Block, Block> GLISTERING_MELON = REGISTRY.register("glistering_melon", () -> new Block(BlockBehaviour.Properties.of()
+	private final DeferredRegister<Block> REGISTRY = RegUtil.create(Registries.BLOCK);
+
+	public final DeferredHolder<Block, Block> GLISTERING_MELON = REGISTRY.register("glistering_melon", () -> new Block(BlockBehaviour.Properties.of()
 			.mapColor(MapColor.COLOR_LIGHT_GREEN)
 			.pushReaction(PushReaction.DESTROY)
 			.strength(1.0F)
 			.sound(SoundType.WOOD)
 			.lightLevel(state -> 4))
 	);
-	public static final Supplier<BlockItem> ITEMBLOCK_GLISTERING_MELON = ModItems.REGISTRY
-			.register(GLISTERING_MELON.getId().getPath(), () -> new BlockItem(GLISTERING_MELON.get(), new Item.Properties().setNoRepair()));
-
-	@Override
-	public void init(IEventBus bus) {
-
-	}
+	public final Supplier<BlockItem> ITEMBLOCK_GLISTERING_MELON = modItems.REGISTRY.register(
+		GLISTERING_MELON.getId().getPath(),
+		() -> new BlockItem(GLISTERING_MELON.get(), new Item.Properties().setNoRepair())
+	);
 
 }
