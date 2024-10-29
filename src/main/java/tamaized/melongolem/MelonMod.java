@@ -9,7 +9,6 @@ import org.apache.logging.log4j.Logger;
 import tamaized.beanification.BeanContext;
 import tamaized.melongolem.client.ClientInitiator;
 import tamaized.melongolem.network.DonatorHandler;
-import tamaized.melongolem.network.NetworkMessages;
 import tamaized.regutil.RegUtil;
 
 @Mod(MelonMod.MODID)
@@ -34,8 +33,6 @@ public class MelonMod {
 //		ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory(MelonConfigScreen::new));
 
 		RegUtil.setup(MODID, busMod);
-
-		NetworkMessages.register(busMod);
 	}
 
 }

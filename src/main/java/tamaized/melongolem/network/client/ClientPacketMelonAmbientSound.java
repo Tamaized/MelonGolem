@@ -3,22 +3,33 @@ package tamaized.melongolem.network.client;
 import com.mojang.text2speech.Narrator;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import tamaized.beanification.Autowired;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.EntityMelonGolem;
+import tamaized.melongolem.config.client.ClientConfig;
 import tamaized.melongolem.registry.ModSounds;
 
 import javax.annotation.Nullable;
 
 public record ClientPacketMelonAmbientSound(int entityID) implements CustomPacketPayload {
 
-	public static final ResourceLocation ID = new ResourceLocation(MelonMod.MODID, "s2c_melon_ambient_sound");
+	public static final Type<ClientPacketMelonAmbientSound> ID = new Type<>(ResourceLocation.fromNamespaceAndPath(MelonMod.MODID, "s2c_melon_ambient_sound"));
+
+	public static final StreamCodec<FriendlyByteBuf, ClientPacketMelonAmbientSound> CODEC = StreamCodec.ofMember(ClientPacketMelonAmbientSound::write, ClientPacketMelonAmbientSound::new);
+
+	@Autowired
+	private static ClientConfig config;
+
+	@Autowired
+	private static ModSounds sounds;
+
 	private static Narrator narrator;
 
 	public ClientPacketMelonAmbientSound(EntityMelonGolem golem) {
@@ -29,31 +40,34 @@ public record ClientPacketMelonAmbientSound(int entityID) implements CustomPacke
 		this(buf.readInt());
 	}
 
+	public void write(FriendlyByteBuf packet) {
+		packet.writeInt(entityID);
+	}
+
 	@Override
-	public ResourceLocation id() {
+	public Type<? extends CustomPacketPayload> type() {
 		return ID;
 	}
 
-	public static void handle(final ClientPacketMelonAmbientSound packet, PlayPayloadContext context) {
-		context.workHandler().execute(() ->
-				context.player().ifPresent(player -> {
-					if (player.level().getEntity(packet.entityID) instanceof EntityMelonGolem golem) {
-						if (golem.getHead().is(ItemTags.SIGNS)) {
-							if (MelonMod.configClient.tts.get() && golem.distanceToSqr(player) <= 225) {
-								if (narrator == null)
-									narrator = Narrator.getNarrator();
-								if (!narrator.active())
-									return;
-								narrator.clear();
-								StringBuilder string = new StringBuilder();
-								for (int i = 0; i < 4; ++i)
-									string.append(ChatFormatting.stripFormatting(golem.getSignText(i).getString())).append(" ");
-								narrator.say(string.toString(), false);
-							}
-						} else
-							playAmbientSound(player, golem);
+	public static void handle(final ClientPacketMelonAmbientSound packet, IPayloadContext context) {
+		context.enqueueWork(() -> {
+			if (context.player().level().getEntity(packet.entityID) instanceof EntityMelonGolem golem) {
+				if (golem.getHead().is(ItemTags.SIGNS)) {
+					if (config.tts.get() && golem.distanceToSqr(context.player()) <= 225) {
+						if (narrator == null)
+							narrator = Narrator.getNarrator();
+						if (!narrator.active())
+							return;
+						narrator.clear();
+						StringBuilder string = new StringBuilder();
+						for (int i = 0; i < 4; ++i)
+							string.append(ChatFormatting.stripFormatting(golem.getSignText(i).getString())).append(" ");
+						narrator.say(string.toString(), false);
 					}
-				}));
+				} else
+					playAmbientSound(context.player(), golem);
+			}
+		});
 	}
 
 	private static void playAmbientSound(Player player, EntityMelonGolem golem) {
@@ -64,15 +78,11 @@ public record ClientPacketMelonAmbientSound(int entityID) implements CustomPacke
 
 	@Nullable
 	private static SoundEvent getAmbientSound() {
-		return MelonMod.configClient.tehnutMode.get() ? ModSounds.DADDY.get() : null;
+		return config.tehnutMode.get() ? sounds.DADDY.get() : null;
 	}
 
 	private static float getVoicePitch(EntityMelonGolem golem) {
-		return MelonMod.configClient.tehnutMode.get() ? golem.getPitch() + golem.level().getRandom().nextFloat() * 0.25F - 0.50F : golem.getVoicePitch();
+		return config.tehnutMode.get() ? golem.getPitch() + golem.level().getRandom().nextFloat() * 0.25F - 0.50F : golem.getVoicePitch();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf packet) {
-		packet.writeInt(entityID);
-	}
 }
