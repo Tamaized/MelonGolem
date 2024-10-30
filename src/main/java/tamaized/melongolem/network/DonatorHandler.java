@@ -13,6 +13,7 @@ import java.util.concurrent.CompletableFuture;
 @Component
 public class DonatorHandler {
 
+	private final Object lock_settings = new Object();
 	private final Map<UUID, Settings> settings = new HashMap<>();
 	private final URI URL_DONATORS = URI.create("https://gh.tamaized.com/Tamaized/MelonGolem/donator.properties");
 	private CompletableFuture<List<UUID>> donators;
@@ -32,13 +33,17 @@ public class DonatorHandler {
 	}
 
 	public Optional<Settings> getSettings(UUID donator) {
-		return Optional.ofNullable(settings.get(donator));
+		synchronized (lock_settings) {
+			return Optional.ofNullable(settings.get(donator));
+		}
 	}
 
 	public void updateSettings(UUID donator, Settings settings) {
-		if (!isDonator(donator))
-			return;
-		this.settings.put(donator, settings);
+		synchronized (lock_settings) {
+			if (!isDonator(donator))
+				return;
+			this.settings.put(donator, settings);
+		}
 	}
 
 	private List<UUID> run() {

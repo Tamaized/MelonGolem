@@ -8,7 +8,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import tamaized.beanification.BeanContext;
 import tamaized.melongolem.client.ClientInitiator;
-import tamaized.melongolem.network.DonatorHandler;
 import tamaized.regutil.RegUtil;
 
 @Mod(MelonMod.MODID)
@@ -27,8 +26,6 @@ public class MelonMod {
 
 		if (FMLEnvironment.dist == Dist.CLIENT)
 			ClientInitiator.call(busMod);
-
-		DonatorHandler.start();
 
 //		ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory(MelonConfigScreen::new));
 
