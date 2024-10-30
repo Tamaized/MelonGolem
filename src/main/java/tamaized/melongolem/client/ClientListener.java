@@ -20,7 +20,7 @@ public class ClientListener {
 			}
 			if (event.phase == TickEvent.Phase.START) {
 				if (MelonConfig.Client.dirty && Minecraft.getInstance().player != null && DonatorHandler.donators.contains(Minecraft.getInstance().player.getUUID())) {
-					PacketDistributor.SERVER.noArg().send(new ServerPacketDonatorSettings(new DonatorHandler.DonatorSettings(MelonMod.configClient.DONATOR_SETTINGS.enable.get(), MelonMod.configClient.DONATOR_SETTINGS.color.get())));
+					PacketDistributor.SERVER.noArg().send(new ServerPacketDonatorSettings(new DonatorHandler.Settings(MelonMod.configClient.DONATOR_SETTINGS.enable.get(), MelonMod.configClient.DONATOR_SETTINGS.color.get())));
 					MelonConfig.Client.dirty = false;
 				}
 			}

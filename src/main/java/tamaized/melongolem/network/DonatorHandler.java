@@ -1,69 +1,62 @@
 package tamaized.melongolem.network;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import tamaized.beanification.Component;
+import tamaized.beanification.PostConstruct;
 import tamaized.melongolem.MelonMod;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
+import java.net.URI;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
+@Component
 public class DonatorHandler {
 
-	public static final Map<UUID, DonatorSettings> settings = new HashMap<>();
-	private static final String URL_DONATORS = "https://gh.tamaized.com/Tamaized/MelonGolem/donator.properties";
-	public static volatile List<UUID> donators = new ArrayList<>();
-	private static boolean started = false;
+	private final Map<UUID, Settings> settings = new HashMap<>();
+	private final URI URL_DONATORS = URI.create("https://gh.tamaized.com/Tamaized/MelonGolem/donator.properties");
+	private CompletableFuture<List<UUID>> donators;
 
-	public static void start() {
-		if (!started) {
-			MelonMod.LOGGER.info("Starting Donator Handler");
-			started = true;
-			new ThreadDonators();
-		}
+	@PostConstruct
+	private void start() {
+		MelonMod.LOGGER.info("Starting Donator Handler");
+		donators = CompletableFuture.supplyAsync(this::run);
 	}
 
-	public static void loadData(Properties props) {
-		donators.clear();
-		for (String s : props.stringPropertyNames()) {
-			donators.add(UUID.fromString(s));
-		}
-		MelonMod.LOGGER.debug(donators);
+	public List<UUID> getDonators() {
+		return donators.join();
 	}
 
-	public static final class DonatorSettings {
-		public boolean enabled = true;
-		public int color = 0xFFFFFF;
-
-		public DonatorSettings(boolean enabled, int color) {
-			this.enabled = enabled;
-			this.color = color;
-		}
+	public boolean isDonator(UUID uuid) {
+		return donators.join().contains(uuid);
 	}
 
-	private static class ThreadDonators extends Thread {
+	public Optional<Settings> getSettings(UUID donator) {
+		return Optional.ofNullable(settings.get(donator));
+	}
 
-		public ThreadDonators() {
-			setName("Melon Golem Donator Loader");
-			setDaemon(true);
-			start();
+	public void updateSettings(UUID donator, Settings settings) {
+		if (!isDonator(donator))
+			return;
+		this.settings.put(donator, settings);
+	}
+
+	private List<UUID> run() {
+		MelonMod.LOGGER.info("Loading donor data");
+		try (InputStreamReader data = new InputStreamReader(URL_DONATORS.toURL().openConnection().getInputStream())) {
+			Properties props = new Properties();
+			props.load(data);
+			List<UUID> result = props.stringPropertyNames().stream().map(UUID::fromString).toList();
+			MelonMod.LOGGER.info("Donor data loaded");
+			return result;
+		} catch (IOException e) {
+			MelonMod.LOGGER.error("Could not load donor data");
 		}
 
-		@Override
-		public void run() {
-			MelonMod.LOGGER.info("Loading donor data");
-			try (InputStreamReader data = new InputStreamReader(new URL(URL_DONATORS).openConnection().getInputStream())) {
-				Properties props = new Properties();
-				props.load(data);
-				loadData(props);
-				MelonMod.LOGGER.info("Donor data loaded");
-			} catch (IOException e) {
-				MelonMod.LOGGER.error("Could not load donor data");
-			}
-		}
+		return Collections.emptyList();
+	}
+
+	public record Settings(boolean enabled, int color) {
 
 	}
 

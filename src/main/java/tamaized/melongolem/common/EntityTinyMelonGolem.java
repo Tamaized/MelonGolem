@@ -98,7 +98,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 		if (owner == null || !owner.isAlive())
 			return;
 		if (DonatorHandler.donators.contains(getOwnerUUID())) {
-			DonatorHandler.DonatorSettings settings = DonatorHandler.settings.get(getOwnerUUID());
+			DonatorHandler.Settings settings = DonatorHandler.settings.get(getOwnerUUID());
 			if (settings != null) {
 				entityData.set(ENABLED, settings.enabled);
 				entityData.set(COLOR, settings.color);
