@@ -13,8 +13,6 @@ public class ClientConfig {
 	@Autowired
 	private DonatorSettings donatorSettings;
 
-	private boolean dirty = true;
-
 	public ModConfigSpec.BooleanValue tehnutMode;
 	public ModConfigSpec.BooleanValue tts;
 

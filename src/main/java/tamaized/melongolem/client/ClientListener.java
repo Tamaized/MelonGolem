@@ -1,28 +1,40 @@
 package tamaized.melongolem.client;
 
 import net.minecraft.client.Minecraft;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.TickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
-import tamaized.melongolem.MelonConfig;
-import tamaized.melongolem.MelonMod;
+import tamaized.beanification.Autowired;
+import tamaized.beanification.Component;
+import tamaized.beanification.PostConstruct;
+import tamaized.melongolem.config.client.DonatorSettings;
 import tamaized.melongolem.network.DonatorHandler;
 import tamaized.melongolem.network.server.ServerPacketDonatorSettings;
 
+@Component(dist = Dist.CLIENT)
 public class ClientListener {
 
-	static void init(IEventBus modBus) {
-		NeoForge.EVENT_BUS.addListener(TickEvent.ClientTickEvent.class, event -> {
+	@Autowired
+	private DonatorHandler donatorHandler;
+
+	@Autowired
+	private DonatorSettings donatorSettingsConfig;
+
+	private boolean dirty = true;
+
+	@PostConstruct
+	private void init(IEventBus modBus) {
+		NeoForge.EVENT_BUS.addListener(ClientTickEvent.Pre.class, event -> {
 			if (Minecraft.getInstance().level == null) {
-				MelonConfig.Client.dirty = true;
+				dirty = true;
 				return;
 			}
-			if (event.phase == TickEvent.Phase.START) {
-				if (MelonConfig.Client.dirty && Minecraft.getInstance().player != null && DonatorHandler.donators.contains(Minecraft.getInstance().player.getUUID())) {
-					PacketDistributor.SERVER.noArg().send(new ServerPacketDonatorSettings(new DonatorHandler.Settings(MelonMod.configClient.DONATOR_SETTINGS.enable.get(), MelonMod.configClient.DONATOR_SETTINGS.color.get())));
-					MelonConfig.Client.dirty = false;
-				}
+
+			if (dirty && Minecraft.getInstance().player != null && donatorHandler.isDonator(Minecraft.getInstance().player.getUUID())) {
+				PacketDistributor.sendToServer(new ServerPacketDonatorSettings(new DonatorHandler.Settings(donatorSettingsConfig.enable.get(), donatorSettingsConfig.color.get())));
+				dirty = false;
 			}
 		});
 	}
