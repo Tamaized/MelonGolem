@@ -10,7 +10,6 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
 import tamaized.regutil.RegUtil;
 
@@ -19,19 +18,17 @@ import java.util.function.Supplier;
 @Component
 public class ModBlocks {
 
-	@Autowired
-	private ModItems modItems;
-
 	private final DeferredRegister<Block> REGISTRY = RegUtil.create(Registries.BLOCK);
+	private final DeferredRegister<Item> ITEM_REGISTRY = RegUtil.create(Registries.ITEM);
 
 	public final DeferredHolder<Block, Block> GLISTERING_MELON = REGISTRY.register("glistering_melon", () -> new Block(BlockBehaviour.Properties.of()
-			.mapColor(MapColor.COLOR_LIGHT_GREEN)
-			.pushReaction(PushReaction.DESTROY)
-			.strength(1.0F)
-			.sound(SoundType.WOOD)
-			.lightLevel(state -> 4))
+		.mapColor(MapColor.COLOR_LIGHT_GREEN)
+		.pushReaction(PushReaction.DESTROY)
+		.strength(1.0F)
+		.sound(SoundType.WOOD)
+		.lightLevel(state -> 4))
 	);
-	public final Supplier<BlockItem> ITEMBLOCK_GLISTERING_MELON = modItems.REGISTRY.register(
+	public Supplier<BlockItem> ITEMBLOCK_GLISTERING_MELON = ITEM_REGISTRY.register(
 		GLISTERING_MELON.getId().getPath(),
 		() -> new BlockItem(GLISTERING_MELON.get(), new Item.Properties().setNoRepair())
 	);

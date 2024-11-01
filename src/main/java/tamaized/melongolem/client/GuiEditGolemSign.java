@@ -66,7 +66,7 @@ public class GuiEditGolemSign extends Screen {
 		if (minecraft == null)
 			return;
 		if (canSend)
-			PacketDistributor.SERVER.noArg().send(new ServerPacketMelonSign(golem));
+			PacketDistributor.sendToServer(new ServerPacketMelonSign(golem));
 		this.minecraft.setScreen(null);
 	}
 

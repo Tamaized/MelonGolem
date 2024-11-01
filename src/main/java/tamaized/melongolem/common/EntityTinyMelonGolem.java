@@ -29,19 +29,28 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.IShearable;
+import net.neoforged.neoforge.common.util.Lazy;
+import tamaized.beanification.Autowired;
+import tamaized.beanification.BeanContext;
+import tamaized.beanification.Configurable;
 import tamaized.melongolem.ISignHolder;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.client.ClientUtil;
+import tamaized.melongolem.config.common.CommonConfig;
 import tamaized.melongolem.network.DonatorHandler;
 import tamaized.melongolem.registry.ModDataAttachments;
 import tamaized.melongolem.registry.ModEntities;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+@Configurable
 public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, ISignHolder {
+
+	private static final Lazy<ModEntities> MOD_ENTITIES = BeanContext.injectLazy(ModEntities.class);
 
 	private static final EntityDataAccessor<ItemStack> HEAD = SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.ITEM_STACK);
 	private static final EntityDataAccessor<Boolean> ENABLED = SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.BOOLEAN);
@@ -60,8 +69,17 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 
 	);
 
+	@Autowired
+	private DonatorHandler donatorHandler;
+
+	@Autowired
+	private CommonConfig config;
+
+	@Autowired
+	private ModDataAttachments modDataAttachments;
+
 	public EntityTinyMelonGolem(Level level) {
-		this(ModEntities.TINY_MELON_GOLEM.get(), level);
+		this(MOD_ENTITIES.get().TINY_MELON_GOLEM.get(), level);
 	}
 
 	public EntityTinyMelonGolem(EntityType<EntityTinyMelonGolem> type, Level level) {
@@ -75,15 +93,15 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		entityData.define(HEAD, ItemStack.EMPTY);
-		entityData.define(GLOWING_TEXT, false);
-		entityData.define(TEXT_COLOR, DyeColor.BLACK.getId());
-		entityData.define(ENABLED, false);
-		entityData.define(COLOR, 0xFFFFFF);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(HEAD, ItemStack.EMPTY);
+		builder.define(GLOWING_TEXT, false);
+		builder.define(TEXT_COLOR, DyeColor.BLACK.getId());
+		builder.define(ENABLED, false);
+		builder.define(COLOR, 0xFFFFFF);
 		for (EntityDataAccessor<Component> sign : SIGN_TEXT)
-			entityData.define(sign, Component.literal(""));
+			builder.define(sign, Component.literal(""));
 	}
 
 	@Override
@@ -97,14 +115,13 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 		LivingEntity owner = getOwner();
 		if (owner == null || !owner.isAlive())
 			return;
-		if (DonatorHandler.donators.contains(getOwnerUUID())) {
-			DonatorHandler.Settings settings = DonatorHandler.settings.get(getOwnerUUID());
-			if (settings != null) {
-				entityData.set(ENABLED, settings.enabled);
-				entityData.set(COLOR, settings.color);
-			}
+		if (donatorHandler.isDonator(getOwnerUUID())) {
+			donatorHandler.getSettings(getOwnerUUID()).ifPresent(settings -> {
+				entityData.set(ENABLED, settings.enabled());
+				entityData.set(COLOR, settings.color());
+			});
 		}
-		TinyGolemAttachment attachment = owner.getData(ModDataAttachments.TINY_GOLEM);
+		TinyGolemAttachment attachment = owner.getData(modDataAttachments.TINY_GOLEM);
 		Optional<EntityTinyMelonGolem> pet = attachment.getPet();
 		if (attachment.isLoaded() && pet.map(p -> p != this).orElse(true)) {
 			hurt(level().damageSources().fellOutOfWorld(), 1024F);
@@ -155,14 +172,14 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 
 	@Override
 	protected void registerGoals() {
-		goalSelector.addGoal(0, new FollowOwnerGoal(this, 1.0D, 4.0F, 2.0F, true));
+		goalSelector.addGoal(0, new FollowOwnerGoal(this, 1.0D, 4.0F, 2.0F));
 		goalSelector.addGoal(1, new WaterAvoidingRandomStrollGoal(this, 1.0D));
 		goalSelector.addGoal(2, new LookAtPlayerGoal(this, Player.class, 8.0F));
 		goalSelector.addGoal(2, new RandomLookAroundGoal(this));
 	}
 
 	@Override
-	public boolean isShearable(@Nonnull ItemStack item, Level world, BlockPos vertex) {
+	public boolean isShearable(@org.jetbrains.annotations.Nullable Player player, ItemStack item, Level level, BlockPos pos) {
 		return !getHead().isEmpty();
 	}
 
@@ -186,7 +203,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 	@Nonnull
 	@Override
 	public InteractionResult interactAt(Player player, Vec3 vec, InteractionHand hand) {
-		if (!MelonMod.config.hats.get() || player.getMainHandItem().getItem() instanceof ShearsItem || player.getOffhandItem().getItem() instanceof ShearsItem)
+		if (!config.hats.get() || player.getMainHandItem().getItem() instanceof ShearsItem || player.getOffhandItem().getItem() instanceof ShearsItem)
 			return InteractionResult.FAIL;
 		// TODO abstract this into a static helper method in EntityMelonGolem
 		ItemStack stack = player.getItemInHand(hand);
@@ -225,11 +242,6 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 	}
 
 	@Override
-	public float getEyeHeightAccess(Pose pose, EntityDimensions dimensions) {
-		return 0.425F;
-	}
-
-	@Override
 	public ItemStack getHead() {
 		return entityData.get(HEAD);
 	}
@@ -242,10 +254,9 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 		entityData.set(HEAD, newstack);
 	}
 
-	@Nonnull
 	@Override
-	public List<ItemStack> onSheared(@Nullable Player player, @Nonnull ItemStack item, Level world, BlockPos vertex, int fortune) {
-		List<ItemStack> list = Lists.newArrayList(MelonMod.config.shear.get() ? getHead() : ItemStack.EMPTY);
+	public List<ItemStack> onSheared(@org.jetbrains.annotations.Nullable Player player, ItemStack item, Level level, BlockPos pos) {
+		List<ItemStack> list = Collections.singletonList(config.shear.get() ? getHead() : ItemStack.EMPTY);
 		setHead(ItemStack.EMPTY);
 		return list;
 	}
@@ -273,13 +284,13 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 	@Nonnull
 	@Override
 	public CompoundTag saveWithoutId(CompoundTag compound) {
-		compound.put("head", getHead().save(new CompoundTag()));
+		compound.put("head", getHead().save(registryAccess()));
 		compound.putBoolean("glowingText", glowingText());
 		compound.putInt("textColor", getTextColor().getId());
 		compound.putBoolean("donator_enabled", isEnabled());
 		compound.putInt("donator_color", getColor());
 		for (int i = 0; i < 4; i++) {
-			String s = Component.Serializer.toJson(getSignText(i));
+			String s = Component.Serializer.toJson(getSignText(i), registryAccess());
 			compound.putString("Text" + (i + 1), s);
 		}
 		return super.saveWithoutId(compound);
@@ -292,12 +303,12 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 			entityData.set(ENABLED, compound.getBoolean("donator_enabled"));
 		if (compound.contains("donator_color"))
 			entityData.set(COLOR, compound.getInt("donator_color"));
-		setHead(ItemStack.of(compound.getCompound("head")));
+		setHead(ItemStack.parseOptional(registryAccess(), compound.getCompound("head")));
 		getEntityData().set(GLOWING_TEXT, compound.getBoolean("glowingText"));
 		getEntityData().set(TEXT_COLOR, compound.getInt("textColor"));
 		for (int i = 0; i < 4; i++) {
 			String s = compound.getString("Text" + (i + 1));
-			Component itextcomponent = Component.Serializer.fromJson(s);
+			Component itextcomponent = Component.Serializer.fromJson(s, registryAccess());
 
 			try {
 				setSignText(i, itextcomponent == null ? Component.literal("") : ComponentUtils.updateForEntity(createCommandSourceStack(), itextcomponent, null, 0));
@@ -305,6 +316,11 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 				setSignText(i, itextcomponent);
 			}
 		}
+	}
+
+	@Override
+	public boolean isFood(ItemStack itemStack) {
+		return false;
 	}
 
 }

@@ -41,11 +41,16 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.IShearable;
+import net.neoforged.neoforge.common.util.Lazy;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
+import tamaized.beanification.Autowired;
+import tamaized.beanification.BeanContext;
+import tamaized.beanification.Configurable;
 import tamaized.melongolem.ISignHolder;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.client.ClientUtil;
+import tamaized.melongolem.config.common.CommonConfig;
 import tamaized.melongolem.network.client.ClientPacketMelonAmbientSound;
 import tamaized.melongolem.registry.ModBlocks;
 import tamaized.melongolem.registry.ModEntities;
@@ -55,7 +60,16 @@ import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.List;
 
+@Configurable
 public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, IShearable, ISignHolder {
+
+	private static final Lazy<ModEntities> MOD_ENTITIES = BeanContext.injectLazy(ModEntities.class);
+
+	@Autowired
+	private ModBlocks modBlocks;
+
+	@Autowired
+	private CommonConfig config;
 
 	private static final EntityDataAccessor<ItemStack> HEAD = SynchedEntityData.defineId(EntityMelonGolem.class, EntityDataSerializers.ITEM_STACK);
 	private static final EntityDataAccessor<Boolean> GLOWING_TEXT = SynchedEntityData.defineId(EntityMelonGolem.class, EntityDataSerializers.BOOLEAN);
@@ -89,7 +103,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 	};
 
 	public EntityMelonGolem(Level level) {
-		this(ModEntities.MELON_GOLEM.get(), level);
+		this(MOD_ENTITIES.get().MELON_GOLEM.get(), level);
 	}
 
 	public EntityMelonGolem(EntityType<? extends EntityMelonGolem> type, Level level) {
@@ -103,14 +117,14 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		entityData.define(HEAD, ItemStack.EMPTY);
-		entityData.define(GLOWING_TEXT, false);
-		entityData.define(TEXT_COLOR, DyeColor.BLACK.getId());
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(HEAD, ItemStack.EMPTY);
+		builder.define(GLOWING_TEXT, false);
+		builder.define(TEXT_COLOR, DyeColor.BLACK.getId());
 		for (EntityDataAccessor<Component> sign : SIGN_TEXT)
-			entityData.define(sign, Component.literal(""));
-		entityData.define(PITCH, getRandom().nextFloat() * 3.0F);
+			builder.define(sign, Component.literal(""));
+		builder.define(PITCH, getRandom().nextFloat() * 3.0F);
 	}
 
 	@Override
@@ -164,7 +178,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 	}
 
 	@Override
-	public boolean isShearable(@Nonnull ItemStack item, Level world, BlockPos vertex) {
+	public boolean isShearable(@org.jetbrains.annotations.Nullable Player player, ItemStack item, Level level, BlockPos pos) {
 		return !getHead().isEmpty();
 	}
 
@@ -198,13 +212,13 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 	@Override
 	public void playAmbientSound() {
 		if (!level().isClientSide())
-			PacketDistributor.TRACKING_ENTITY.with(this).send(new ClientPacketMelonAmbientSound(this));
+			PacketDistributor.sendToPlayersTrackingEntity(this, new ClientPacketMelonAmbientSound(this));
 	}
 
 	@Nonnull
 	@Override
 	public InteractionResult interactAt(Player player, Vec3 vec, InteractionHand hand) {
-		if (!MelonMod.config.hats.get() || player.getMainHandItem().getItem() instanceof ShearsItem || player.getOffhandItem().getItem() instanceof ShearsItem)
+		if (!config.hats.get() || player.getMainHandItem().getItem() instanceof ShearsItem || player.getOffhandItem().getItem() instanceof ShearsItem)
 			return InteractionResult.FAIL;
 		ItemStack stack = player.getItemInHand(hand);
 		if (!stack.isEmpty() && getHead().isEmpty()) {
@@ -242,11 +256,6 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 	}
 
 	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions dimensions) {
-		return 1.7F;
-	}
-
-	@Override
 	public ItemStack getHead() {
 		return entityData.get(HEAD);
 	}
@@ -259,10 +268,9 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 		entityData.set(HEAD, newstack);
 	}
 
-	@Nonnull
 	@Override
-	public List<ItemStack> onSheared(@Nullable Player player, @Nonnull ItemStack item, Level world, BlockPos vertex, int fortune) {
-		List<ItemStack> list = Lists.newArrayList(MelonMod.config.shear.get() ? getHead() : ItemStack.EMPTY);
+	public List<ItemStack> onSheared(@org.jetbrains.annotations.Nullable Player player, ItemStack item, Level level, BlockPos pos) {
+		List<ItemStack> list = Lists.newArrayList(config.shear.get() ? getHead() : ItemStack.EMPTY);
 		setHead(ItemStack.EMPTY);
 		return list;
 	}
@@ -286,28 +294,27 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 		}
 	}
 
-	@Nonnull
 	@Override
-	public CompoundTag saveWithoutId(CompoundTag compound) {
-		compound.put("head", getHead().save(new CompoundTag()));
+	public void addAdditionalSaveData(CompoundTag compound) {
+		super.addAdditionalSaveData(compound);
+		compound.put("head", getHead().save(registryAccess()));
 		compound.putBoolean("glowingText", glowingText());
 		compound.putInt("textColor", getTextColor().getId());
 		for (int i = 0; i < 4; i++) {
-			String s = Component.Serializer.toJson(getSignText(i));
+			String s = Component.Serializer.toJson(getSignText(i), registryAccess());
 			compound.putString("Text" + (i + 1), s);
 		}
-		return super.saveWithoutId(compound);
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compound) {
 		super.readAdditionalSaveData(compound);
-		setHead(ItemStack.of(compound.getCompound("head")));
+		setHead(ItemStack.parseOptional(registryAccess(), compound.getCompound("head")));
 		getEntityData().set(GLOWING_TEXT, compound.getBoolean("glowingText"));
 		getEntityData().set(TEXT_COLOR, compound.getInt("textColor"));
 		for (int i = 0; i < 4; i++) {
 			String s = compound.getString("Text" + (i + 1));
-			Component itextcomponent = Component.Serializer.fromJson(s);
+			Component itextcomponent = Component.Serializer.fromJson(s, registryAccess());
 
 			try {
 				setSignText(i, itextcomponent == null ? Component.literal("") : ComponentUtils.updateForEntity(createCommandSourceStack(), itextcomponent, null, 0));
@@ -321,7 +328,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 		return entityData.get(PITCH);
 	}
 
-	static class EntityAISearchAndEatMelons extends Goal {
+	class EntityAISearchAndEatMelons extends Goal {
 
 		private final Mob parent;
 		private final Item melon;
@@ -334,12 +341,12 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 			parent = entity;
 			setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
 			melon = entity instanceof EntityGlisteringMelonGolem ? Items.GLISTERING_MELON_SLICE : Items.MELON_SLICE;
-			melonblock = entity instanceof EntityGlisteringMelonGolem ? ModBlocks.GLISTERING_MELON.get() : Blocks.MELON;
+			melonblock = entity instanceof EntityGlisteringMelonGolem ? modBlocks.GLISTERING_MELON.get() : Blocks.MELON;
 		}
 
 		@Override
 		public boolean canUse() {
-			return MelonMod.config.eats.get() && parent.getHealth() < parent.getMaxHealth();
+			return config.eats.get() && parent.getHealth() < parent.getMaxHealth();
 		}
 
 		@Override
@@ -377,7 +384,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 					boolean flag = item.getItem().getItem() == melonblock.asItem();
 					item.getItem().shrink(1);
 					parent.playSound(SoundEvents.PLAYER_BURP, 1F, 1F);
-					parent.heal(MelonMod.config.heal.get().floatValue() * (flag ? 9 : 1));
+					parent.heal(config.heal.get().floatValue() * (flag ? 9 : 1));
 					cooldown = 30 + parent.getRandom().nextInt(40);
 				}
 			}
@@ -439,7 +446,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 						boolean flag = handler.getStackInSlot(i).getItem() == melonblock.asItem();
 						handler.getStackInSlot(i).shrink(1);
 						parent.playSound(SoundEvents.PLAYER_BURP, 1F, 1F);
-						parent.heal(MelonMod.config.heal.get().floatValue() * (flag ? 9 : 1));
+						parent.heal(config.heal.get().floatValue() * (flag ? 9 : 1));
 						cooldown = 10 + parent.getRandom().nextInt(40);
 					}
 				} else {

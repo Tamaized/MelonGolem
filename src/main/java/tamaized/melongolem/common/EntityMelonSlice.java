@@ -14,19 +14,31 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.neoforged.neoforge.common.util.Lazy;
+import tamaized.beanification.Autowired;
+import tamaized.beanification.BeanContext;
+import tamaized.beanification.Configurable;
 import tamaized.melongolem.MelonMod;
+import tamaized.melongolem.config.common.CommonConfig;
 import tamaized.melongolem.registry.ModEntities;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
+@Configurable
 public class EntityMelonSlice extends ThrowableProjectile implements ItemSupplier {
 
+	private static final Lazy<ModEntities> MOD_ENTITIES = BeanContext.injectLazy(ModEntities.class);
+
 	private static final EntityDataAccessor<Boolean> GLIST = SynchedEntityData.defineId(EntityMelonSlice.class, EntityDataSerializers.BOOLEAN);
-	private static ItemStack cacheRenderStack = ItemStack.EMPTY;
+
+	@Autowired
+	private CommonConfig config;
+
+	private ItemStack cacheRenderStack = ItemStack.EMPTY;
 
 	public EntityMelonSlice(Level level) {
-		this(ModEntities.MELON_SLICE.get(), level);
+		this(MOD_ENTITIES.get().MELON_SLICE.get(), level);
 	}
 
 	public EntityMelonSlice(EntityType<? extends EntityMelonSlice> type, Level level) {
@@ -34,18 +46,18 @@ public class EntityMelonSlice extends ThrowableProjectile implements ItemSupplie
 	}
 
 	public EntityMelonSlice(Level level, LivingEntity thrower) {
-		super(ModEntities.MELON_SLICE.get(), thrower, level);
+		super(MOD_ENTITIES.get().MELON_SLICE.get(), thrower, level);
 		if (thrower instanceof EntityGlisteringMelonGolem)
 			setGlist();
 	}
 
 	public EntityMelonSlice(Level level, double x, double y, double z) {
-		super(ModEntities.MELON_SLICE.get(), x, y, z, level);
+		super(MOD_ENTITIES.get().MELON_SLICE.get(), x, y, z, level);
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		entityData.define(GLIST, false);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		builder.define(GLIST, false);
 	}
 
 	public boolean isGlistering() {
@@ -80,7 +92,7 @@ public class EntityMelonSlice extends ThrowableProjectile implements ItemSupplie
 		super.onHitEntity(result);
 		if (result.getEntity() == getOwner())
 			return;
-		result.getEntity().hurt(this.damageSources().thrown(this, getOwner()), MelonMod.config.damage.get().floatValue() * (isGlistering() ? MelonMod.config.glisterDamageAmp.get().floatValue() : 1F));
+		result.getEntity().hurt(this.damageSources().thrown(this, getOwner()), config.damage.get().floatValue() * (isGlistering() ? config.glisterDamageAmp.get().floatValue() : 1F));
 
 	}
 

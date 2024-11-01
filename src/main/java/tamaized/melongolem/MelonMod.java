@@ -19,7 +19,6 @@ public class MelonMod {
 	}
 
 	public MelonMod(IEventBus busMod) {
-		BeanContext.enableMainModClassInjections(this);
 		RegUtil.setup(MODID, busMod);
 	}
 

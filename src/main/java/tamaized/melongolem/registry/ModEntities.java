@@ -14,7 +14,6 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
 import tamaized.beanification.PostConstruct;
 import tamaized.melongolem.MelonMod;
@@ -30,32 +29,30 @@ import java.util.function.Supplier;
 @Component
 public class ModEntities {
 
-	@Autowired
-	private ModItems modItems;
-
 	private final DeferredRegister<EntityType<?>> REGISTRY = RegUtil.create(Registries.ENTITY_TYPE);
+	private final DeferredRegister<Item> ITEM_REGISTRY = RegUtil.create(Registries.ITEM);
 
 	public final Supplier<EntityType<EntityMelonGolem>> MELON_GOLEM = REGISTRY.register(
 		"melon_golem",
-		() -> make(ResourceLocation.fromNamespaceAndPath(MelonMod.MODID, "melon_golem"), EntityMelonGolem::new, MobCategory.CREATURE, 0.7F, 1.9F)
+		() -> make(ResourceLocation.fromNamespaceAndPath(MelonMod.MODID, "melon_golem"), EntityMelonGolem::new, MobCategory.CREATURE, 0.7F, 1.9F, 1.7F)
 	);
-	public final Supplier<Item> SPAWN_EGG_MELON_GOLEM = modItems.REGISTRY.register(
+	public final Supplier<Item> SPAWN_EGG_MELON_GOLEM = ITEM_REGISTRY.register(
 		"melon_golem_spawn_egg",
 		() -> new DeferredSpawnEggItem(MELON_GOLEM, 0x00FF00, 0x000000, new Item.Properties())
 	);
 
 	public final Supplier<EntityType<EntityGlisteringMelonGolem>> GLISTERING_MELON_GOLEM = REGISTRY.register(
 		"glistering_melon_golem",
-		() -> make(ResourceLocation.fromNamespaceAndPath(MelonMod.MODID, "glistering_melon_golem"), EntityGlisteringMelonGolem::new, MobCategory.CREATURE, 0.7F, 1.9F)
+		() -> make(ResourceLocation.fromNamespaceAndPath(MelonMod.MODID, "glistering_melon_golem"), EntityGlisteringMelonGolem::new, MobCategory.CREATURE, 0.7F, 1.9F, 1.7F)
 	);
-	public final Supplier<Item> SPAWN_EGG_GLISTERING_MELON_GOLEM = modItems.REGISTRY.register(
+	public final Supplier<Item> SPAWN_EGG_GLISTERING_MELON_GOLEM = ITEM_REGISTRY.register(
 		"glistering_melon_golem_spawn_egg",
 		() -> new DeferredSpawnEggItem(GLISTERING_MELON_GOLEM, 0xAAFF00, 0xFFCC00, new Item.Properties())
 	);
 
 	public final Supplier<EntityType<EntityTinyMelonGolem>> TINY_MELON_GOLEM = REGISTRY.register(
 		"tiny_melon_golem",
-		() -> make(ResourceLocation.fromNamespaceAndPath(MelonMod.MODID, "tiny_melon_golem"), EntityTinyMelonGolem::new, MobCategory.CREATURE, 0.175F, 0.475F)
+		() -> make(ResourceLocation.fromNamespaceAndPath(MelonMod.MODID, "tiny_melon_golem"), EntityTinyMelonGolem::new, MobCategory.CREATURE, 0.175F, 0.475F, 0.425F)
 	);
 
 	public final Supplier<EntityType<EntityMelonSlice>> MELON_SLICE = REGISTRY.register(
@@ -65,6 +62,10 @@ public class ModEntities {
 
 	private <E extends Entity> EntityType<E> make(ResourceLocation id, EntityType.EntityFactory<E> factory, MobCategory classification, float width, float height) {
 		return build(id, makeBuilder(factory, classification).sized(width, height));
+	}
+
+	private <E extends Entity> EntityType<E> make(ResourceLocation id, EntityType.EntityFactory<E> factory, MobCategory classification, float width, float height, float eyeHeight) {
+		return build(id, makeBuilder(factory, classification).sized(width, height).eyeHeight(eyeHeight));
 	}
 
 	private <E extends Entity> EntityType<E> make(ResourceLocation id, EntityType.EntityFactory<E> factory, MobCategory classification) {

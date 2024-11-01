@@ -23,18 +23,19 @@ import javax.annotation.Nonnull;
 import java.util.Objects;
 
 public class RenderMelonGolem<T extends Mob & ISignHolder> extends MobRenderer<T, SnowGolemModel<T>> {
-	private static final ResourceLocation TEXTURES = new ResourceLocation(MelonMod.MODID, "textures/entity/golem.png");
-	private static final ResourceLocation TEXTURES_GREY = new ResourceLocation(MelonMod.MODID, "textures/entity/greygolem.png");
-	private static final ResourceLocation TEXTURES_GLISTER = new ResourceLocation(MelonMod.MODID, "textures/entity/glistening_melon_golem.png");
-	private static final ResourceLocation TEXTURES_GLISTER_OVERLAY = new ResourceLocation(MelonMod.MODID, "textures/entity/glistening_melon_golem_overlay.png");
+	private static final ResourceLocation TEXTURES = ResourceLocation.fromNamespaceAndPath(MelonMod.MODID, "textures/entity/golem.png");
+	private static final ResourceLocation TEXTURES_GREY = ResourceLocation.fromNamespaceAndPath(MelonMod.MODID, "textures/entity/greygolem.png");
+	private static final ResourceLocation TEXTURES_GLISTER = ResourceLocation.fromNamespaceAndPath(MelonMod.MODID, "textures/entity/glistening_melon_golem.png");
+	private static final ResourceLocation TEXTURES_GLISTER_OVERLAY = ResourceLocation.fromNamespaceAndPath(MelonMod.MODID, "textures/entity/glistening_melon_golem_overlay.png");
 	private static final ColorHack COLOR_STATE = new ColorHack();
 	private final Type type;
 
 	public RenderMelonGolem(EntityRendererProvider.Context renderManagerIn, Type type) {
 		super(renderManagerIn, new SnowGolemModel<>(renderManagerIn.bakeLayer(ModelLayers.SNOW_GOLEM)) {
+
 			@Override
-			public void renderToBuffer(@Nonnull PoseStack stack, @Nonnull VertexConsumer buffer, int light, int overlay, float red, float green, float blue, float alpha) {
-				super.renderToBuffer(stack, buffer, light, overlay, COLOR_STATE.enabled ? COLOR_STATE.red : red, COLOR_STATE.enabled ? COLOR_STATE.green : green, COLOR_STATE.enabled ? COLOR_STATE.blue : blue, alpha);
+			public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
+				super.renderToBuffer(poseStack, buffer, packedLight, packedOverlay, COLOR_STATE.enabled ? COLOR_STATE.color : color);
 			}
 		}, type == Type.TINY ? 0.125F : 0.5F);
 		addLayer(new LayerMelonHead<>(this));
@@ -50,10 +51,7 @@ public class RenderMelonGolem<T extends Mob & ISignHolder> extends MobRenderer<T
 			EntityTinyMelonGolem golem = (EntityTinyMelonGolem) entity;
 			if (golem.isEnabled()) {
 				COLOR_STATE.enabled = true;
-				int color = golem.getColor();
-				COLOR_STATE.red = ((color >> 16) & 0xFF) / 255F;
-				COLOR_STATE.green = ((color >> 8) & 0xFF) / 255F;
-				COLOR_STATE.blue = ((color) & 0xFF) / 255F;
+				COLOR_STATE.color = golem.getColor();
 			}
 		}
 		super.render(entity, rotation, partialTicks, stack, buffer, light);
@@ -79,9 +77,7 @@ public class RenderMelonGolem<T extends Mob & ISignHolder> extends MobRenderer<T
 
 	private static class ColorHack {
 		private boolean enabled = false;
-		private float red = 1F;
-		private float green = 1F;
-		private float blue = 1F;
+		private int color = 0xFFFFFF;
 	}
 
 	public static class Factory {
@@ -112,7 +108,7 @@ public class RenderMelonGolem<T extends Mob & ISignHolder> extends MobRenderer<T
 			stack.pushPose();
 			final float s = 1.01F;
 			stack.scale(s, s, s);
-			getParentModel().renderToBuffer(stack, builder, 0xF000F0, getOverlayCoords(entity, getWhiteOverlayProgress(entity, partialTicks)), 1F, 1F, 1F, (!isBodyVisible(entity) && !entity.isInvisibleTo(Objects.requireNonNull(Minecraft.getInstance().player))) ? 0.15F : 1.0F);
+			getParentModel().renderToBuffer(stack, builder, 0xF000F0, getOverlayCoords(entity, getWhiteOverlayProgress(entity, partialTicks)), 0x00FFFFFF | (!isBodyVisible(entity) && !entity.isInvisibleTo(Objects.requireNonNull(Minecraft.getInstance().player)) ? 0x26000000 : 0xFF000000));
 			stack.popPose();
 		}
 	}

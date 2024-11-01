@@ -1,16 +1,22 @@
 package tamaized.melongolem.common;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.common.util.INBTSerializable;
+import org.jetbrains.annotations.UnknownNullability;
+import tamaized.beanification.Autowired;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.UUID;
 
 public class TinyGolemAttachment implements INBTSerializable<CompoundTag> {
+
+	@Autowired
+	private static TeleportHelper teleportHelper;
 
 	private boolean loaded = false;
 
@@ -50,7 +56,10 @@ public class TinyGolemAttachment implements INBTSerializable<CompoundTag> {
 			boolean noAi = pet.isNoAiEntityDataFlagSet();
 			EntityTinyMelonGolem newPet = new EntityTinyMelonGolem(serverLevel);
 			newPet.restoreFrom(pet);
-			ItemMelonStick.findTeleportFriendlyBlock(serverLevel, newPet, owner.blockPosition()).ifPresentOrElse(pos -> newPet.moveTo(pos, 0, 0), () -> newPet.moveTo(owner.position()));
+			teleportHelper.findLocationAboveFriendlyBlock(serverLevel, newPet, owner.blockPosition()).ifPresentOrElse(
+				pos -> newPet.moveTo(pos, 0, 0),
+				() -> newPet.moveTo(owner.position())
+			);
 			if (owner instanceof Player player)
 				newPet.tame(player);
 			newPet.setNoAi(noAi);
@@ -64,7 +73,7 @@ public class TinyGolemAttachment implements INBTSerializable<CompoundTag> {
 	}
 
 	@Override
-	public CompoundTag serializeNBT() {
+	public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
 		CompoundTag nbt = new CompoundTag();
 		if (pet != null)
 			nbt.putUUID("pet", pet.getUUID());
@@ -72,7 +81,7 @@ public class TinyGolemAttachment implements INBTSerializable<CompoundTag> {
 	}
 
 	@Override
-	public void deserializeNBT(CompoundTag nbt) {
+	public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
 		if (nbt.contains("pet"))
 			petId = nbt.getUUID("pet");
 	}
