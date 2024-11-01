@@ -284,7 +284,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 	@Nonnull
 	@Override
 	public CompoundTag saveWithoutId(CompoundTag compound) {
-		compound.put("head", getHead().save(registryAccess()));
+		compound.put("head", getHead().saveOptional(registryAccess()));
 		compound.putBoolean("glowingText", glowingText());
 		compound.putInt("textColor", getTextColor().getId());
 		compound.putBoolean("donator_enabled", isEnabled());

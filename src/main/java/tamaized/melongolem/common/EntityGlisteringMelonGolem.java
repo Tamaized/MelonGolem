@@ -7,11 +7,8 @@ import tamaized.melongolem.registry.ModEntities;
 
 public class EntityGlisteringMelonGolem extends EntityMelonGolem {
 
-	@Autowired
-	private static ModEntities modEntities;
-
 	public EntityGlisteringMelonGolem(Level level) {
-		super(modEntities.GLISTERING_MELON_GOLEM.get(), level);
+		super(MOD_ENTITIES.get().GLISTERING_MELON_GOLEM.get(), level);
 	}
 
 	public EntityGlisteringMelonGolem(EntityType<? extends EntityGlisteringMelonGolem> type, Level level){

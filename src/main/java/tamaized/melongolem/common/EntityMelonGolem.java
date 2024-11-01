@@ -63,10 +63,8 @@ import java.util.List;
 @Configurable
 public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, IShearable, ISignHolder {
 
-	private static final Lazy<ModEntities> MOD_ENTITIES = BeanContext.injectLazy(ModEntities.class);
-
-	@Autowired
-	private ModBlocks modBlocks;
+	protected static final Lazy<ModEntities> MOD_ENTITIES = BeanContext.injectLazy(ModEntities.class);
+	protected static final Lazy<ModBlocks> MOD_BLOCKS = BeanContext.injectLazy(ModBlocks.class);
 
 	@Autowired
 	private CommonConfig config;
@@ -297,7 +295,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 	@Override
 	public void addAdditionalSaveData(CompoundTag compound) {
 		super.addAdditionalSaveData(compound);
-		compound.put("head", getHead().save(registryAccess()));
+		compound.put("head", getHead().saveOptional(registryAccess()));
 		compound.putBoolean("glowingText", glowingText());
 		compound.putInt("textColor", getTextColor().getId());
 		for (int i = 0; i < 4; i++) {
@@ -341,7 +339,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 			parent = entity;
 			setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
 			melon = entity instanceof EntityGlisteringMelonGolem ? Items.GLISTERING_MELON_SLICE : Items.MELON_SLICE;
-			melonblock = entity instanceof EntityGlisteringMelonGolem ? modBlocks.GLISTERING_MELON.get() : Blocks.MELON;
+			melonblock = entity instanceof EntityGlisteringMelonGolem ? MOD_BLOCKS.get().GLISTERING_MELON.get() : Blocks.MELON;
 		}
 
 		@Override
