@@ -102,8 +102,8 @@ public class GuiEditGolemSign extends Screen {
 
 	@Override
 	public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+		super.render(graphics, mouseX, mouseY, partialTicks);
 		Lighting.setupForFlatItems();
-		this.renderBackground(graphics, mouseX, mouseY, partialTicks);
 		graphics.drawCenteredString(this.font, this.title, this.width / 2, 40, 16777215);
 		PoseStack stack = graphics.pose();
 		stack.pushPose();
@@ -178,6 +178,5 @@ public class GuiEditGolemSign extends Screen {
 
 		stack.popPose();
 		Lighting.setupFor3DItems();
-		super.render(graphics, mouseX, mouseY, partialTicks);
 	}
 }
