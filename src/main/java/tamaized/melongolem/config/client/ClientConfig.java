@@ -6,9 +6,13 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
 import tamaized.beanification.PostConstruct;
+import tamaized.melongolem.config.ConfigUtil;
 
 @Component
 public class ClientConfig {
+
+	@Autowired
+	private ConfigUtil configUtil;
 
 	@Autowired
 	private DonatorSettings donatorSettings;
@@ -26,13 +30,13 @@ public class ClientConfig {
 		donatorSettings.setup(builder);
 
 		tehnutMode = builder
-			.translation("TehNut Mode") // TODO: translation key
+			.translation(configUtil.translationKey("tehnut"))
 			.comment(":^)")
 			.define("tehnutMode", false);
 
 		tts = builder
-			.translation("TTS Signs") // TODO: translation key
-			.comment("When enabled, written signs on a golem's head will play text to speech audio")
+			.translation(configUtil.translationKey("tts"))
+			.comment("When enabled, written signs on a Golem's head will play text to speech audio")
 			.define("tts", true);
 
 		return this;

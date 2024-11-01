@@ -55,17 +55,17 @@ public class CommonConfig {
 	private CommonConfig setup(ModConfigSpec.Builder builder) {
 		health = builder
 			.translation(configUtil.translationKey("health"))
-			.comment("Base Golem Health")
+			.comment("How much base max health Melon Golems will have")
 			.defineInRange("health", 8.0F, 0.5F, Float.MAX_VALUE);
 
 		damage = builder
 			.translation(configUtil.translationKey("damage"))
-			.comment("Melon Slice Damage")
+			.comment("How much damage projectiles fired by Melon Golems will deal")
 			.defineInRange("damage", 4.0F, 0.5F, Float.MAX_VALUE);
 
 		glisterDamageAmp = builder
 			.translation(configUtil.translationKey("glister_damage_amp"))
-			.comment("Glistering Melon Slice Damage Amplification")
+			.comment("Damage multiplier for projectiles fired by Glistering Melon Golems")
 			.defineInRange("damage", 1.5F, 1F, Float.MAX_VALUE);
 
 		hats = builder
@@ -75,7 +75,7 @@ public class CommonConfig {
 
 		shear = builder
 			.translation(configUtil.translationKey("shear"))
-			.comment("If disabled, shearing a Melon Golem will destroy the Block on its head.")
+			.comment("If disabled, shearing a Melon Golem will destroy the Block on its head")
 			.define("shear", true);
 
 		eats = builder
@@ -91,7 +91,7 @@ public class CommonConfig {
 
 		stabby = builder
 			.translation(configUtil.translationKey("stabby"))
-			.comment("The item used in each hand to spawn a melon golem. Format as `namepsace:name`")
+			.comment("The item used in each hand to spawn a melon golem. Format as `namespace:name`")
 			.define("stabby", Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(Items.STICK)).toString());
 
 		return this;
