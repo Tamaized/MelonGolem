@@ -1,6 +1,5 @@
 package tamaized.melongolem;
 
-import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,8 +17,8 @@ public class MelonMod {
 		BeanContext.init();
 	}
 
-	public MelonMod(IEventBus busMod) {
-		RegUtil.setup(MODID, busMod);
+	public MelonMod() {
+		RegUtil.setup();
 	}
 
 }
