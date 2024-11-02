@@ -1,6 +1,5 @@
 package tamaized.melongolem.network.client;
 
-import com.mojang.text2speech.Narrator;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -9,9 +8,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.player.Player;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import tamaized.beanification.Autowired;
 import tamaized.melongolem.MelonMod;
+import tamaized.melongolem.client.NarratorHelper;
 import tamaized.melongolem.common.EntityMelonGolem;
 import tamaized.melongolem.config.client.ClientConfig;
 import tamaized.melongolem.registry.ModSounds;
@@ -30,7 +31,8 @@ public record ClientPacketMelonAmbientSound(int entityID) implements CustomPacke
 	@Autowired
 	private static ModSounds sounds;
 
-	private static Narrator narrator;
+	@Autowired(dist = Dist.CLIENT)
+	private static NarratorHelper narratorHelper;
 
 	public ClientPacketMelonAmbientSound(EntityMelonGolem golem) {
 		this(golem.getId());
@@ -54,15 +56,10 @@ public record ClientPacketMelonAmbientSound(int entityID) implements CustomPacke
 			if (context.player().level().getEntity(packet.entityID) instanceof EntityMelonGolem golem) {
 				if (golem.getHead().is(ItemTags.SIGNS)) {
 					if (config.tts.get() && golem.distanceToSqr(context.player()) <= 225) {
-						if (narrator == null)
-							narrator = Narrator.getNarrator();
-						if (!narrator.active())
-							return;
-						narrator.clear();
 						StringBuilder string = new StringBuilder();
 						for (int i = 0; i < 4; ++i)
 							string.append(ChatFormatting.stripFormatting(golem.getSignText(i).getString())).append(" ");
-						narrator.say(string.toString(), false);
+						narratorHelper.say(string.toString());
 					}
 				} else
 					playAmbientSound(context.player(), golem);
