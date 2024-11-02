@@ -22,19 +22,17 @@ public class ClientListener {
 	@Autowired
 	private DonatorSettings donatorSettingsConfig;
 
-	private boolean dirty = true;
-
 	@PostConstruct
 	private void init(IEventBus modBus) {
 		NeoForge.EVENT_BUS.addListener(ClientTickEvent.Pre.class, event -> {
 			if (Minecraft.getInstance().level == null) {
-				dirty = true;
+				donatorSettingsConfig.markDirty();
 				return;
 			}
 
-			if (dirty && Minecraft.getInstance().player != null && donatorHandler.isDonator(Minecraft.getInstance().player.getUUID())) {
+			if (donatorSettingsConfig.isDirty() && Minecraft.getInstance().player != null && donatorHandler.isDonator(Minecraft.getInstance().player.getUUID())) {
 				PacketDistributor.sendToServer(new ServerPacketDonatorSettings(new DonatorHandler.Settings(donatorSettingsConfig.enable.get(), donatorSettingsConfig.color.get())));
-				dirty = false;
+				donatorSettingsConfig.unmarkDirty();
 			}
 		});
 	}

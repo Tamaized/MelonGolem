@@ -1,6 +1,5 @@
 package tamaized.melongolem.network;
 
-import tamaized.beanification.Component;
 import tamaized.beanification.PostConstruct;
 import tamaized.melongolem.MelonMod;
 
@@ -10,7 +9,6 @@ import java.net.URI;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-@Component
 public class DonatorHandler {
 
 	private final Object lock_settings = new Object();

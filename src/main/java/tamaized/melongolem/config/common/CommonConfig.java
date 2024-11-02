@@ -45,7 +45,7 @@ public class CommonConfig {
 		ModLoadingContext.get().registerExtensionPoint(IConfigScreenFactory.class, () -> ConfigurationScreen::new);
 
 		modBus.addListener(ModConfigEvent.Reloading.class, event -> {
-			if (event.getConfig().getModId().equals(MelonMod.MODID)) {
+			if (event.getConfig().getType() == ModConfig.Type.COMMON && event.getConfig().getModId().equals(MelonMod.MODID)) {
 				setupStabby();
 			}
 		});

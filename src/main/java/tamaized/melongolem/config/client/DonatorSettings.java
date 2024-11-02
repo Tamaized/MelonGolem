@@ -1,8 +1,13 @@
 package tamaized.melongolem.config.client;
 
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
+import tamaized.beanification.PostConstruct;
+import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.config.ConfigUtil;
 
 @Component
@@ -13,6 +18,29 @@ public class DonatorSettings {
 
 	public ModConfigSpec.BooleanValue enable;
 	public ModConfigSpec.IntValue color;
+
+	private boolean dirty;
+
+	@PostConstruct
+	private void postConstruct(IEventBus modBus) {
+		modBus.addListener(ModConfigEvent.Reloading.class, event -> {
+			if (event.getConfig().getType() == ModConfig.Type.CLIENT && event.getConfig().getModId().equals(MelonMod.MODID)) {
+				markDirty();
+			}
+		});
+	}
+
+	public boolean isDirty() {
+		return dirty;
+	}
+
+	public void markDirty() {
+		dirty = true;
+	}
+
+	public void unmarkDirty() {
+		dirty = false;
+	}
 
 	void setup(ModConfigSpec.Builder builder) {
 		builder.comment("Donator Settings").push("Donator Settings");
