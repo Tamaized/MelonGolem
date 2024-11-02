@@ -23,17 +23,17 @@ public class ConfigUtil {
 	}
 
 	@Bean("common")
-	private static ConfigUtil commonPrefix() {
+	private static ConfigUtil commonSuffix() {
 		return new ConfigUtil("common");
 	}
 
 	@Bean("client")
-	private static ConfigUtil clientPrefix() {
+	private static ConfigUtil clientSuffix() {
 		return new ConfigUtil("client");
 	}
 
 	@Bean("donatorSettings")
-	private static ConfigUtil configUtil() {
+	private static ConfigUtil donatorSettingsSuffix() {
 		return new ConfigUtil("client.donatorSettings");
 	}
 
