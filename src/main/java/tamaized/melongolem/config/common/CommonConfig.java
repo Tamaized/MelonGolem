@@ -11,8 +11,6 @@ import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
-import net.neoforged.neoforge.client.gui.ConfigurationScreen;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
@@ -43,7 +41,6 @@ public class CommonConfig {
 	private void postConstruct(IEventBus modBus) {
 		ModConfigSpec spec = new ModConfigSpec.Builder().configure(this::setup).getRight();
 		ModLoadingContext.get().getActiveContainer().registerConfig(ModConfig.Type.COMMON, spec);
-		ModLoadingContext.get().registerExtensionPoint(IConfigScreenFactory.class, () -> ConfigurationScreen::new);
 
 		modBus.addListener(ModConfigEvent.Reloading.class, event -> {
 			if (event.getConfig().getType() == ModConfig.Type.COMMON && event.getConfig().getModId().equals(MelonMod.MODID)) {

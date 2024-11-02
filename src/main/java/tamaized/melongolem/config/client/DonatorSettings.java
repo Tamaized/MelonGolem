@@ -52,7 +52,7 @@ public class DonatorSettings {
 
 			color = builder
 				.translation(configUtil.translationKey("color"))
-				.comment("Changes the Tiny Melon Golem Color, values are in RRGGBB hex. Use a Hex Color to Decimal converter tool")
+				.comment("Changes the Tiny Melon Golem Color, values are in RRGGBB hex.")
 				.defineInRange("color", 0xFFA4EA, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
 		}

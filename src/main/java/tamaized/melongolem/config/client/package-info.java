@@ -1,0 +1,6 @@
+@MethodsReturnNonnullByDefault @ParametersAreNonnullByDefault
+package tamaized.melongolem.config.client;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+
+import javax.annotation.ParametersAreNonnullByDefault;
