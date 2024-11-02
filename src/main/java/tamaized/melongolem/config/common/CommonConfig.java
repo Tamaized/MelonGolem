@@ -20,15 +20,16 @@ import tamaized.beanification.PostConstruct;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.config.ConfigUtil;
 
+import java.util.List;
 import java.util.Objects;
 
 @Component
 public class CommonConfig {
 
-	@Autowired
+	@Autowired("common")
 	private ConfigUtil configUtil;
 
-	private Item stabItem = Items.STICK;
+	private List<Item> stabItems = List.of(Items.STICK);
 	public ModConfigSpec.DoubleValue health;
 	public ModConfigSpec.DoubleValue damage;
 	public ModConfigSpec.DoubleValue glisterDamageAmp;
@@ -36,7 +37,7 @@ public class CommonConfig {
 	public ModConfigSpec.BooleanValue shear;
 	public ModConfigSpec.BooleanValue eats;
 	public ModConfigSpec.DoubleValue heal;
-	public ModConfigSpec.ConfigValue<String> stabby;
+	public ModConfigSpec.ConfigValue<List<? extends String>> stabby;
 
 	@PostConstruct
 	private void postConstruct(IEventBus modBus) {
@@ -92,25 +93,30 @@ public class CommonConfig {
 		stabby = builder
 			.translation(configUtil.translationKey("stabby"))
 			.comment("The item used in each hand to spawn a melon golem. Format as `namespace:name`")
-			.define("stabby", Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(Items.STICK)).toString());
+			.defineListAllowEmpty("stabby",
+				List.of(Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(Items.STICK)).toString()),
+				() -> BuiltInRegistries.ITEM.getKey(Items.STICK).toString(),
+				o -> o instanceof String);
 
 		return this;
 	}
 
 	private void setupStabby() {
-		String[] split = stabby.get().split(":");
-		String domain = "minecraft";
-		String regname = split[0];
-		if (split.length > 1) {
-			domain = split[0];
-			regname = split[1];
-		}
-		Item item = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(domain, regname));
-		stabItem = item instanceof AirItem ? Items.STICK : item;
+		stabItems = stabby.get().stream().map(stab -> {
+			String[] split = stab.split(":");
+			String domain = "minecraft";
+			String regname = split[0];
+			if (split.length > 1) {
+				domain = split[0];
+				regname = split[1];
+			}
+			Item item = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(domain, regname));
+			return item instanceof AirItem ? Items.STICK : item;
+		}).toList();
 	}
 
 	public boolean compareStabbyItem(ItemStack stack) {
-		return stack.getItem() == stabItem;
+		return stabItems.contains(stack.getItem());
 	}
 
 }

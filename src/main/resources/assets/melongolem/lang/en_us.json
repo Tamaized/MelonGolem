@@ -12,14 +12,18 @@
 
   "block.melongolem.glistering_melon": "Glistering Melon",
 
-  "melongolem.config.health": "Melon Golem Base Health",
-  "melongolem.config.glister_damage_amp": "Glistering Melon Slice Projectile Damage Multiplier",
-  "melongolem.config.hats": "Hats",
-  "melongolem.config.shear": "Non-Destructive Hat shearing",
-  "melongolem.config.eats": "Cannibalistic Golems",
-  "melongolem.config.heal": "Cannibalistic Health Restore Amount",
-  "melongolem.config.stabby": "Items used to create Melon Golems",
+  "melongolem.config.common.health": "Melon Golem Base Health",
+  "melongolem.config.common.glister_damage_amp": "Glistering Melon Slice Projectile Damage Multiplier",
+  "melongolem.config.common.hats": "Hats",
+  "melongolem.config.common.shear": "Non-Destructive Hat shearing",
+  "melongolem.config.common.eats": "Cannibalistic Golems",
+  "melongolem.config.common.heal": "Cannibalistic Health Restore Amount",
+  "melongolem.config.common.stabby": "Items used to create Melon Golems",
 
-  "melongolem.config.tehnut": "TehNut Mode",
-  "melongolem.config.tts": "Text-to-Speech Signs"
+  "melongolem.config.client.tehnut": "TehNut Mode",
+  "melongolem.config.client.tts": "Text-to-Speech Signs",
+
+  "melongolem.configuration.donatorSettings": "Donor Settings",
+  "melongolem.config.client.donatorSettings.color": "Color",
+  "melongolem.config.client.donatorSettings.enable": "Enabled"
 }

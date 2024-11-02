@@ -13,7 +13,7 @@ import tamaized.melongolem.config.ConfigUtil;
 @Component
 public class DonatorSettings {
 
-	@Autowired
+	@Autowired("donatorSettings")
 	private ConfigUtil configUtil;
 
 	public ModConfigSpec.BooleanValue enable;
@@ -43,7 +43,7 @@ public class DonatorSettings {
 	}
 
 	void setup(ModConfigSpec.Builder builder) {
-		builder.comment("Donator Settings").push("Donator Settings");
+		builder.comment("Settings for players who have donated or contributed to the Mod's development").push("donatorSettings");
 		{
 			enable = builder
 				.translation(configUtil.translationKey("enable"))
@@ -52,7 +52,7 @@ public class DonatorSettings {
 
 			color = builder
 				.translation(configUtil.translationKey("color"))
-				.comment("Changes the Tiny Melon Golem Color")
+				.comment("Changes the Tiny Melon Golem Color, values are in RRGGBB hex. Use a Hex Color to Decimal converter tool")
 				.defineInRange("color", 0xFFA4EA, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
 		}

@@ -11,7 +11,7 @@ import tamaized.melongolem.config.ConfigUtil;
 @Component
 public class ClientConfig {
 
-	@Autowired
+	@Autowired("client")
 	private ConfigUtil configUtil;
 
 	@Autowired
