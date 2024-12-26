@@ -19,6 +19,6 @@ repositories {
 }
 
 dependencies {
-    implementation fg.deobf("tamaized:melongolem:{version}")
+    implementation "tamaized:melongolem:{version}"
 }
 ```
