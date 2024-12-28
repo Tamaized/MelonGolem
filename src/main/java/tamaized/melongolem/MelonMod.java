@@ -15,9 +15,6 @@ public class MelonMod {
 
 	static {
 		BeanContext.init();
-	}
-
-	public MelonMod() {
 		RegUtil.setup();
 	}
 

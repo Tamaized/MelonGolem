@@ -1,5 +1,6 @@
 package tamaized.melongolem.config;
 
+import org.jetbrains.annotations.Nullable;
 import tamaized.beanification.Bean;
 import tamaized.beanification.Component;
 import tamaized.melongolem.MelonMod;
@@ -14,7 +15,7 @@ public class ConfigUtil {
 		this(null);
 	}
 
-	public ConfigUtil(String suffix) {
+	public ConfigUtil(@Nullable String suffix) {
 		this.suffix = suffix;
 	}
 
