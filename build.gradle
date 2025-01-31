@@ -59,7 +59,7 @@ idea {
 }
 
 version = "${project.minecraft_version}-${project.mod_major_version}." + (hasProperty("CIVersion") ? CIVersion : mod_version)
-group = "tamaized.melongolem"
+group = "tamaized.${project.mod_id}"
 
 base {
     archivesName = "MelonGolem"
@@ -172,7 +172,7 @@ dependencies {
     implementation beanification
     shade beanification
     testImplementation "${beanification}:tests"
-    compileOnly "${beanification}:test-sources"
+	testCompileOnly "${beanification}:test-sources"
 
     def reg = "tamaized:regutil:${project.minecraft_version}-${project.regutil_version}"
     implementation reg
