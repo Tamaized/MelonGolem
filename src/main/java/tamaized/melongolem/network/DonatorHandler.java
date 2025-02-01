@@ -9,6 +9,9 @@ import java.net.URI;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Bean {@link NetworkMessages#donatorHandler()}
+ */
 public class DonatorHandler {
 
 	private final Object lock_settings = new Object();

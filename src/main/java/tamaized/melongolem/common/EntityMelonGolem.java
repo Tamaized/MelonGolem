@@ -63,12 +63,6 @@ import java.util.List;
 @Configurable
 public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, IShearable, ISignHolder {
 
-	protected static final Lazy<ModEntities> MOD_ENTITIES = BeanContext.injectLazy(ModEntities.class);
-	protected static final Lazy<ModBlocks> MOD_BLOCKS = BeanContext.injectLazy(ModBlocks.class);
-
-	@Autowired
-	private CommonConfig config;
-
 	private static final EntityDataAccessor<ItemStack> HEAD = SynchedEntityData.defineId(EntityMelonGolem.class, EntityDataSerializers.ITEM_STACK);
 	private static final EntityDataAccessor<Boolean> GLOWING_TEXT = SynchedEntityData.defineId(EntityMelonGolem.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Integer> TEXT_COLOR = SynchedEntityData.defineId(EntityMelonGolem.class, EntityDataSerializers.INT);
@@ -99,6 +93,12 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 					this.worldPosition;
 		}
 	};
+
+	protected static final Lazy<ModEntities> MOD_ENTITIES = BeanContext.injectLazy(ModEntities.class);
+	protected static final Lazy<ModBlocks> MOD_BLOCKS = BeanContext.injectLazy(ModBlocks.class);
+
+	@Autowired
+	private CommonConfig config;
 
 	public EntityMelonGolem(Level level) {
 		this(MOD_ENTITIES.get().MELON_GOLEM.get(), level);

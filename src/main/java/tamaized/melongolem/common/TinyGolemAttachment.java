@@ -8,15 +8,17 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 import org.jetbrains.annotations.UnknownNullability;
 import tamaized.beanification.Autowired;
+import tamaized.beanification.Configurable;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.UUID;
 
+@Configurable
 public class TinyGolemAttachment implements INBTSerializable<CompoundTag> {
 
 	@Autowired
-	private static TeleportHelper teleportHelper;
+	private TeleportHelper teleportHelper;
 
 	private boolean loaded = false;
 
