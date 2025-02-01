@@ -13,6 +13,8 @@ import tamaized.beanification.Component;
 import tamaized.melongolem.network.client.ClientPacketSendParticles;
 import tamaized.melongolem.registry.ModDataAttachments;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 @Component
 public class PetHelper {
 
@@ -22,7 +24,8 @@ public class PetHelper {
 	@Autowired
 	private TeleportHelper teleportHelper;
 
-	public void summon(ServerLevel level, Player owner) {
+	public boolean summon(ServerLevel level, Player owner) {
+		AtomicBoolean summoned = new AtomicBoolean(false);
 		TinyGolemAttachment attachment = owner.getData(modDataAttachments.TINY_GOLEM);
 
 		EntityTinyMelonGolem pet = attachment.getPet().orElse(new EntityTinyMelonGolem(level));
@@ -40,7 +43,9 @@ public class PetHelper {
 				level.addFreshEntity(pet);
 			attachment.changePet(pet);
 			level.playSound(null, pet.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 1.0F, pet.getRandom().nextFloat() + 0.5F);
+			summoned.set(true);
 		});
+		return summoned.get();
 	}
 
 }

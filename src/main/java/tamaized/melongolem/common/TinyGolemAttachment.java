@@ -55,7 +55,6 @@ public class TinyGolemAttachment implements INBTSerializable<CompoundTag> {
 				check = 30;
 			}
 		} else if (pet != null && owner.level() instanceof ServerLevel serverLevel && !pet.level().dimension().equals(serverLevel.dimension())) {
-			boolean noAi = pet.isNoAiEntityDataFlagSet();
 			EntityTinyMelonGolem newPet = new EntityTinyMelonGolem(serverLevel);
 			newPet.restoreFrom(pet);
 			teleportHelper.findLocationAboveFriendlyBlock(serverLevel, newPet, owner.blockPosition()).ifPresentOrElse(
@@ -64,7 +63,6 @@ public class TinyGolemAttachment implements INBTSerializable<CompoundTag> {
 			);
 			if (owner instanceof Player player)
 				newPet.tame(player);
-			newPet.setNoAi(noAi);
 			serverLevel.addFreshEntity(newPet);
 			pet.discard();
 			pet = newPet;
