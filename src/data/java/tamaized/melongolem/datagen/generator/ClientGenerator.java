@@ -9,6 +9,7 @@ import net.neoforged.neoforge.data.event.GatherDataEvent;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
 import tamaized.melongolem.datagen.bakedmodel.BlockModelProviderFactory;
+import tamaized.melongolem.datagen.bakedmodel.ItemModelProviderFactory;
 import tamaized.melongolem.datagen.blockstate.BlockStateProviderFactory;
 import tamaized.melongolem.datagen.lang.LangProviderFactory;
 
@@ -21,6 +22,9 @@ public class ClientGenerator {
 	private BlockModelProviderFactory blockModelProviderFactory;
 
 	@Autowired
+	private ItemModelProviderFactory itemModelProviderFactory;
+
+	@Autowired
 	private BlockStateProviderFactory blockStateProviderFactory;
 
 	@Autowired
@@ -28,6 +32,7 @@ public class ClientGenerator {
 
 	public void generate(GatherDataEvent event) {
 		event.getGenerator().addProvider(event.includeClient(), blockModelProviderFactory.make(event));
+		event.getGenerator().addProvider(event.includeClient(), itemModelProviderFactory.make(event));
 		event.getGenerator().addProvider(event.includeClient(), blockStateProviderFactory.make(event));
 		event.getGenerator().addProvider(event.includeClient(), langProviderFactory.make(event));
 
