@@ -1,9 +1,9 @@
-package tamaized.melongolem.datagen.bakedmodel.block.overlay;
+package tamaized.melongolem.datagen.assets.bakedmodel.block.overlay;
 
 import net.neoforged.neoforge.client.model.generators.BlockModelProvider;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
-import tamaized.melongolem.datagen.bakedmodel.block.BlockModelHolder;
+import tamaized.melongolem.datagen.assets.bakedmodel.block.BlockModelHolder;
 
 @Component
 public class OverlaySideBlockModelHolder extends BlockModelHolder {

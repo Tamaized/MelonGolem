@@ -8,15 +8,15 @@ import net.minecraft.util.InclusiveRange;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
-import tamaized.melongolem.datagen.bakedmodel.BlockModelProviderFactory;
-import tamaized.melongolem.datagen.bakedmodel.ItemModelProviderFactory;
-import tamaized.melongolem.datagen.blockstate.BlockStateProviderFactory;
-import tamaized.melongolem.datagen.lang.LangProviderFactory;
+import tamaized.melongolem.datagen.assets.bakedmodel.BlockModelProviderFactory;
+import tamaized.melongolem.datagen.assets.bakedmodel.ItemModelProviderFactory;
+import tamaized.melongolem.datagen.assets.blockstate.BlockStateProviderFactory;
+import tamaized.melongolem.datagen.assets.lang.LangProviderFactory;
 
 import java.util.Optional;
 
 @Component
-public class ClientGenerator {
+public class AssetsGenerator {
 
 	@Autowired
 	private BlockModelProviderFactory blockModelProviderFactory;

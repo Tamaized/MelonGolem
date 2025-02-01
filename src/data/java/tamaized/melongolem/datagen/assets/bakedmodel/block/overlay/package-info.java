@@ -1,5 +1,5 @@
 @MethodsReturnNonnullByDefault @ParametersAreNonnullByDefault
-package tamaized.melongolem.datagen.bakedmodel.block.overlay;
+package tamaized.melongolem.datagen.assets.bakedmodel.block.overlay;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
 

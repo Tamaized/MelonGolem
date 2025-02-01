@@ -1,4 +1,4 @@
-package tamaized.melongolem.datagen.bakedmodel;
+package tamaized.melongolem.datagen.assets.bakedmodel;
 
 import net.neoforged.neoforge.client.model.generators.ModelFile;
 

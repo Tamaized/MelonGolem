@@ -1,10 +1,10 @@
-package tamaized.melongolem.datagen.bakedmodel.block;
+package tamaized.melongolem.datagen.assets.bakedmodel.block;
 
 import net.minecraft.client.renderer.RenderType;
 import net.neoforged.neoforge.client.model.generators.BlockModelProvider;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
-import tamaized.melongolem.datagen.bakedmodel.block.overlay.OverlaySideBlockModelHolder;
+import tamaized.melongolem.datagen.assets.bakedmodel.block.overlay.OverlaySideBlockModelHolder;
 
 @Component
 public class GlisteringMelonBlockModelHolder extends BlockModelHolder {

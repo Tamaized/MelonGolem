@@ -1,11 +1,11 @@
-package tamaized.melongolem.datagen.blockstate;
+package tamaized.melongolem.datagen.assets.blockstate;
 
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
 import tamaized.melongolem.MelonMod;
-import tamaized.melongolem.datagen.bakedmodel.block.GlisteringMelonBlockModelHolder;
+import tamaized.melongolem.datagen.assets.bakedmodel.block.GlisteringMelonBlockModelHolder;
 import tamaized.melongolem.registry.ModBlocks;
 
 @Component

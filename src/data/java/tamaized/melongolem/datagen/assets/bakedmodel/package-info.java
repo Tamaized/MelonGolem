@@ -1,5 +1,5 @@
 @MethodsReturnNonnullByDefault @ParametersAreNonnullByDefault
-package tamaized.melongolem.datagen.bakedmodel.block;
+package tamaized.melongolem.datagen.assets.bakedmodel;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
 

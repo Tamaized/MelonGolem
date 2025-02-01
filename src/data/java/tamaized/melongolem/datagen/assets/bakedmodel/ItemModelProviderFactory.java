@@ -1,4 +1,4 @@
-package tamaized.melongolem.datagen.bakedmodel;
+package tamaized.melongolem.datagen.assets.bakedmodel;
 
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;

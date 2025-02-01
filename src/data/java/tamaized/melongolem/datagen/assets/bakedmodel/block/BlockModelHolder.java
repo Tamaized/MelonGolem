@@ -1,7 +1,7 @@
-package tamaized.melongolem.datagen.bakedmodel.block;
+package tamaized.melongolem.datagen.assets.bakedmodel.block;
 
 import net.neoforged.neoforge.client.model.generators.BlockModelProvider;
-import tamaized.melongolem.datagen.bakedmodel.ModelHolder;
+import tamaized.melongolem.datagen.assets.bakedmodel.ModelHolder;
 
 public abstract class BlockModelHolder extends ModelHolder {
 

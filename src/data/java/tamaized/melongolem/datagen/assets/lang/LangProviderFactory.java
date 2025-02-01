@@ -1,4 +1,4 @@
-package tamaized.melongolem.datagen.lang;
+package tamaized.melongolem.datagen.assets.lang;
 
 import net.minecraft.locale.Language;
 import net.minecraft.resources.ResourceKey;

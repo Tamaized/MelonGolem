@@ -1,13 +1,13 @@
-package tamaized.melongolem.datagen.bakedmodel;
+package tamaized.melongolem.datagen.assets.bakedmodel;
 
 import net.neoforged.neoforge.client.model.generators.BlockModelProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
 import tamaized.melongolem.MelonMod;
-import tamaized.melongolem.datagen.bakedmodel.block.GlisteringMelonBlockModelHolder;
-import tamaized.melongolem.datagen.bakedmodel.block.overlay.OverlayBaseBlockModelHolder;
-import tamaized.melongolem.datagen.bakedmodel.block.overlay.OverlaySideBlockModelHolder;
+import tamaized.melongolem.datagen.assets.bakedmodel.block.GlisteringMelonBlockModelHolder;
+import tamaized.melongolem.datagen.assets.bakedmodel.block.overlay.OverlayBaseBlockModelHolder;
+import tamaized.melongolem.datagen.assets.bakedmodel.block.overlay.OverlaySideBlockModelHolder;
 
 @Component
 public class BlockModelProviderFactory {
