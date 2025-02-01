@@ -35,15 +35,6 @@ public class AssetsGenerator {
 		event.getGenerator().addProvider(event.includeClient(), itemModelProviderFactory.make(event));
 		event.getGenerator().addProvider(event.includeClient(), blockStateProviderFactory.make(event));
 		event.getGenerator().addProvider(event.includeClient(), langProviderFactory.make(event));
-
-		event.getGenerator().addProvider(true, new PackMetadataGenerator(event.getGenerator().getPackOutput())
-			.add(PackMetadataSection.TYPE, new PackMetadataSection(
-					net.minecraft.network.chat.Component.literal("Resources for MelonGolem"),
-					DetectedVersion.BUILT_IN.getPackVersion(PackType.SERVER_DATA),
-					Optional.of(new InclusiveRange<>(0, Integer.MAX_VALUE))
-				)
-			)
-		);
 	}
 
 }
