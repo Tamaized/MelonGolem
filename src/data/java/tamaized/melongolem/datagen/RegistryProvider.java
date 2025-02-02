@@ -5,7 +5,6 @@ import net.minecraft.core.RegistrySetBuilder;
 import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import tamaized.beanification.Component;
-import tamaized.beanification.PostConstruct;
 import tamaized.melongolem.MelonMod;
 
 import java.util.Set;
@@ -14,12 +13,8 @@ import java.util.concurrent.CompletableFuture;
 @Component
 public class RegistryProvider {
 
-	private RegistrySetBuilder builder = new RegistrySetBuilder();
+	private final RegistrySetBuilder builder = new RegistrySetBuilder();
 	private DatapackBuiltinEntriesProvider value;
-
-	@PostConstruct
-	private void setup() {
-	}
 
 	public CompletableFuture<HolderLookup.Provider> retrieve(GatherDataEvent event) {
 		if (value == null) {
@@ -27,6 +22,10 @@ public class RegistryProvider {
 			event.getGenerator().addProvider(event.includeServer(), value);
 		}
 		return value.getRegistryProvider();
+	}
+
+	public HolderLookup.Provider join() {
+		return value.getRegistryProvider().join();
 	}
 
 }

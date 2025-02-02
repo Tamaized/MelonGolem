@@ -6,6 +6,7 @@ import net.neoforged.neoforge.data.event.GatherDataEvent;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
 import tamaized.melongolem.datagen.RegistryProvider;
+import tamaized.melongolem.datagen.data.loot.sub.BlockLootTableSubProvider;
 import tamaized.melongolem.datagen.data.loot.sub.EntityLootTableSubProvider;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class LootTableProviderFactory {
 			event.getGenerator().getPackOutput(),
 			Set.of(),
 			List.of(
+				new LootTableProvider.SubProviderEntry(BlockLootTableSubProvider::new, LootContextParamSets.BLOCK),
 				new LootTableProvider.SubProviderEntry(EntityLootTableSubProvider::new, LootContextParamSets.ENTITY)
 			),
 			registryProvider.retrieve(event)
