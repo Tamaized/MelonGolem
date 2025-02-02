@@ -1,5 +1,5 @@
 buildscript {
-	repositories{
+	repositories {
 		maven {
 			name 'Beanification'
 			url 'https://maven.tamaized.com/releases/'
@@ -11,64 +11,64 @@ buildscript {
 }
 
 plugins {
-    id 'java-library'
-    id 'eclipse'
-    id 'idea'
-    id 'maven-publish'
-    // Version List: https://projects.neoforged.net/neoforged/ModDevGradle
-    id 'net.neoforged.moddev' version "${mdg_version}"
-    id "com.dorongold.task-tree" version "4.0.0"
-    id 'com.gradleup.shadow' version '8.3.3'
+	id 'java-library'
+	id 'eclipse'
+	id 'idea'
+	id 'maven-publish'
+	// Version List: https://projects.neoforged.net/neoforged/ModDevGradle
+	id 'net.neoforged.moddev' version "${mdg_version}"
+	id "com.dorongold.task-tree" version "4.0.0"
+	id 'com.gradleup.shadow' version '8.3.3'
 }
 
 apply plugin: 'tamaized.beanification'
 
 configurations {
-    shade
+	shade
 }
 
 shadowJar {
-    archiveClassifier.set('')
-    configurations = [project.configurations.shade]
-    relocate 'tamaized.beanification', 'tamaized.melongolem.beanification'
-    relocate 'tamaized.regutil', 'tamaized.melongolem.regutil'
+	archiveClassifier.set('')
+	configurations = [project.configurations.shade]
+	relocate 'tamaized.beanification', 'tamaized.melongolem.beanification'
+	relocate 'tamaized.regutil', 'tamaized.melongolem.regutil'
 }
 
 def secrets = new Properties()
 def secretsFile = file('secrets.properties')
 if (secretsFile.exists()) {
-    secretsFile.withInputStream {
-        stream -> secrets.load(stream)
-    }
+	secretsFile.withInputStream {
+		stream -> secrets.load(stream)
+	}
 
-    fileTree("secrets").matching {
-        include "**/*.properties"
-    }.each {
-        File file ->
-            file.withInputStream {
-                stream -> secrets.load(stream)
-            }
-    }
+	fileTree("secrets").matching {
+		include "**/*.properties"
+	}.each {
+		File file ->
+			file.withInputStream {
+				stream -> secrets.load(stream)
+			}
+	}
 }
 
 idea {
-    module {
-        downloadJavadoc = true
-        downloadSources = true
-    }
+	module {
+		downloadJavadoc = true
+		downloadSources = true
+	}
 }
 
 version = "${project.minecraft_version}-${project.mod_major_version}." + (hasProperty("CIVersion") ? CIVersion : mod_version)
 group = "tamaized.${project.mod_id}"
 
 base {
-    archivesName = "MelonGolem"
+	archivesName = "MelonGolem"
 }
 
 java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
-    }
+	toolchain {
+		languageVersion.set(JavaLanguageVersion.of(21))
+	}
 }
 
 compileJava.options.compilerArgs << "-Xlint:all,-classfile,-processing,-deprecation,-this-escape" << "-Werror"
@@ -155,47 +155,47 @@ neoForge {
 }
 
 repositories {
-    maven {
-        name 'Tama\'s Maven' // Beanification, RegUtil
-        url 'https://maven.tamaized.com/releases/'
-    }
-    maven {
-        name 'Jared\'s Maven' // JEI
-        url 'https://maven.blamejared.com/'
-    }
+	maven {
+		name 'Tama\'s Maven' // Beanification, RegUtil
+		url 'https://maven.tamaized.com/releases/'
+	}
+	maven {
+		name 'Jared\'s Maven' // JEI
+		url 'https://maven.blamejared.com/'
+	}
 }
 
 dependencies {
-    runtimeOnly "mezz.jei:jei-${project.base_minecraft_version}-neoforge:${project.jei_version}"
+	runtimeOnly "mezz.jei:jei-${project.base_minecraft_version}-neoforge:${project.jei_version}"
 
-    def beanification = "tamaized:beanification:${project.minecraft_version}-${project.beanification_version}"
-    implementation beanification
-    shade beanification
-    testImplementation "${beanification}:tests"
+	def beanification = "tamaized:beanification:${project.minecraft_version}-${project.beanification_version}"
+	implementation beanification
+	shade beanification
+	testImplementation "${beanification}:tests"
 	testCompileOnly "${beanification}:test-sources"
 
-    def reg = "tamaized:regutil:${project.minecraft_version}-${project.regutil_version}"
-    implementation reg
-    shade reg
+	def reg = "tamaized:regutil:${project.minecraft_version}-${project.regutil_version}"
+	implementation reg
+	shade reg
 
-    testImplementation group: 'net.neoforged', name: 'testframework', version: project.neoforge_version
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.10.3'
-    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.10.3'
-    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '5.12.0'
+	testImplementation group: 'net.neoforged', name: 'testframework', version: project.neoforge_version
+	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.10.3'
+	testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.10.3'
+	testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '5.12.0'
 }
 
 test {
-    useJUnitPlatform()
-    testLogging {
-        events "failed"
+	useJUnitPlatform()
+	testLogging {
+		events "failed"
 
-        showExceptions true
-        exceptionFormat "full"
-        showCauses true
-        showStackTraces true
+		showExceptions true
+		exceptionFormat "full"
+		showCauses true
+		showStackTraces true
 
-        showStandardStreams = false
-    }
+		showStandardStreams = false
+	}
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
@@ -212,17 +212,17 @@ processResources {
 }
 
 jar {
-    manifest {
-        attributes([
-                "Specification-Title"     : "Melon Golem",
-                "Specification-Vendor"    : "Tamaized",
-                "Specification-Version"   : "${version}",
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : "${version}",
-                "Implementation-Vendor"   : "Tamaized",
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ])
-    }
+	manifest {
+		attributes([
+			"Specification-Title"     : "Melon Golem",
+			"Specification-Vendor"    : "Tamaized",
+			"Specification-Version"   : "${version}",
+			"Implementation-Title"    : project.name,
+			"Implementation-Version"  : "${version}",
+			"Implementation-Vendor"   : "Tamaized",
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
+	}
 }
 
 def mavenUser = hasProperty("CIMUser") ? CIMUser : secrets.getProperty("maven_username")
