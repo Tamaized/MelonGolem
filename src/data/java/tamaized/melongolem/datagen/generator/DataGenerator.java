@@ -5,6 +5,7 @@ import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
 import tamaized.melongolem.datagen.data.loot.LootTableProviderFactory;
 import tamaized.melongolem.datagen.data.recipe.RecipeProviderFactory;
+import tamaized.melongolem.datagen.data.tag.BlockTagProviderFactory;
 
 @Component
 public class DataGenerator {
@@ -15,9 +16,13 @@ public class DataGenerator {
 	@Autowired
 	private RecipeProviderFactory recipeProviderFactory;
 
+	@Autowired
+	private BlockTagProviderFactory blockTagProviderFactory;
+
 	public void generate(GatherDataEvent event) {
 		event.getGenerator().addProvider(event.includeServer(), lootTableProviderFactory.make(event));
 		event.getGenerator().addProvider(event.includeServer(), recipeProviderFactory.make(event));
+		event.getGenerator().addProvider(event.includeServer(), blockTagProviderFactory.make(event));
 	}
 
 }

@@ -1,5 +1,6 @@
 package tamaized.melongolem.datagen.data.loot.sub.entity;
 
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -9,8 +10,9 @@ import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
-import tamaized.melongolem.datagen.data.loot.sub.EntityLootTableSubProvider;
 import tamaized.melongolem.registry.ModEntities;
+
+import java.util.function.BiConsumer;
 
 @Component
 public class MelonGolemEntityLootTableFactory {
@@ -18,8 +20,8 @@ public class MelonGolemEntityLootTableFactory {
 	@Autowired
 	private ModEntities entities;
 
-	public void add(EntityLootTableSubProvider provider) {
-		provider.add(entities.MELON_GOLEM.get(),
+	public void add(BiConsumer<EntityType<?>, LootTable.Builder> add) {
+		add.accept(entities.MELON_GOLEM.get(),
 			LootTable.lootTable()
 				.withPool(
 					LootPool.lootPool()

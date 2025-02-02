@@ -7,7 +7,6 @@ import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Configurable;
 import tamaized.melongolem.MelonMod;
@@ -30,18 +29,7 @@ public class BlockLootTableSubProvider extends BlockLootSubProvider {
 	@Override
 	public void generate() {
 		getKnownBlocksStream().forEach(e -> add(e, LootTable.lootTable()));
-		glisteringMelonBlockLootTableFactory.add(this);
-	}
-
-	// Increased visibility
-	@Override
-	public void add(Block block, LootTable.Builder builder) {
-		super.add(block, builder);
-	}
-
-	@Override
-	public LootItemCondition.Builder hasSilkTouch() {
-		return super.hasSilkTouch();
+		glisteringMelonBlockLootTableFactory.add(this::add, this::hasSilkTouch);
 	}
 
 	@Override
