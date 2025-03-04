@@ -7,7 +7,6 @@ license="All Rights Reserved"
     modId="melongolem"
     version="${file.jarVersion}"
     displayName="Melon Golem"
-	updateJSONURL = "https://gh.tamaized.com/Tamaized/MelonGolem/update.json?m=${m}&l=${l}&v=${v}"
     credits=""
     authors="Tamaized"
     description='''

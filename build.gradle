@@ -208,10 +208,7 @@ processResources {
 		expand([
 			'file'           : [
 				'jarVersion': ver
-			],
-			'm'      : mc,
-			'l'      : "NeoForge",
-			'v': neo,
+			]
 		])
 	}
 }
