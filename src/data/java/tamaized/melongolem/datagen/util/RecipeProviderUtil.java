@@ -2,8 +2,8 @@ package tamaized.melongolem.datagen.util;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.critereon.InventoryChangeTrigger;
-import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.criterion.InventoryChangeTrigger;
+import net.minecraft.advancements.criterion.ItemPredicate;
 import net.minecraft.world.level.ItemLike;
 import tamaized.beanification.Component;
 
@@ -15,7 +15,7 @@ import java.util.Optional;
 public class RecipeProviderUtil {
 
 	public Criterion<InventoryChangeTrigger.TriggerInstance> has(ItemLike itemLike) {
-		return inventoryTrigger(net.minecraft.advancements.critereon.ItemPredicate.Builder.item().of(new ItemLike[]{itemLike}));
+		return inventoryTrigger(ItemPredicate.Builder.item().of(new ItemLike[]{itemLike}));
 	}
 
 	public Criterion<InventoryChangeTrigger.TriggerInstance> inventoryTrigger(ItemPredicate.Builder... items) {

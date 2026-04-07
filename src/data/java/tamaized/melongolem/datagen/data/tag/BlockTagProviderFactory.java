@@ -24,8 +24,7 @@ public class BlockTagProviderFactory {
 			event.getGenerator().getPackOutput(),
 			Registries.BLOCK,
 			registryProvider.retrieve(event),
-			MelonMod.MODID,
-			event.getExistingFileHelper()
+			MelonMod.MODID
 		) {
 			@Override
 			protected void addTags(HolderLookup.Provider provider) {

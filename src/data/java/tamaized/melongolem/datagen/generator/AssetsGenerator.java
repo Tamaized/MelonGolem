@@ -10,6 +10,7 @@ import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
 import tamaized.melongolem.datagen.assets.bakedmodel.BlockModelProviderFactory;
 import tamaized.melongolem.datagen.assets.bakedmodel.ItemModelProviderFactory;
+import tamaized.melongolem.datagen.assets.bakedmodel.ModelProviderFactory;
 import tamaized.melongolem.datagen.assets.blockstate.BlockStateProviderFactory;
 import tamaized.melongolem.datagen.assets.lang.LangProviderFactory;
 
@@ -17,6 +18,9 @@ import java.util.Optional;
 
 @Component
 public class AssetsGenerator {
+
+	@Autowired
+	private ModelProviderFactory modelProviderFactory;
 
 	@Autowired
 	private BlockModelProviderFactory blockModelProviderFactory;
@@ -30,11 +34,11 @@ public class AssetsGenerator {
 	@Autowired
 	private LangProviderFactory langProviderFactory;
 
-	public void generate(GatherDataEvent event) {
-		event.getGenerator().addProvider(event.includeClient(), blockModelProviderFactory.make(event));
-		event.getGenerator().addProvider(event.includeClient(), itemModelProviderFactory.make(event));
-		event.getGenerator().addProvider(event.includeClient(), blockStateProviderFactory.make(event));
-		event.getGenerator().addProvider(event.includeClient(), langProviderFactory.make(event));
+	public void generate(GatherDataEvent.Client event) {
+		event.getGenerator().addProvider(true, modelProviderFactory.make(event));
+		event.getGenerator().addProvider(true, itemModelProviderFactory.make(event));
+		event.getGenerator().addProvider(true, blockStateProviderFactory.make(event));
+		event.getGenerator().addProvider(true, langProviderFactory.make(event));
 	}
 
 }

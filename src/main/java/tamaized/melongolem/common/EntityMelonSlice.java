@@ -18,12 +18,10 @@ import net.neoforged.neoforge.common.util.Lazy;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.BeanContext;
 import tamaized.beanification.Configurable;
-import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.config.common.CommonConfig;
 import tamaized.melongolem.registry.ModEntities;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
 
 @Configurable
 public class EntityMelonSlice extends ThrowableProjectile implements ItemSupplier {
@@ -46,7 +44,7 @@ public class EntityMelonSlice extends ThrowableProjectile implements ItemSupplie
 	}
 
 	public EntityMelonSlice(Level level, LivingEntity thrower) {
-		super(MOD_ENTITIES.get().MELON_SLICE.get(), thrower, level);
+		super(MOD_ENTITIES.get().MELON_SLICE.get(), thrower.getX(), thrower.getEyeY(), thrower.getZ(), level);
 		if (thrower instanceof EntityGlisteringMelonGolem)
 			setGlist();
 	}
@@ -73,7 +71,7 @@ public class EntityMelonSlice extends ThrowableProjectile implements ItemSupplie
 	public void handleEntityEvent(byte id) {
 		if (id == 3) {
 			for (int i = 0; i < 8; ++i) {
-				this.level().addParticle(new ItemParticleOption(ParticleTypes.ITEM, random.nextInt() == 0 ? new ItemStack(Items.MELON_SEEDS) : new ItemStack(Items.MELON_SLICE)), this.getX(), this.getY(), this.getZ(), 0.0D, 0.0D, 0.0D);
+				this.level().addParticle(new ItemParticleOption(ParticleTypes.ITEM, random.nextInt() == 0 ? Items.MELON_SEEDS : Items.MELON_SLICE), this.getX(), this.getY(), this.getZ(), 0.0D, 0.0D, 0.0D);
 			}
 		}
 	}

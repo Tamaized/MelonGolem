@@ -1,7 +1,7 @@
 package tamaized.melongolem.registry;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -16,7 +16,7 @@ public class ModSounds {
 
 	public final DeferredHolder<SoundEvent, SoundEvent> DADDY = REGISTRY.register(
 		"melon_me_daddy",
-		() -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(MelonMod.MODID, "melon_me_daddy"))
+		() -> SoundEvent.createVariableRangeEvent(Identifier.fromNamespaceAndPath(MelonMod.MODID, "melon_me_daddy"))
 	);
 
 }

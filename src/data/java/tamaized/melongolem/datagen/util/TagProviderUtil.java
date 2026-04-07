@@ -11,7 +11,7 @@ import java.util.function.Function;
 public class TagProviderUtil {
 
 	@SafeVarargs
-	public final <T> void tagMany(Function<TagKey<T>, TagsProvider.TagAppender<T>> provider, ResourceKey<T> type, TagKey<T>... tags) {
+	public final <T> void tagMany(Function<TagKey<T>, TagsProvider.TagLookup<T>> provider, ResourceKey<T> type, TagKey<T>... tags) {
 		for (TagKey<T> key : tags) {
 			provider.apply(key).add(type);
 		}

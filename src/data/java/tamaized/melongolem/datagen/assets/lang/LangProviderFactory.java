@@ -75,11 +75,11 @@ public class LangProviderFactory {
 			}
 
 			private void addDeathMessage(ResourceKey<DamageType> key, String translation) {
-				add(key.location().toLanguageKey("death.attack"), translation);
+				add(key.identifier().toLanguageKey("death.attack"), translation);
 			}
 
 			private void addSubtitle(SoundEvent key, String translation) {
-				add(key.getLocation().toLanguageKey("subtitles"), translation);
+				add(key.location().toLanguageKey("subtitles"), translation);
 			}
 
 			private void addConfiguration(String configuration, String translation) {

@@ -32,13 +32,13 @@ public class PetHelper {
 		pet.tame(owner);
 
 		teleportHelper.findLocationAboveFriendlyBlock(level, pet, owner.blockPosition()).ifPresent(pos -> {
-			pet.moveTo(pos.getCenter());
+			pet.snapTo(pos.getCenter());
 			ClientPacketSendParticles particles = new ClientPacketSendParticles();
 			for (int i = 0; i < 25; i++) {
 				Vec3 result = pet.getViewVector(1F).yRot(pet.getRandom().nextFloat() * 360F).xRot(pet.getRandom().nextFloat() * 360F).scale(0.35F);
 				particles.queueParticle(ParticleTypes.END_ROD, false, pet.getX() + result.x, pet.getY() + pet.getBbHeight() / 2F + result.y, pet.getZ() + result.z, 0, 0, 0);
 			}
-			PacketDistributor.sendToPlayersTrackingChunk(level, new ChunkPos(owner.blockPosition()), particles);
+			PacketDistributor.sendToPlayersTrackingChunk(level, ChunkPos.containing(owner.blockPosition()), particles);
 			if (attachment.getPet().isEmpty())
 				level.addFreshEntity(pet);
 			attachment.changePet(pet);

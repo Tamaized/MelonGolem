@@ -5,7 +5,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import tamaized.melongolem.ISignHolder;
@@ -13,7 +13,7 @@ import tamaized.melongolem.MelonMod;
 
 public record ServerPacketMelonSign(int entityID, String[] lines) implements CustomPacketPayload {
 
-	public static final Type<ServerPacketMelonSign> ID = new Type<>(ResourceLocation.fromNamespaceAndPath(MelonMod.MODID, "c2s_edit_melon_sign"));
+	public static final Type<ServerPacketMelonSign> ID = new Type<>(Identifier.fromNamespaceAndPath(MelonMod.MODID, "c2s_edit_melon_sign"));
 
 	public static final StreamCodec<FriendlyByteBuf, ServerPacketMelonSign> CODEC = StreamCodec.ofMember(ServerPacketMelonSign::write, ServerPacketMelonSign::new);
 

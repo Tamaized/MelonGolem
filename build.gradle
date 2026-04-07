@@ -6,7 +6,7 @@ buildscript {
 		}
 	}
 	dependencies {
-		classpath "tamaized:beanification:${minecraft_version}-${beanification_version}:gradle"
+		classpath "tamaized:beanification:${beanification_version}:gradle"
 	}
 }
 
@@ -67,7 +67,7 @@ base {
 
 java {
 	toolchain {
-		languageVersion.set(JavaLanguageVersion.of(21))
+		languageVersion.set(JavaLanguageVersion.of(25))
 	}
 }
 
@@ -144,8 +144,8 @@ neoForge {
 			programArgument '--nogui'
 		}
 
-		data {
-			data()
+		serverData {
+			serverData()
 			gameDirectory = project.file('run-data')
 			programArguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
 			sourceSet = this.sourceSets.data
@@ -166,15 +166,15 @@ repositories {
 }
 
 dependencies {
-	runtimeOnly "mezz.jei:jei-${project.base_minecraft_version}-neoforge:${project.jei_version}"
+	//runtimeOnly "mezz.jei:jei-${project.base_minecraft_version}-neoforge:${project.jei_version}"
 
-	def beanification = "tamaized:beanification:${project.minecraft_version}-${project.beanification_version}"
+	def beanification = "tamaized:beanification:${project.beanification_version}"
 	implementation beanification
 	shade beanification
 	testImplementation "${beanification}:tests"
 	testCompileOnly "${beanification}:test-sources"
 
-	def reg = "tamaized:regutil:${project.minecraft_version}-${project.regutil_version}"
+	def reg = "tamaized:regutil:26.1-snapshot-1-${project.regutil_version}"
 	implementation reg
 	shade reg
 

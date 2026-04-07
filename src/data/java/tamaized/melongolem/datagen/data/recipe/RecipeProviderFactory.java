@@ -25,7 +25,7 @@ public class RecipeProviderFactory {
 			registryProvider.retrieve(event)
 		) {
 			@Override
-			protected void buildRecipes(RecipeOutput recipeOutput) {
+			protected void buildRecipes() {
 				glisteringMelonBlockRecipeFactory.make(recipeOutput);
 				melonStickRecipeFactory.make(recipeOutput);
 			}

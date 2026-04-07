@@ -5,10 +5,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import tamaized.beanification.Autowired;
@@ -28,16 +26,16 @@ public class ItemMelonStick extends Item {
 
 	@Nonnull
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, @Nonnull InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, @Nonnull InteractionHand hand) {
 		player.swing(hand);
 		if (level.isClientSide())
-			return new InteractionResultHolder<>(InteractionResult.PASS, player.getItemInHand(hand));
+			return InteractionResult.PASS;
 		if (level instanceof ServerLevel serverLevel) {
 			if (petHelper.summon(serverLevel, player))
-				player.getItemInHand(hand).hurtAndBreak(1, player, LivingEntity.getSlotForHand(hand));
+				player.getItemInHand(hand).hurtAndBreak(1, player, hand.asEquipmentSlot());
 			else
 				level.playSound(null, player.blockPosition(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 0.5F, player.getRandom().nextFloat() + 0.5F);
 		}
-		return new InteractionResultHolder<>(InteractionResult.SUCCESS, player.getItemInHand(hand));
+		return InteractionResult.SUCCESS;
 	}
 }

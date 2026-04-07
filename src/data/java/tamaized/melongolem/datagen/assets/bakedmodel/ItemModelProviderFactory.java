@@ -1,6 +1,5 @@
 package tamaized.melongolem.datagen.assets.bakedmodel;
 
-import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;

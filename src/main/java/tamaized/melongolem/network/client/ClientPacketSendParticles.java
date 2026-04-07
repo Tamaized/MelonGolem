@@ -6,7 +6,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import tamaized.melongolem.MelonMod;
@@ -16,7 +16,7 @@ import java.util.List;
 
 public record ClientPacketSendParticles(List<QueuedParticle> queuedParticles) implements CustomPacketPayload {
 
-	public static final Type<ClientPacketSendParticles> ID = new Type<>(ResourceLocation.fromNamespaceAndPath(MelonMod.MODID, "s2c_send_particles"));
+	public static final Type<ClientPacketSendParticles> ID = new Type<>(Identifier.fromNamespaceAndPath(MelonMod.MODID, "s2c_send_particles"));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ClientPacketSendParticles> CODEC = StreamCodec.ofMember(ClientPacketSendParticles::write, ClientPacketSendParticles::new);
 
@@ -62,7 +62,7 @@ public record ClientPacketSendParticles(List<QueuedParticle> queuedParticles) im
 	public static void handle(ClientPacketSendParticles payload, IPayloadContext context) {
 		if (!(context.player().level() instanceof ClientLevel level))
 			return;
-		context.enqueueWork(() -> payload.queuedParticles.forEach(queuedParticle -> level.addParticle(queuedParticle.particleOptions, queuedParticle.b, queuedParticle.x, queuedParticle.y, queuedParticle.z, queuedParticle.x2, queuedParticle.y2, queuedParticle.z2)));
+		context.enqueueWork(() -> payload.queuedParticles.forEach(queuedParticle -> level.addAlwaysVisibleParticle(queuedParticle.particleOptions, queuedParticle.b, queuedParticle.x, queuedParticle.y, queuedParticle.z, queuedParticle.x2, queuedParticle.y2, queuedParticle.z2)));
 	}
 
 	private record QueuedParticle(ParticleOptions particleOptions, boolean b, double x, double y, double z, double x2, double y2, double z2) {

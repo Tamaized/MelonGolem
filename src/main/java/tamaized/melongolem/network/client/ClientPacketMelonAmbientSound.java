@@ -4,7 +4,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.player.Player;
@@ -21,7 +21,7 @@ import javax.annotation.Nullable;
 
 public record ClientPacketMelonAmbientSound(int entityID) implements CustomPacketPayload {
 
-	public static final Type<ClientPacketMelonAmbientSound> ID = new Type<>(ResourceLocation.fromNamespaceAndPath(MelonMod.MODID, "s2c_melon_ambient_sound"));
+	public static final Type<ClientPacketMelonAmbientSound> ID = new Type<>(Identifier.fromNamespaceAndPath(MelonMod.MODID, "s2c_melon_ambient_sound"));
 
 	public static final StreamCodec<FriendlyByteBuf, ClientPacketMelonAmbientSound> CODEC = StreamCodec.ofMember(ClientPacketMelonAmbientSound::write, ClientPacketMelonAmbientSound::new);
 

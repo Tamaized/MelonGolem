@@ -19,10 +19,10 @@ public class DataGenerator {
 	@Autowired
 	private BlockTagProviderFactory blockTagProviderFactory;
 
-	public void generate(GatherDataEvent event) {
-		event.getGenerator().addProvider(event.includeServer(), lootTableProviderFactory.make(event));
-		event.getGenerator().addProvider(event.includeServer(), recipeProviderFactory.make(event));
-		event.getGenerator().addProvider(event.includeServer(), blockTagProviderFactory.make(event));
+	public void generate(GatherDataEvent.Server event) {
+		event.getGenerator().addProvider(true, lootTableProviderFactory.make(event));
+		event.getGenerator().addProvider(true, recipeProviderFactory.make(event));
+		event.getGenerator().addProvider(true, blockTagProviderFactory.make(event));
 	}
 
 }

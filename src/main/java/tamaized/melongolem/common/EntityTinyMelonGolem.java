@@ -3,9 +3,11 @@ package tamaized.melongolem.common;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.ResolutionContext;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -27,6 +29,8 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.IShearable;
 import net.neoforged.neoforge.common.util.Lazy;
@@ -34,7 +38,6 @@ import tamaized.beanification.Autowired;
 import tamaized.beanification.BeanContext;
 import tamaized.beanification.Configurable;
 import tamaized.melongolem.ISignHolder;
-import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.client.ClientUtil;
 import tamaized.melongolem.config.common.CommonConfig;
 import tamaized.melongolem.network.DonatorHandler;
@@ -109,14 +112,14 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 		super.tick();
 		if (level().isClientSide() || !isAlive())
 			return;
-		if (getOwnerUUID() == null) {
+		if (getOwner() == null) {
 			hurt(level().damageSources().fellOutOfWorld(), 1024F);
 		}
 		LivingEntity owner = getOwner();
 		if (owner == null || !owner.isAlive())
 			return;
-		if (donatorHandler.isDonator(getOwnerUUID())) {
-			donatorHandler.getSettings(getOwnerUUID()).ifPresent(settings -> {
+		if (donatorHandler.isDonator(getOwnerReference().getUUID())) {
+			donatorHandler.getSettings(getOwnerReference().getUUID()).ifPresent(settings -> {
 				entityData.set(ENABLED, settings.enabled());
 				entityData.set(COLOR, settings.color());
 			});
@@ -129,9 +132,9 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 	}
 
 	@Override
-	protected void customServerAiStep() {
+	protected void customServerAiStep(ServerLevel level) {
 		if (getOwner() != null)
-			super.customServerAiStep();
+			super.customServerAiStep(level);
 	}
 
 	public boolean isEnabled() {
@@ -199,7 +202,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 
 	@Nonnull
 	@Override
-	public InteractionResult interactAt(Player player, Vec3 vec, InteractionHand hand) {
+	public InteractionResult interact(Player player, InteractionHand hand, Vec3 vec) {
 		if (!config.hats.get() || player.getMainHandItem().getItem() instanceof ShearsItem || player.getOffhandItem().getItem() instanceof ShearsItem)
 			return InteractionResult.FAIL;
 		// TODO abstract this into a static helper method in EntityMelonGolem
@@ -222,8 +225,8 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 				playSound(SoundEvents.INK_SAC_USE);
 				if (!player.isCreative())
 					player.getItemInHand(hand).shrink(1);
-			} else if (stack.getItem() instanceof DyeItem dye && getTextColor() != dye.getDyeColor()) {
-				getEntityData().set(TEXT_COLOR, dye.getDyeColor().getId());
+			} else if (stack.has(DataComponents.DYE) && getTextColor() != stack.get(DataComponents.DYE)) {
+				getEntityData().set(TEXT_COLOR, stack.get(DataComponents.DYE).getId());
 				playSound(SoundEvents.DYE_USE);
 				if (!player.isCreative())
 					player.getItemInHand(hand).shrink(1);
@@ -233,7 +236,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 						ClientUtil.openGolemSignScreen(this);
 				}
 			}
-			return InteractionResult.sidedSuccess(level().isClientSide());
+			return InteractionResult.SUCCESS;
 		}
 		return InteractionResult.FAIL;
 	}
@@ -280,38 +283,40 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 
 	@Nonnull
 	@Override
-	public CompoundTag saveWithoutId(CompoundTag compound) {
-		compound.put("head", getHead().saveOptional(registryAccess()));
+	public void saveWithoutId(ValueOutput compound) {
+		compound.storeNullable("head", ItemStack.CODEC, getHead());
 		compound.putBoolean("glowingText", glowingText());
 		compound.putInt("textColor", getTextColor().getId());
 		compound.putBoolean("donator_enabled", isEnabled());
 		compound.putInt("donator_color", getColor());
 		for (int i = 0; i < 4; i++) {
-			String s = Component.Serializer.toJson(getSignText(i), registryAccess());
-			compound.putString("Text" + (i + 1), s);
+			compound.storeNullable("Text" + (i + 1), ComponentSerialization.CODEC, getSignText(i));
 		}
-		return super.saveWithoutId(compound);
+		super.saveWithoutId(compound);
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag compound) {
+	public void readAdditionalSaveData(ValueInput compound) {
 		super.readAdditionalSaveData(compound);
-		if (compound.contains("donator_enabled"))
-			entityData.set(ENABLED, compound.getBoolean("donator_enabled"));
-		if (compound.contains("donator_color"))
-			entityData.set(COLOR, compound.getInt("donator_color"));
-		setHead(ItemStack.parseOptional(registryAccess(), compound.getCompound("head")));
-		getEntityData().set(GLOWING_TEXT, compound.getBoolean("glowingText"));
-		getEntityData().set(TEXT_COLOR, compound.getInt("textColor"));
+		entityData.set(ENABLED, compound.getBooleanOr("donator_enabled", false));
+		entityData.set(COLOR, compound.getIntOr("donator_color", 0));
+		setHead(compound.read("head", ItemStack.CODEC).orElse(ItemStack.EMPTY));
+		getEntityData().set(GLOWING_TEXT, compound.getBooleanOr("glowingText", false));
+		getEntityData().set(TEXT_COLOR, compound.getIntOr("textColor", 0));
 		for (int i = 0; i < 4; i++) {
-			String s = compound.getString("Text" + (i + 1));
-			Component itextcomponent = Component.Serializer.fromJson(s, registryAccess());
+			Optional<Component> text = compound.read("Text" + (i + 1), ComponentSerialization.CODEC);
+			Component component = Component.literal("");
 
-			try {
-				setSignText(i, itextcomponent == null ? Component.literal("") : ComponentUtils.updateForEntity(createCommandSourceStack(), itextcomponent, null, 0));
-			} catch (CommandSyntaxException var7) {
-				setSignText(i, itextcomponent);
+			if (text.isPresent()) {
+				try {
+					if (this.level() instanceof ServerLevel server) {
+						component = ComponentUtils.resolve(ResolutionContext.create(createCommandSourceStackForNameResolution(server)), text.get());
+					}
+				} catch (CommandSyntaxException error) {
+					component = text.get();
+				}
 			}
+			setSignText(i, component);
 		}
 	}
 

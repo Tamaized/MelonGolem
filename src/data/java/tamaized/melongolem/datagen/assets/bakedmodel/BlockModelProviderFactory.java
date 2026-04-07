@@ -1,6 +1,6 @@
 package tamaized.melongolem.datagen.assets.bakedmodel;
 
-import net.neoforged.neoforge.client.model.generators.BlockModelProvider;
+import net.minecraft.client.data.models.BlockModelGenerators;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
@@ -21,19 +21,10 @@ public class BlockModelProviderFactory {
 	@Autowired
 	private GlisteringMelonBlockModelHolder glisteringMelonBlockModelHolder;
 
-	public BlockModelProvider make(GatherDataEvent event) {
-		return new BlockModelProvider(
-			event.getGenerator().getPackOutput(),
-			MelonMod.MODID,
-			event.getExistingFileHelper()
-		) {
-			@Override
-			protected void registerModels() {
-				overlayBaseBlockModelHolder.build(this);
-				overlaySideBlockModelHolder.build(this);
-				glisteringMelonBlockModelHolder.build(this);
-			}
-		};
+	public void make(BlockModelGenerators generators) {
+		overlayBaseBlockModelHolder.build(this);
+		overlaySideBlockModelHolder.build(this);
+		glisteringMelonBlockModelHolder.build(this);
 	}
 
 }

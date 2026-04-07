@@ -1,6 +1,5 @@
 package tamaized.melongolem.datagen.assets.blockstate;
 
-import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;

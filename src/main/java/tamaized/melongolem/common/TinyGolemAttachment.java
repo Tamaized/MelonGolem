@@ -1,21 +1,21 @@
 package tamaized.melongolem.common;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityReference;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.common.util.INBTSerializable;
-import org.jetbrains.annotations.UnknownNullability;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.common.util.ValueIOSerializable;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Configurable;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
-import java.util.UUID;
 
 @Configurable
-public class TinyGolemAttachment implements INBTSerializable<CompoundTag> {
+public class TinyGolemAttachment implements ValueIOSerializable {
 
 	@Autowired
 	private TeleportHelper teleportHelper;
@@ -26,7 +26,7 @@ public class TinyGolemAttachment implements INBTSerializable<CompoundTag> {
 	private EntityTinyMelonGolem pet;
 
 	@Nullable
-	private UUID petId;
+	private Optional<EntityReference<LivingEntity>> petId;
 
 	private int check;
 
@@ -47,8 +47,8 @@ public class TinyGolemAttachment implements INBTSerializable<CompoundTag> {
 	}
 
 	public void tick(Entity owner) {
-		if (pet == null && petId != null && check-- <= 0 && owner.level() instanceof ServerLevel level) {
-			if (level.getEntity(petId) instanceof EntityTinyMelonGolem tinyMelonGolem) {
+		if (pet == null && petId.isPresent() && check-- <= 0 && owner.level() instanceof ServerLevel level) {
+			if (level.getEntity(petId.get().getUUID()) instanceof EntityTinyMelonGolem tinyMelonGolem) {
 				pet = tinyMelonGolem;
 				petId = null;
 			} else {
@@ -58,8 +58,8 @@ public class TinyGolemAttachment implements INBTSerializable<CompoundTag> {
 			EntityTinyMelonGolem newPet = new EntityTinyMelonGolem(serverLevel);
 			newPet.restoreFrom(pet);
 			teleportHelper.findLocationAboveFriendlyBlock(serverLevel, newPet, owner.blockPosition()).ifPresentOrElse(
-				pos -> newPet.moveTo(pos, 0, 0),
-				() -> newPet.moveTo(owner.position())
+				pos -> newPet.snapTo(pos, 0, 0),
+				() -> newPet.snapTo(owner.position())
 			);
 			if (owner instanceof Player player)
 				newPet.tame(player);
@@ -73,16 +73,15 @@ public class TinyGolemAttachment implements INBTSerializable<CompoundTag> {
 	}
 
 	@Override
-	public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
-		CompoundTag nbt = new CompoundTag();
+	public void serialize(ValueOutput provider) {
 		if (pet != null)
-			nbt.putUUID("pet", pet.getUUID());
-		return nbt;
+			EntityReference.store(petId.get(), provider, "pet");
 	}
 
 	@Override
-	public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
-		if (nbt.contains("pet"))
-			petId = nbt.getUUID("pet");
+	public void deserialize(ValueInput nbt) {
+		EntityReference<LivingEntity> ref = EntityReference.readWithOldOwnerConversion(nbt, "pet", pet.level());
+		if (ref != null)
+			petId = Optional.of(ref);
 	}
 }

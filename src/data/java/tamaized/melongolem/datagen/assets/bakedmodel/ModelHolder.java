@@ -1,6 +1,5 @@
 package tamaized.melongolem.datagen.assets.bakedmodel;
 
-import net.neoforged.neoforge.client.model.generators.ModelFile;
 
 import javax.annotation.Nullable;
 import java.util.Optional;

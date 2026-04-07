@@ -26,11 +26,11 @@ public class ModBlocks {
 		.pushReaction(PushReaction.DESTROY)
 		.strength(1.0F)
 		.sound(SoundType.WOOD)
-		.lightLevel(state -> 4))
+		.lightLevel(_ -> 4))
 	);
 	public Supplier<BlockItem> ITEMBLOCK_GLISTERING_MELON = ITEM_REGISTRY.register(
 		GLISTERING_MELON.getId().getPath(),
-		() -> new BlockItem(GLISTERING_MELON.get(), new Item.Properties().setNoRepair())
+		() -> new BlockItem(GLISTERING_MELON.get(), new Item.Properties())
 	);
 
 }

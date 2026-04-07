@@ -14,7 +14,7 @@ public class MelonMod {
 	public static final Logger LOGGER = LogManager.getLogger(MODID);
 
 	static {
-		BeanContext.init();
+		BeanContext.init(MODID);
 		RegUtil.setup();
 	}
 

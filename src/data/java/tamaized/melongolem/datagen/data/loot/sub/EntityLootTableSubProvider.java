@@ -40,7 +40,7 @@ public class EntityLootTableSubProvider extends EntityLootSubProvider {
 	protected Stream<EntityType<?>> getKnownEntityTypes() {
 		return registries.lookupOrThrow(Registries.ENTITY_TYPE)
 			.listElements()
-			.filter(r -> Objects.requireNonNull(r.getKey()).location().getNamespace().equals(MelonMod.MODID))
+			.filter(r -> Objects.requireNonNull(r.getKey()).identifier().getNamespace().equals(MelonMod.MODID))
 			.map(Holder.Reference::value);
 	}
 }

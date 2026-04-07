@@ -1,7 +1,8 @@
 package tamaized.melongolem.config.common;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.AirItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -20,6 +21,7 @@ import tamaized.melongolem.config.ConfigUtil;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Component
 public class CommonConfig {
@@ -107,8 +109,11 @@ public class CommonConfig {
 				domain = split[0];
 				regname = split[1];
 			}
-			Item item = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(domain, regname));
-			return item instanceof AirItem ? Items.STICK : item;
+			Optional<Holder.Reference<Item>> item = BuiltInRegistries.ITEM.get(Identifier.fromNamespaceAndPath(domain, regname));
+			if (item.isEmpty() || item.get().value() instanceof AirItem) {
+				return Items.STICK;
+			}
+			return item.get().value();
 		}).toList();
 	}
 

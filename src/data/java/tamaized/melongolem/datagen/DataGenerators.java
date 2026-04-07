@@ -1,10 +1,5 @@
 package tamaized.melongolem.datagen;
 
-import net.minecraft.DetectedVersion;
-import net.minecraft.data.metadata.PackMetadataGenerator;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
-import net.minecraft.util.InclusiveRange;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import tamaized.beanification.Autowired;
@@ -29,15 +24,6 @@ public class DataGenerators {
 		bus.addListener(GatherDataEvent.class, event -> {
 			assetsGenerator.generate(event);
 			dataGenerator.generate(event);
-
-			event.getGenerator().addProvider(true, new PackMetadataGenerator(event.getGenerator().getPackOutput())
-				.add(PackMetadataSection.TYPE, new PackMetadataSection(
-						net.minecraft.network.chat.Component.literal("Resources for MelonGolem"),
-						DetectedVersion.BUILT_IN.getPackVersion(PackType.SERVER_DATA),
-						Optional.of(new InclusiveRange<>(0, Integer.MAX_VALUE))
-					)
-				)
-			);
 		});
 	}
 

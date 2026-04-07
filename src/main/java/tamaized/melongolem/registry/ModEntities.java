@@ -2,16 +2,17 @@ package tamaized.melongolem.registry;
 
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.SpawnEggItem;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import tamaized.beanification.Component;
@@ -34,46 +35,46 @@ public class ModEntities {
 
 	public final Supplier<EntityType<EntityMelonGolem>> MELON_GOLEM = REGISTRY.register(
 		"melon_golem",
-		() -> make(ResourceLocation.fromNamespaceAndPath(MelonMod.MODID, "melon_golem"), EntityMelonGolem::new, MobCategory.CREATURE, 0.7F, 1.9F, 1.7F)
+		() -> make(Identifier.fromNamespaceAndPath(MelonMod.MODID, "melon_golem"), EntityMelonGolem::new, MobCategory.CREATURE, 0.7F, 1.9F, 1.7F)
 	);
 	public final Supplier<Item> SPAWN_EGG_MELON_GOLEM = ITEM_REGISTRY.register(
 		"melon_golem_spawn_egg",
-		() -> new DeferredSpawnEggItem(MELON_GOLEM, 0x00FF00, 0x000000, new Item.Properties())
+		() -> new SpawnEggItem(/*0x00FF00, 0x000000, */new Item.Properties().spawnEgg(MELON_GOLEM.get()))
 	);
 
 	public final Supplier<EntityType<EntityGlisteringMelonGolem>> GLISTERING_MELON_GOLEM = REGISTRY.register(
 		"glistering_melon_golem",
-		() -> make(ResourceLocation.fromNamespaceAndPath(MelonMod.MODID, "glistering_melon_golem"), EntityGlisteringMelonGolem::new, MobCategory.CREATURE, 0.7F, 1.9F, 1.7F)
+		() -> make(Identifier.fromNamespaceAndPath(MelonMod.MODID, "glistering_melon_golem"), EntityGlisteringMelonGolem::new, MobCategory.CREATURE, 0.7F, 1.9F, 1.7F)
 	);
 	public final Supplier<Item> SPAWN_EGG_GLISTERING_MELON_GOLEM = ITEM_REGISTRY.register(
 		"glistering_melon_golem_spawn_egg",
-		() -> new DeferredSpawnEggItem(GLISTERING_MELON_GOLEM, 0xAAFF00, 0xFFCC00, new Item.Properties())
+		() -> new SpawnEggItem(/*0xAAFF00, 0xFFCC00, */new Item.Properties().spawnEgg(GLISTERING_MELON_GOLEM.get()))
 	);
 
 	public final Supplier<EntityType<EntityTinyMelonGolem>> TINY_MELON_GOLEM = REGISTRY.register(
 		"tiny_melon_golem",
-		() -> make(ResourceLocation.fromNamespaceAndPath(MelonMod.MODID, "tiny_melon_golem"), EntityTinyMelonGolem::new, MobCategory.CREATURE, 0.175F, 0.475F, 0.425F)
+		() -> make(Identifier.fromNamespaceAndPath(MelonMod.MODID, "tiny_melon_golem"), EntityTinyMelonGolem::new, MobCategory.CREATURE, 0.175F, 0.475F, 0.425F)
 	);
 
 	public final Supplier<EntityType<EntityMelonSlice>> MELON_SLICE = REGISTRY.register(
 		"melon_slice",
-		() -> make(ResourceLocation.fromNamespaceAndPath(MelonMod.MODID, "melon_slice"), EntityMelonSlice::new, MobCategory.MISC, 0.25F, 0.25F)
+		() -> make(Identifier.fromNamespaceAndPath(MelonMod.MODID, "melon_slice"), EntityMelonSlice::new, MobCategory.MISC, 0.25F, 0.25F)
 	);
 
-	private <E extends Entity> EntityType<E> make(ResourceLocation id, EntityType.EntityFactory<E> factory, MobCategory classification, float width, float height) {
+	private <E extends Entity> EntityType<E> make(Identifier id, EntityType.EntityFactory<E> factory, MobCategory classification, float width, float height) {
 		return build(id, makeBuilder(factory, classification).sized(width, height));
 	}
 
-	private <E extends Entity> EntityType<E> make(ResourceLocation id, EntityType.EntityFactory<E> factory, MobCategory classification, float width, float height, float eyeHeight) {
+	private <E extends Entity> EntityType<E> make(Identifier id, EntityType.EntityFactory<E> factory, MobCategory classification, float width, float height, float eyeHeight) {
 		return build(id, makeBuilder(factory, classification).sized(width, height).eyeHeight(eyeHeight));
 	}
 
-	private <E extends Entity> EntityType<E> make(ResourceLocation id, EntityType.EntityFactory<E> factory, MobCategory classification) {
+	private <E extends Entity> EntityType<E> make(Identifier id, EntityType.EntityFactory<E> factory, MobCategory classification) {
 		return make(id, factory, classification, 0.6F, 1.8F);
 	}
 
-	private <E extends Entity> EntityType<E> build(ResourceLocation id, EntityType.Builder<E> builder) {
-		return builder.build(id.toString());
+	private <E extends Entity> EntityType<E> build(Identifier id, EntityType.Builder<E> builder) {
+		return builder.build(ResourceKey.create(Registries.ENTITY_TYPE, id));
 	}
 
 	private <E extends Entity> EntityType.Builder<E> makeCastedBuilder(Class<E> cast, EntityType.EntityFactory<E> factory, MobCategory classification) {
@@ -91,7 +92,7 @@ public class ModEntities {
 	@PostConstruct
 	public void init(IEventBus bus) {
 		bus.addListener(EntityAttributeCreationEvent.class, this::registerAttributes);
-		if (FMLEnvironment.dist == Dist.CLIENT) {
+		if (FMLEnvironment.getDist() == Dist.CLIENT) {
 			bus.addListener(EntityRenderersEvent.RegisterLayerDefinitions.class, this::registerLayerDefinitions);
 			bus.addListener(EntityRenderersEvent.RegisterRenderers.class, this::registerEntityRenderer);
 		}

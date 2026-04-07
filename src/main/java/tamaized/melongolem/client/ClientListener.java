@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.PacketDistributor;
 import tamaized.beanification.Autowired;
@@ -31,7 +32,7 @@ public class ClientListener {
 			}
 
 			if (donatorSettingsConfig.isDirty() && Minecraft.getInstance().player != null && donatorHandler.isDonator(Minecraft.getInstance().player.getUUID())) {
-				PacketDistributor.sendToServer(new ServerPacketDonatorSettings(new DonatorHandler.Settings(donatorSettingsConfig.enable.get(), donatorSettingsConfig.color.get())));
+				ClientPacketDistributor.sendToServer(new ServerPacketDonatorSettings(new DonatorHandler.Settings(donatorSettingsConfig.enable.get(), donatorSettingsConfig.color.get())));
 				donatorSettingsConfig.unmarkDirty();
 			}
 		});
