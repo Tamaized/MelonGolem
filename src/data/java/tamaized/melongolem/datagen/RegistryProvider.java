@@ -16,10 +16,10 @@ public class RegistryProvider {
 	private final RegistrySetBuilder builder = new RegistrySetBuilder();
 	private DatapackBuiltinEntriesProvider value;
 
-	public CompletableFuture<HolderLookup.Provider> retrieve(GatherDataEvent event) {
+	public CompletableFuture<HolderLookup.Provider> retrieve(GatherDataEvent.Server event) {
 		if (value == null) {
 			value = new DatapackBuiltinEntriesProvider(event.getGenerator().getPackOutput(), event.getLookupProvider(), builder, Set.of("minecraft", MelonMod.MODID));
-			event.getGenerator().addProvider(event.includeServer(), value);
+			event.getGenerator().addProvider(true, value);
 		}
 		return value.getRegistryProvider();
 	}

@@ -14,6 +14,9 @@ public class ModelProviderFactory {
 	@Autowired
 	private BlockModelProviderFactory blockModelProviderFactory;
 
+	@Autowired
+	private ItemModelProviderFactory itemModelProviderFactory;
+
 	public ModelProvider make(GatherDataEvent event) {
 		return new ModelProvider(
 			event.getGenerator().getPackOutput(),
@@ -22,6 +25,7 @@ public class ModelProviderFactory {
 			@Override
 			protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
 				blockModelProviderFactory.make(blockModels);
+				itemModelProviderFactory.make(itemModels);
 			}
 		};
 	}

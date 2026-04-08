@@ -1,19 +1,21 @@
 package tamaized.melongolem.datagen.assets.bakedmodel;
 
 
+import net.minecraft.resources.Identifier;
+
 import javax.annotation.Nullable;
 import java.util.Optional;
 
 public abstract class ModelHolder {
 
 	@Nullable
-	private ModelFile model;
+	private Identifier model;
 
-	public final Optional<ModelFile> get() {
+	public final Optional<Identifier> get() {
 		return Optional.ofNullable(model);
 	}
 
-	protected final void set(ModelFile model) {
+	protected final void set(Identifier model) {
 		this.model = model;
 	}
 

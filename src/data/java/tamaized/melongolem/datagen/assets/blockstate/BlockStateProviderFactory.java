@@ -16,17 +16,17 @@ public class BlockStateProviderFactory {
 	@Autowired
 	private GlisteringMelonBlockModelHolder glisteringMelonBlockModelHolder;
 
-	public BlockStateProvider make(GatherDataEvent event) {
-		return new BlockStateProvider(
-			event.getGenerator().getPackOutput(),
-			MelonMod.MODID,
-			event.getExistingFileHelper()
-		) {
-			@Override
-			protected void registerStatesAndModels() {
-				simpleBlockWithItem(blocks.GLISTERING_MELON.get(), glisteringMelonBlockModelHolder.get().orElseThrow());
-			}
-		};
-	}
+//	public BlockStateProvider make(GatherDataEvent event) {
+//		return new BlockStateProvider(
+//			event.getGenerator().getPackOutput(),
+//			MelonMod.MODID,
+//			event.getExistingFileHelper()
+//		) {
+//			@Override
+//			protected void registerStatesAndModels() {
+//				simpleBlockWithItem(blocks.GLISTERING_MELON.get(), glisteringMelonBlockModelHolder.get().orElseThrow());
+//			}
+//		};
+//	}
 
 }

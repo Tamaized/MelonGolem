@@ -36,8 +36,8 @@ public class AssetsGenerator {
 
 	public void generate(GatherDataEvent.Client event) {
 		event.getGenerator().addProvider(true, modelProviderFactory.make(event));
-		event.getGenerator().addProvider(true, itemModelProviderFactory.make(event));
-		event.getGenerator().addProvider(true, blockStateProviderFactory.make(event));
+		//event.getGenerator().addProvider(true, itemModelProviderFactory.make(event));
+		//event.getGenerator().addProvider(true, blockStateProviderFactory.make(event));
 		event.getGenerator().addProvider(true, langProviderFactory.make(event));
 	}
 

@@ -18,7 +18,7 @@ public class LootTableProviderFactory {
 	@Autowired
 	private RegistryProvider registryProvider;
 
-	public LootTableProvider make(GatherDataEvent event) {
+	public LootTableProvider make(GatherDataEvent.Server event) {
 		return new LootTableProvider(
 			event.getGenerator().getPackOutput(),
 			Set.of(),

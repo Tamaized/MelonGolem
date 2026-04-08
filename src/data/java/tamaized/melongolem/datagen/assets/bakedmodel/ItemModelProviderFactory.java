@@ -1,9 +1,9 @@
 package tamaized.melongolem.datagen.assets.bakedmodel;
 
-import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.minecraft.client.data.models.ItemModelGenerators;
+import net.minecraft.client.data.models.model.ModelTemplates;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
-import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.registry.ModEntities;
 import tamaized.melongolem.registry.ModItems;
 
@@ -16,19 +16,9 @@ public class ItemModelProviderFactory {
 	@Autowired
 	private ModEntities entities;
 
-	public ItemModelProvider make(GatherDataEvent event) {
-		return new ItemModelProvider(
-			event.getGenerator().getPackOutput(),
-			MelonMod.MODID,
-			event.getExistingFileHelper()
-		) {
-			@Override
-			protected void registerModels() {
-				handheldItem(items.MELON_STICK.get());
-				spawnEggItem(entities.SPAWN_EGG_MELON_GOLEM.get());
-				spawnEggItem(entities.SPAWN_EGG_GLISTERING_MELON_GOLEM.get());
-			}
-		};
+	public void make(ItemModelGenerators event) {
+		event.generateFlatItem(items.MELON_STICK.get(), ModelTemplates.FLAT_ITEM);
+		event.generateFlatItem(entities.SPAWN_EGG_MELON_GOLEM.get(), ModelTemplates.FLAT_ITEM);
+		event.generateFlatItem(entities.SPAWN_EGG_GLISTERING_MELON_GOLEM.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
 	}
-
 }
