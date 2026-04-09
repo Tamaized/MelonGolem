@@ -31,7 +31,7 @@ public class EntityLootTableSubProvider extends EntityLootSubProvider {
 
 	@Override
 	public void generate() {
-		getKnownEntityTypes().filter(this::canHaveLootTable).forEach(e -> add(e, LootTable.lootTable()));
+		getKnownEntityTypes().filter((e) -> e.getDefaultLootTable().isPresent()).forEach(e -> add(e, LootTable.lootTable()));
 		melonGolemEntityLootTableFactory.add(this::add);
 		glisteringMelonGolemEntityLootTableFactory.add(this::add);
 	}

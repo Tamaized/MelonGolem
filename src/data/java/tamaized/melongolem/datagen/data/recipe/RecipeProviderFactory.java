@@ -1,5 +1,6 @@
 package tamaized.melongolem.datagen.data.recipe;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
@@ -19,18 +20,29 @@ public class RecipeProviderFactory {
 	@Autowired
 	private MelonStickRecipeFactory melonStickRecipeFactory;
 
-	public RecipeProvider make(GatherDataEvent event) {
-		return new RecipeProvider(
+	public RecipeProvider.Runner make(GatherDataEvent.Server event) {
+		return new RecipeProvider.Runner(
 			event.getGenerator().getPackOutput(),
-			registryProvider.retrieve(event)
+			event.getLookupProvider()
 		) {
+
 			@Override
-			protected void buildRecipes() {
-				glisteringMelonBlockRecipeFactory.make(recipeOutput);
-				melonStickRecipeFactory.make(recipeOutput);
+			public String getName() {
+				return "Melon Golem Recipes";
 			}
 
-		};
-	}
+			@Override
+			protected RecipeProvider createRecipeProvider(HolderLookup.Provider provider, RecipeOutput output) {
+				return new RecipeProvider(provider, output) {
+					@Override
+					protected void buildRecipes() {
+						glisteringMelonBlockRecipeFactory.make(provider);
+						melonStickRecipeFactory.make(provider);
+					}
 
+				};
+			}
+		};
+
+	}
 }

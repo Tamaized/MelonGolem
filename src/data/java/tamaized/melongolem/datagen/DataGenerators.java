@@ -8,8 +8,6 @@ import tamaized.beanification.PostConstruct;
 import tamaized.melongolem.datagen.generator.AssetsGenerator;
 import tamaized.melongolem.datagen.generator.DataGenerator;
 
-import java.util.Optional;
-
 @Component
 public class DataGenerators {
 
@@ -21,10 +19,8 @@ public class DataGenerators {
 
 	@PostConstruct
 	private void register(IEventBus bus) {
-		bus.addListener(GatherDataEvent.class, event -> {
-			assetsGenerator.generate(event);
-			dataGenerator.generate(event);
-		});
+		bus.addListener(GatherDataEvent.Client.class, event -> assetsGenerator.generate(event));
+		bus.addListener(GatherDataEvent.Server.class, event -> dataGenerator.generate(event));
 	}
 
 }
