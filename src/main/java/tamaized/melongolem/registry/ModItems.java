@@ -1,6 +1,7 @@
 package tamaized.melongolem.registry;
 
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -16,6 +17,8 @@ public class ModItems {
 
 	final DeferredRegister<Item> REGISTRY = RegUtil.create(Registries.ITEM);
 
-	public final Supplier<Item> MELON_STICK = REGISTRY.register("melon_stick", () -> new ItemMelonStick(new Item.Properties()));
+	public final Supplier<Item> MELON_STICK = REGISTRY.register("melon_stick", (id) -> new ItemMelonStick(new Item.Properties()
+		.setId(ResourceKey.create(Registries.ITEM, id))
+	));
 
 }

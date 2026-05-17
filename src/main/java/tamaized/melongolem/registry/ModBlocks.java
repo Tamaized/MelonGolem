@@ -1,6 +1,7 @@
 package tamaized.melongolem.registry;
 
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -21,7 +22,8 @@ public class ModBlocks {
 	private final DeferredRegister<Block> REGISTRY = RegUtil.create(Registries.BLOCK);
 	private final DeferredRegister<Item> ITEM_REGISTRY = RegUtil.create(Registries.ITEM);
 
-	public final DeferredHolder<Block, Block> GLISTERING_MELON = REGISTRY.register("glistering_melon", () -> new Block(BlockBehaviour.Properties.of()
+	public final DeferredHolder<Block, Block> GLISTERING_MELON = REGISTRY.register("glistering_melon", (id) -> new Block(BlockBehaviour.Properties.of()
+		.setId(ResourceKey.create(Registries.BLOCK, id))
 		.mapColor(MapColor.COLOR_LIGHT_GREEN)
 		.pushReaction(PushReaction.DESTROY)
 		.strength(1.0F)
@@ -30,7 +32,9 @@ public class ModBlocks {
 	);
 	public Supplier<BlockItem> ITEMBLOCK_GLISTERING_MELON = ITEM_REGISTRY.register(
 		GLISTERING_MELON.getId().getPath(),
-		() -> new BlockItem(GLISTERING_MELON.get(), new Item.Properties())
+		(id) -> new BlockItem(GLISTERING_MELON.get(), new Item.Properties()
+			.setId(ResourceKey.create(Registries.ITEM, id))
+		)
 	);
 
 }

@@ -39,7 +39,10 @@ public class ModEntities {
 	);
 	public final Supplier<Item> SPAWN_EGG_MELON_GOLEM = ITEM_REGISTRY.register(
 		"melon_golem_spawn_egg",
-		() -> new SpawnEggItem(/*0x00FF00, 0x000000, */new Item.Properties().spawnEgg(MELON_GOLEM.get()))
+		(id) -> new SpawnEggItem(/*0x00FF00, 0x000000, */new Item.Properties()
+			.setId(ResourceKey.create(Registries.ITEM, id))
+			.spawnEgg(MELON_GOLEM.get())
+		)
 	);
 
 	public final Supplier<EntityType<EntityGlisteringMelonGolem>> GLISTERING_MELON_GOLEM = REGISTRY.register(
@@ -48,7 +51,10 @@ public class ModEntities {
 	);
 	public final Supplier<Item> SPAWN_EGG_GLISTERING_MELON_GOLEM = ITEM_REGISTRY.register(
 		"glistering_melon_golem_spawn_egg",
-		() -> new SpawnEggItem(/*0xAAFF00, 0xFFCC00, */new Item.Properties().spawnEgg(GLISTERING_MELON_GOLEM.get()))
+		(id) -> new SpawnEggItem(/*0xAAFF00, 0xFFCC00, */new Item.Properties()
+			.setId(ResourceKey.create(Registries.ITEM, id))
+			.spawnEgg(GLISTERING_MELON_GOLEM.get())
+		)
 	);
 
 	public final Supplier<EntityType<EntityTinyMelonGolem>> TINY_MELON_GOLEM = REGISTRY.register(
