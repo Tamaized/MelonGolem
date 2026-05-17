@@ -108,6 +108,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void tick() {
 		super.tick();
 		if (level().isClientSide() || !isAlive())

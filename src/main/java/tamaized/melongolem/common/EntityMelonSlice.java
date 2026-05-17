@@ -86,6 +86,7 @@ public class EntityMelonSlice extends ThrowableProjectile implements ItemSupplie
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	protected void onHitEntity(EntityHitResult result) {
 		super.onHitEntity(result);
 		if (result.getEntity() == getOwner())
