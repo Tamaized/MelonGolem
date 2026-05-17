@@ -11,6 +11,7 @@
 !/gradle/**
 !/src/
 !/src/**
+/src/generated/resources/.cache
 !/libs/
 !/libs/**
 !/bbmodels/

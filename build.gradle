@@ -145,6 +145,14 @@ neoForge {
 			programArgument '--nogui'
 		}
 
+		clientData {
+			clientData()
+			gameDirectory = project.file('run-data')
+			programArguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+			sourceSet = this.sourceSets.data
+			loadedMods = [dataMod]
+		}
+
 		serverData {
 			serverData()
 			gameDirectory = project.file('run-data')
