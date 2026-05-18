@@ -3,85 +3,61 @@ package tamaized.melongolem.common;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityReference;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.ValueIOSerializable;
-import tamaized.beanification.Autowired;
-import tamaized.beanification.Configurable;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-@Configurable
 public class TinyGolemAttachment implements ValueIOSerializable {
 
-	@Autowired
-	private TeleportHelper teleportHelper;
-
-	private boolean loaded = false;
-
 	@Nullable
-	private EntityTinyMelonGolem pet;
-
-	@Nullable
-	private Optional<EntityReference<LivingEntity>> petId;
-
-	private int check;
+	private EntityReference<EntityTinyMelonGolem> pet;
 
 	public TinyGolemAttachment() {
 
 	}
 
-	public boolean isLoaded() {
-		return loaded;
-	}
-
 	public void changePet(EntityTinyMelonGolem pet) {
-		this.pet = pet;
+		this.pet = EntityReference.of(pet);
 	}
 
-	public Optional<EntityTinyMelonGolem> getPet() {
-		return Optional.ofNullable(pet);
+	public Optional<EntityTinyMelonGolem> getPet(Level level) {
+		return Optional.ofNullable(pet).map(v -> v.getEntity(level::getEntityInAnyDimension, EntityTinyMelonGolem.class));
 	}
 
 	public void tick(Entity owner) {
-		if (pet == null && petId.isPresent() && check-- <= 0 && owner.level() instanceof ServerLevel level) {
-			if (level.getEntity(petId.get().getUUID()) instanceof EntityTinyMelonGolem tinyMelonGolem) {
-				pet = tinyMelonGolem;
-				petId = null;
-			} else {
-				check = 30;
+		getPet(owner.level()).ifPresent(pet -> {
+			if (!pet.isAlive()) {
+				this.pet = null;
+				return;
 			}
-		} else if (pet != null && owner.level() instanceof ServerLevel serverLevel && !pet.level().dimension().equals(serverLevel.dimension())) {
-			EntityTinyMelonGolem newPet = new EntityTinyMelonGolem(serverLevel);
-			newPet.restoreFrom(pet);
-			teleportHelper.findLocationAboveFriendlyBlock(serverLevel, newPet, owner.blockPosition()).ifPresentOrElse(
-				pos -> newPet.snapTo(pos, 0, 0),
-				() -> newPet.snapTo(owner.position())
-			);
-			if (owner instanceof Player player)
-				newPet.tame(player);
-			serverLevel.addFreshEntity(newPet);
-			pet.discard();
-			pet = newPet;
-		} else if (pet != null && !pet.isAlive()) {
-			pet = null;
-		}
-		loaded = true;
+
+			if (owner.level() instanceof ServerLevel serverLevel && !pet.level().dimension().equals(owner.level().dimension())) {
+				pet.teleport(new TeleportTransition(
+					serverLevel,
+					owner.position(),
+					Vec3.ZERO,
+					1F,
+					1F,
+					TeleportTransition.DO_NOTHING
+				));
+				pet.tryToTeleportToOwner();
+			}
+		});
 	}
 
 	@Override
 	public void serialize(ValueOutput provider) {
-		if (pet != null)
-			EntityReference.store(petId.get(), provider, "pet");
+		EntityReference.store(pet, provider, "pet");
 	}
 
 	@Override
 	public void deserialize(ValueInput nbt) {
-		EntityReference<LivingEntity> ref = EntityReference.readWithOldOwnerConversion(nbt, "pet", pet.level());
-		if (ref != null)
-			petId = Optional.of(ref);
+		pet = EntityReference.read(nbt, "pet");
 	}
 }

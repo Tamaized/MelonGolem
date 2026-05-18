@@ -114,21 +114,30 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 		super.tick();
 		if (level().isClientSide() || !isAlive())
 			return;
-		if (getOwner() == null) {
+
+		EntityReference<LivingEntity> owner = getOwnerReference();
+
+		if (owner == null) {
 			hurt(level().damageSources().fellOutOfWorld(), 1024F);
-		}
-		LivingEntity owner = getOwner();
-		if (owner == null || !owner.isAlive())
 			return;
+		}
+
 		if (donatorHandler.isDonator(owner.getUUID())) {
 			donatorHandler.getSettings(owner.getUUID()).ifPresent(settings -> {
 				entityData.set(ENABLED, settings.enabled());
 				entityData.set(COLOR, settings.color());
 			});
 		}
-		TinyGolemAttachment attachment = owner.getData(modDataAttachments.TINY_GOLEM);
-		Optional<EntityTinyMelonGolem> pet = attachment.getPet();
-		if (attachment.isLoaded() && pet.map(p -> p != this).orElse(true)) {
+
+		LivingEntity ownerEntity = owner.getEntity(level(), LivingEntity.class);
+
+		if (ownerEntity == null || !ownerEntity.isAlive()) {
+			return;
+		}
+
+		TinyGolemAttachment attachment = ownerEntity.getData(modDataAttachments.TINY_GOLEM);
+		Optional<EntityTinyMelonGolem> pet = attachment.getPet(level());
+		if (pet.map(p -> p != this).orElse(true)) {
 			hurt(level().damageSources().fellOutOfWorld(), 1024F);
 		}
 	}

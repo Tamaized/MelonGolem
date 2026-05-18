@@ -28,8 +28,14 @@ public class PetHelper {
 		AtomicBoolean summoned = new AtomicBoolean(false);
 		TinyGolemAttachment attachment = owner.getData(modDataAttachments.TINY_GOLEM);
 
-		EntityTinyMelonGolem pet = attachment.getPet().orElse(new EntityTinyMelonGolem(level));
+		EntityTinyMelonGolem pet = attachment.getPet(level).orElseGet(() -> {
+			EntityTinyMelonGolem p = new EntityTinyMelonGolem(level);
+			p.snapTo(owner.position());
+			level.addFreshEntity(p);
+			return p;
+		});
 		pet.tame(owner);
+		attachment.changePet(pet);
 
 		teleportHelper.findLocationAboveFriendlyBlock(level, pet, owner.blockPosition()).ifPresent(pos -> {
 			pet.snapTo(pos.getCenter());
@@ -39,9 +45,7 @@ public class PetHelper {
 				particles.queueParticle(ParticleTypes.END_ROD, pet.getX() + result.x, pet.getY() + pet.getBbHeight() / 2F + result.y, pet.getZ() + result.z, 0, 0, 0);
 			}
 			PacketDistributor.sendToPlayersTrackingChunk(level, ChunkPos.containing(owner.blockPosition()), particles);
-			if (attachment.getPet().isEmpty())
-				level.addFreshEntity(pet);
-			attachment.changePet(pet);
+
 			level.playSound(null, pet.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 1.0F, pet.getRandom().nextFloat() + 0.5F);
 			summoned.set(true);
 		});
