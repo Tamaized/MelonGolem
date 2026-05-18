@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.animal.golem.SnowGolemModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.block.BlockModelResolver;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -19,8 +18,6 @@ import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.common.EntityGlisteringMelonGolem;
 import tamaized.melongolem.common.EntityMelonGolem;
 import tamaized.melongolem.common.EntityTinyMelonGolem;
-
-import javax.annotation.Nonnull;
 
 public class RenderMelonGolem<T extends Mob & ISignHolder> extends MobRenderer<T, MelonGolemRenderState, SnowGolemModel> {
 	private static final Identifier TEXTURES = Identifier.fromNamespaceAndPath(MelonMod.MODID, "textures/entity/golem.png");
@@ -47,13 +44,18 @@ public class RenderMelonGolem<T extends Mob & ISignHolder> extends MobRenderer<T
 	@Override
 	public void extractRenderState(T entity, MelonGolemRenderState state, float partialTicks) {
 		super.extractRenderState(entity, state, partialTicks);
-		state.head = entity.getHead();
+
+		state.headStack = entity.getHead();
+		this.itemModelResolver.updateForLiving(state.headItem, entity.getHead(), ItemDisplayContext.HEAD, entity);
+
 		state.isTinyMelon = type == Type.TINY && entity instanceof EntityTinyMelonGolem;
 		state.isEnabled = entity instanceof EntityTinyMelonGolem tiny && tiny.isEnabled();
 		state.color = entity instanceof EntityTinyMelonGolem tiny ? tiny.getColor() : 0xFFFFFF;
+
+		state.signTileEntity = entity.getSignTileEntity();
+		state.signText = entity.getSignTextList();
 		state.textColor = entity.getTextColor();
 		state.isTextGlowing = entity.glowingText();
-		this.itemModelResolver.updateForLiving(state.blockState, entity.getHead(), ItemDisplayContext.HEAD, entity);
 	}
 
 	@Override
@@ -61,9 +63,8 @@ public class RenderMelonGolem<T extends Mob & ISignHolder> extends MobRenderer<T
 		return state.isEnabled ? state.color : super.getModelTint(state);
 	}
 
-	@Nonnull
 	@Override
-	public Identifier getTextureLocation(@Nonnull MelonGolemRenderState entity) {
+	public Identifier getTextureLocation(MelonGolemRenderState entity) {
 		return entity.isTinyMelon && entity.isEnabled ? TEXTURES_GREY : type == Type.GLISTER ? TEXTURES_GLISTER : TEXTURES;
 	}
 
@@ -100,7 +101,7 @@ public class RenderMelonGolem<T extends Mob & ISignHolder> extends MobRenderer<T
 		}
 
 		@Override
-		public void submit(@Nonnull PoseStack stack, @Nonnull SubmitNodeCollector buffer, int light, @Nonnull MelonGolemRenderState entity, float yawHead, float pitch) {
+		public void submit(PoseStack stack, SubmitNodeCollector buffer, int light, MelonGolemRenderState entity, float yawHead, float pitch) {
 			stack.pushPose();
 			final float s = 1.01F;
 			stack.scale(s, s, s);

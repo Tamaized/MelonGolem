@@ -29,6 +29,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
@@ -50,6 +51,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 @Configurable
 public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, ISignHolder {
@@ -72,6 +74,23 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 			SynchedEntityData.defineId(EntityTinyMelonGolem.class, EntityDataSerializers.COMPONENT)
 
 	);
+
+	private final SignBlockEntity signTileEntity = new SignBlockEntity(BlockPos.ZERO, Blocks.OAK_WALL_SIGN.defaultBlockState()) {
+		@Override
+		public BlockPos getBlockPos() {
+			return EntityTinyMelonGolem.this.blockPosition();
+		}
+
+		@Override
+		public Level getLevel() {
+			return EntityTinyMelonGolem.this.level();
+		}
+
+		@Override
+		public boolean hasLevel() {
+			return true;
+		}
+	};
 
 	@Autowired
 	private DonatorHandler donatorHandler;
@@ -177,8 +196,18 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 	}
 
 	@Override
+	public SignBlockEntity getSignTileEntity() {
+		return signTileEntity;
+	}
+
+	@Override
 	public Component getSignText(int index) {
 		return entityData.get(SIGN_TEXT.get(index));
+	}
+
+	@Override
+	public List<Component> getSignTextList() {
+		return IntStream.range(0, SIGN_TEXT.size()).mapToObj(this::getSignText).toList();
 	}
 
 	@Override

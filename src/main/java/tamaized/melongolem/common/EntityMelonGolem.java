@@ -66,6 +66,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 @Configurable
 public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, IShearable, ISignHolder {
@@ -85,17 +86,21 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 
 	);
 	private static final EntityDataAccessor<Float> PITCH = SynchedEntityData.defineId(EntityMelonGolem.class, EntityDataSerializers.FLOAT);
-	public static BlockState SIGN_TILE_BLOCKSTATE = Blocks.OAK_WALL_SIGN.defaultBlockState();
-	public static final SignBlockEntity te = new SignBlockEntity(BlockPos.ZERO, SIGN_TILE_BLOCKSTATE) {
-		@Override
-		public BlockState getBlockState() {
-			return SIGN_TILE_BLOCKSTATE;
-		}
+
+	private final SignBlockEntity signTileEntity = new SignBlockEntity(BlockPos.ZERO, Blocks.OAK_WALL_SIGN.defaultBlockState()) {
 		@Override
 		public BlockPos getBlockPos() {
-			return FMLEnvironment.getDist() == Dist.CLIENT && Minecraft.getInstance().getCameraEntity() != null ?
-					Minecraft.getInstance().getCameraEntity().blockPosition() :
-					this.worldPosition;
+			return EntityMelonGolem.this.blockPosition();
+		}
+
+		@Override
+		public Level getLevel() {
+			return EntityMelonGolem.this.level();
+		}
+
+		@Override
+		public boolean hasLevel() {
+			return true;
 		}
 	};
 
@@ -151,8 +156,18 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 	}
 
 	@Override
+	public SignBlockEntity getSignTileEntity() {
+		return signTileEntity;
+	}
+
+	@Override
 	public Component getSignText(int index) {
 		return entityData.get(SIGN_TEXT.get(index));
+	}
+
+	@Override
+	public List<Component> getSignTextList() {
+		return IntStream.range(0, SIGN_TEXT.size()).mapToObj(this::getSignText).toList();
 	}
 
 	@Override

@@ -1,55 +1,58 @@
 package tamaized.melongolem.client;
 
-import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.IMEPreeditOverlay;
 import net.minecraft.client.gui.components.TextCursorUtils;
 import net.minecraft.client.gui.font.TextFieldHelper;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.PreeditEvent;
 import net.minecraft.client.model.Model;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.StandingSignRenderer;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.sprite.SpriteGetter;
-import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.StandingAndWallBlockItem;
 import net.minecraft.world.level.block.PlainSignBlock;
 import net.minecraft.world.level.block.SignBlock;
-import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
-import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 import tamaized.melongolem.ISignHolder;
-import tamaized.melongolem.common.EntityMelonGolem;
 import tamaized.melongolem.network.server.ServerPacketMelonSign;
 
-import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class GuiEditGolemSign extends Screen {
 
-	private Model.Simple signModel;
+	private static final Vector3f TEXT_SCALE = new Vector3f(0.9765628F, 0.9765628F, 0.9765628F);
+
 	private final ISignHolder golem;
-	private int updateCounter;
+	private long cursorBlinkStartTime;
 	private int editLine;
 	private boolean canSend = true;
+
+	@Nullable
+	private Model.Simple signModel;
+
+	@Nullable
 	private TextFieldHelper textInputUtil;
+	private @Nullable IMEPreeditOverlay preeditOverlay;
+	private final Vector2f cursorPosScratch;
 
 	public GuiEditGolemSign(ISignHolder golem) {
 		super(Component.translatable("sign.edit"));
 		this.golem = golem;
+		this.cursorPosScratch = new Vector2f();
 	}
 
 	@Override
 	protected void init() {
 		this.addRenderableWidget(Button.builder(Component.translatable("gui.done"), (_) -> this.onClose()).bounds(this.width / 2 - 100, this.height / 4 + 120, 200, 20).build());
+		this.cursorBlinkStartTime = Util.getMillis();
 		this.textInputUtil = new TextFieldHelper(
 
 				() -> golem.getSignText(this.editLine).getString(),
@@ -63,13 +66,16 @@ public class GuiEditGolemSign extends Screen {
 				(string) -> this.minecraft.font.width(string) <= 90
 
 		);
-		signModel = StandingSignRenderer.createSignModel(minecraft.getEntityModels(), ((SignBlock)EntityMelonGolem.SIGN_TILE_BLOCKSTATE.getBlock()).type(), PlainSignBlock.Attachment.WALL);
+		signModel = StandingSignRenderer.createSignModel(minecraft.getEntityModels(), ((SignBlock)golem.getSignTileEntity().getBlockState().getBlock()).type(), PlainSignBlock.Attachment.WALL);
+	}
+
+	public boolean preeditUpdated(@org.jspecify.annotations.Nullable PreeditEvent event) {
+		this.preeditOverlay = event != null ? new IMEPreeditOverlay(event, this.font, getTextLineHeight()) : null;
+		return true;
 	}
 
 	@Override
 	public void onClose() {
-		if (minecraft == null)
-			return;
 		if (canSend)
 			ClientPacketDistributor.sendToServer(new ServerPacketMelonSign(golem));
 		this.minecraft.setScreen(null);
@@ -77,8 +83,7 @@ public class GuiEditGolemSign extends Screen {
 
 	@Override
 	public void tick() {
-		++this.updateCounter;
-		if (golem.distanceTo(Minecraft.getInstance().player) > 6) {
+		if (minecraft.player == null || golem.distanceTo(minecraft.player) > 6) {
 			canSend = false;
 			onClose();
 		}
@@ -86,12 +91,18 @@ public class GuiEditGolemSign extends Screen {
 
 	@Override
 	public boolean charTyped(CharacterEvent typedChar) {
-		this.textInputUtil.charTyped(typedChar);
+		if (textInputUtil == null)
+			return false;
+
+		textInputUtil.charTyped(typedChar);
 		return true;
 	}
 
 	@Override
 	public boolean keyPressed(KeyEvent event) {
+		if (textInputUtil == null)
+			return false;
+
 		if (event.key() == 265) {
 			this.editLine = this.editLine - 1 & 3;
 			this.textInputUtil.setCursorToEnd();
@@ -106,79 +117,113 @@ public class GuiEditGolemSign extends Screen {
 	}
 
 	@Override
-	public void extractBackground(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
-		super.extractBackground(graphics, mouseX, mouseY, partialTicks);
-		Minecraft.getInstance().gameRenderer.getLighting().setupFor(Lighting.Entry.ITEMS_FLAT);
-		graphics.text(this.font, this.title, this.width / 2, 40, 16777215);
+	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+		super.extractRenderState(graphics, mouseX, mouseY, a);
+		graphics.centeredText(this.font, this.title, this.width / 2, 40, -1);
+		this.extractSign(graphics);
+	}
+
+	private float getSignYOffset() {
+		return 90.0F;
+	}
+
+	private int getTextLineHeight() {
+		return 10;
+	}
+
+	private void extractSign(GuiGraphicsExtractor graphics) {
 		graphics.pose().pushMatrix();
-		graphics.pose().translate(this.width / 2.0F, 0.0F/*, 50.0D*/);
-//		stack.scale(93.75F, -93.75F, 93.75F);
-//		stack.translate(0.0D, -1.3125D, 0.0D);
-		BlockState blockstate = EntityMelonGolem.SIGN_TILE_BLOCKSTATE = ((StandingAndWallBlockItem) golem.getHead().getItem()).wallBlock.defaultBlockState();
-//		stack.translate(0.0D, -0.3125D, 0.0D);
+		float offsetX = (float)this.width / 2.0F;
+		float offsetY = this.getSignYOffset();
+		graphics.pose().translate(offsetX, offsetY);
+		graphics.pose().pushMatrix();
+		this.extractSignBackground(graphics);
 		graphics.pose().popMatrix();
+		graphics.pose().scale(TEXT_SCALE.x(), TEXT_SCALE.y());
+		this.cursorPosScratch.zero();
+		this.extractSignText(graphics, this.cursorPosScratch);
+		graphics.pose().popMatrix();
+		if (this.preeditOverlay != null) {
+			this.cursorPosScratch.mul(TEXT_SCALE.x(), TEXT_SCALE.y()).add(offsetX, offsetY);
+			this.preeditOverlay.updateInputPosition((int)this.cursorPosScratch.x, (int)this.cursorPosScratch.y);
+			graphics.setPreeditOverlay(this.preeditOverlay);
+		}
+	}
 
-		boolean flag1 = this.updateCounter / 6 % 2 == 0;
-		PoseStack poseStack = new PoseStack();
-		poseStack.scale(0.6666667F, -0.6666667F, -0.6666667F);
-		SpriteGetter getter = this.minecraft.getAtlasManager();
-		MultiBufferSource.BufferSource irendertypebuffer$impl = this.minecraft.renderBuffers().bufferSource();
-		SpriteId rendermaterial = Sheets.getSignSprite(((SignBlock)blockstate.getBlock()).type());
-		VertexConsumer ivertexbuilder = rendermaterial.buffer(getter, irendertypebuffer$impl, this.signModel.renderType());
-		this.signModel.renderToBuffer(poseStack, ivertexbuilder, 15728880, OverlayTexture.NO_OVERLAY);
+	public void extractSignBackground(GuiGraphicsExtractor graphics) {
+		if (this.signModel != null) {
+			int centerX = this.width / 2;
+			int x0 = centerX - 48;
+			int x1 = centerX + 48;
+			graphics.sign(
+				this.signModel,
+				62.500004F,
+				((SignBlock)golem.getSignTileEntity().getBlockState().getBlock()).type(),
+				x0, 66, x1, 168);
+		}
+	}
 
-//		stack.popPose();
-//		stack.translate(0.0D, 0.33333334F, 0.046666667F);
-//		stack.scale(0.010416667F, -0.010416667F, 0.010416667F);
-		int i = DyeColor.BLACK.getTextColor();
-		int j = this.textInputUtil.getCursorPos();
-		int k = this.textInputUtil.getSelectionPos();
-		int l = this.editLine * 10 - 4 * 5;
-		//Matrix4f matrix4f = stack.last().pose();
+	private int getDarkColor() {
+		int color = golem.getTextColor().getTextColor();
+		return color == DyeColor.BLACK.getTextColor() && golem.glowingText() ? -988212 : ARGB.scaleRGB(color, 0.4F);
+	}
 
-		for (int i1 = 0; i1 < 4; ++i1) {
-			String s = this.golem.getSignText(i1).getString();
-			if (s != null) {
-				if (this.font.isBidirectional()) {
-					s = this.font.bidirectionalShaping(s);
-				}
+	private void extractSignText(GuiGraphicsExtractor graphics, Vector2f cursorPosOutput) {
+		if (textInputUtil == null)
+			return;
 
-				int f3 = -this.font.width(s) / 2;
-				graphics.text(this.font, s, f3, i1 * 10 - 4 * 5, i, false);
-				if (i1 == this.editLine && j >= 0 && flag1) {
-					int j1 = this.font.width(s.substring(0, Math.min(j, s.length())));
-					int k1 = j1 - this.font.width(s) / 2;
-					if (j >= s.length()) {
-						TextCursorUtils.extractAppendCursor(graphics, this.font, k1, l, i, false);
+		int color = golem.glowingText() ? golem.getTextColor().getTextColor() : getDarkColor();
+		boolean showCursor = TextCursorUtils.isCursorVisible(Util.getMillis() - this.cursorBlinkStartTime);
+		boolean needsValidCursorPos = this.preeditOverlay != null;
+		int cursorPos = this.textInputUtil.getCursorPos();
+		int selectionPos = this.textInputUtil.getSelectionPos();
+		int signMidpoint = 4 * getTextLineHeight() / 2;
+		int cursorY = this.editLine * getTextLineHeight() - signMidpoint;
+
+		for(int i = 0; i < golem.getSignTextList().size(); ++i) {
+			String line = golem.getSignText(i).getString();
+			if (this.font.isBidirectional()) {
+				line = this.font.bidirectionalShaping(line);
+			}
+
+			int x1 = -this.font.width(line) / 2;
+			graphics.text(this.font, line, x1, i * getTextLineHeight() - signMidpoint, color, false);
+			if (i == editLine && cursorPos >= 0 && (showCursor || needsValidCursorPos)) {
+				int cursorPosition = this.font.width(line.substring(0, Math.min(cursorPos, line.length())));
+				int cursorX = cursorPosition - this.font.width(line) / 2;
+				if (cursorPos >= line.length()) {
+					if (showCursor) {
+						TextCursorUtils.extractAppendCursor(graphics, this.font, cursorX, cursorY, color, false);
 					}
+
+					cursorPosOutput.set((float) cursorX, (float) cursorY);
 				}
 			}
 		}
 
-		irendertypebuffer$impl.endBatch();
+		for(int ix = 0; ix < golem.getSignTextList().size(); ++ix) {
+			String line = golem.getSignText(ix).getString();
+			if (ix == this.editLine && cursorPos >= 0) {
+				int cursorPosition = this.font.width(line.substring(0, Math.min(cursorPos, line.length())));
+				int cursorX = cursorPosition - this.font.width(line) / 2;
+				if (cursorPos < line.length()) {
+					if (showCursor) {
+						TextCursorUtils.extractInsertCursor(graphics, cursorX, cursorY, ARGB.opaque(color), getTextLineHeight());
+					}
 
-		for (int i3 = 0; i3 < 4; ++i3) {
-			String s1 = this.golem.getSignText(i3).getString();
-			if (s1 != null && i3 == this.editLine && j >= 0) {
-				int j3 = this.minecraft.font.width(s1.substring(0, Math.max(Math.min(j, s1.length()), 0)));
-				int k3 = j3 - this.minecraft.font.width(s1) / 2;
-				if (flag1 && j < s1.length()) {
-					graphics.fill(k3, l - 1, k3 + 1, l + 9, -16777216 | i);
+					cursorPosOutput.set((float)cursorX, (float)cursorY);
 				}
 
-				if (k != j) {
-					int l3 = Math.min(j, k);
-					int l1 = Math.max(j, k);
-					int i2 = this.minecraft.font.width(s1.substring(0, l3)) - this.minecraft.font.width(s1) / 2;
-					int j2 = this.minecraft.font.width(s1.substring(0, l1)) - this.minecraft.font.width(s1) / 2;
-					int k2 = Math.min(i2, j2);
-					int l2 = Math.max(i2, j2);
-					graphics.textHighlight(k2, l, l2, l + 9, true);
+				if (selectionPos != cursorPos) {
+					int startIndex = Math.min(cursorPos, selectionPos);
+					int endIndex = Math.max(cursorPos, selectionPos);
+					int startPosX = this.font.width(line.substring(0, startIndex)) - this.font.width(line) / 2;
+					int endPosX = this.font.width(line.substring(0, endIndex)) - this.font.width(line) / 2;
+					int fromX = Math.min(startPosX, endPosX);
+					int toX = Math.max(startPosX, endPosX);
+					graphics.textHighlight(fromX, cursorY, toX, cursorY + getTextLineHeight(), true);
 				}
 			}
 		}
-
-		graphics.pose().popMatrix();
-		Minecraft.getInstance().gameRenderer.getLighting().setupFor(Lighting.Entry.ITEMS_3D);
 	}
 }
