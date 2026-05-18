@@ -33,6 +33,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.IShearable;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.util.Lazy;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.BeanContext;
@@ -44,10 +45,10 @@ import tamaized.melongolem.network.DonatorHandler;
 import tamaized.melongolem.registry.ModDataAttachments;
 import tamaized.melongolem.registry.ModEntities;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Configurable
@@ -119,8 +120,8 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 		LivingEntity owner = getOwner();
 		if (owner == null || !owner.isAlive())
 			return;
-		if (donatorHandler.isDonator(getOwnerReference().getUUID())) {
-			donatorHandler.getSettings(getOwnerReference().getUUID()).ifPresent(settings -> {
+		if (donatorHandler.isDonator(owner.getUUID())) {
+			donatorHandler.getSettings(owner.getUUID()).ifPresent(settings -> {
 				entityData.set(ENABLED, settings.enabled());
 				entityData.set(COLOR, settings.color());
 			});
@@ -201,10 +202,12 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 		return SoundEvents.SLIME_DEATH;
 	}
 
-	@Nonnull
 	@Override
 	public InteractionResult interact(Player player, InteractionHand hand, Vec3 vec) {
-		if (!config.hats.get() || player.getMainHandItem().getItem() instanceof ShearsItem || player.getOffhandItem().getItem() instanceof ShearsItem)
+		if (config.getHats().map(ModConfigSpec.BooleanValue::isFalse).orElse(true)
+			|| player.getMainHandItem().getItem() instanceof ShearsItem
+			|| player.getOffhandItem().getItem() instanceof ShearsItem
+		)
 			return InteractionResult.FAIL;
 		// TODO abstract this into a static helper method in EntityMelonGolem
 		ItemStack stack = player.getItemInHand(hand);
@@ -227,7 +230,7 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 				if (!player.isCreative())
 					player.getItemInHand(hand).shrink(1);
 			} else if (stack.has(DataComponents.DYE) && getTextColor() != stack.get(DataComponents.DYE)) {
-				getEntityData().set(TEXT_COLOR, stack.get(DataComponents.DYE).getId());
+				getEntityData().set(TEXT_COLOR, Objects.requireNonNull(stack.get(DataComponents.DYE)).getId());
 				playSound(SoundEvents.DYE_USE);
 				if (!player.isCreative())
 					player.getItemInHand(hand).shrink(1);
@@ -257,13 +260,13 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 
 	@Override
 	public List<ItemStack> onSheared(@org.jetbrains.annotations.Nullable Player player, ItemStack item, Level level, BlockPos pos) {
-		List<ItemStack> list = Collections.singletonList(config.shear.get() ? getHead() : ItemStack.EMPTY);
+		List<ItemStack> list = Collections.singletonList(config.getShear().map(ModConfigSpec.BooleanValue::isTrue).orElse(false) ? getHead() : ItemStack.EMPTY);
 		setHead(ItemStack.EMPTY);
 		return list;
 	}
 
 	@Override
-	public void die(@Nonnull DamageSource cause) {
+	public void die(DamageSource cause) {
 		super.die(cause);
 		// TODO abstract this into a static helper method in EntityMelonGolem
 		ItemStack stack = getHead();
@@ -282,7 +285,6 @@ public class EntityTinyMelonGolem extends TamableAnimal implements IShearable, I
 		}
 	}
 
-	@Nonnull
 	@Override
 	public void saveWithoutId(ValueOutput compound) {
 		compound.storeNullable("head", ItemStack.CODEC, getHead());

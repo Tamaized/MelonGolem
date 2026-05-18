@@ -19,6 +19,7 @@ import tamaized.beanification.PostConstruct;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.config.ConfigUtil;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -30,14 +31,30 @@ public class CommonConfig {
 	private ConfigUtil configUtil;
 
 	private List<Item> stabItems = List.of(Items.STICK);
-	public ModConfigSpec.DoubleValue health;
-	public ModConfigSpec.DoubleValue damage;
-	public ModConfigSpec.DoubleValue glisterDamageAmp;
-	public ModConfigSpec.BooleanValue hats;
-	public ModConfigSpec.BooleanValue shear;
-	public ModConfigSpec.BooleanValue eats;
-	public ModConfigSpec.DoubleValue heal;
-	public ModConfigSpec.ConfigValue<List<? extends String>> stabby;
+
+	@Nullable
+	private ModConfigSpec.DoubleValue health;
+
+	@Nullable
+	private ModConfigSpec.DoubleValue damage;
+
+	@Nullable
+	private ModConfigSpec.DoubleValue glisterDamageAmp;
+
+	@Nullable
+	private ModConfigSpec.BooleanValue hats;
+
+	@Nullable
+	private ModConfigSpec.BooleanValue shear;
+
+	@Nullable
+	private ModConfigSpec.BooleanValue eats;
+
+	@Nullable
+	private ModConfigSpec.DoubleValue heal;
+
+	@Nullable
+	private ModConfigSpec.ConfigValue<List<? extends String>> stabby;
 
 	@PostConstruct
 	private void postConstruct(IEventBus modBus) {
@@ -100,7 +117,38 @@ public class CommonConfig {
 		return this;
 	}
 
+	public  Optional<ModConfigSpec.DoubleValue> getHealth() {
+		return Optional.ofNullable(health);
+	}
+
+	public  Optional<ModConfigSpec.DoubleValue> getDamage() {
+		return Optional.ofNullable(damage);
+	}
+
+	public  Optional<ModConfigSpec.DoubleValue> getGlisterDamageAmp() {
+		return Optional.ofNullable(glisterDamageAmp);
+	}
+
+	public  Optional<ModConfigSpec.BooleanValue> getHats() {
+		return Optional.ofNullable(hats);
+	}
+
+	public  Optional<ModConfigSpec.BooleanValue> getShear() {
+		return Optional.ofNullable(shear);
+	}
+
+	public  Optional<ModConfigSpec.BooleanValue> getEats() {
+		return Optional.ofNullable(eats);
+	}
+
+	public  Optional<ModConfigSpec.DoubleValue> getHeal() {
+		return Optional.ofNullable(heal);
+	}
+
 	private void setupStabby() {
+		if (stabby == null)
+			return;
+
 		stabItems = stabby.get().stream().map(stab -> {
 			String[] split = stab.split(":");
 			String domain = "minecraft";

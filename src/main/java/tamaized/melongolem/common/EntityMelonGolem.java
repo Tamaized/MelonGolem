@@ -46,6 +46,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.IShearable;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.util.Lazy;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.transfer.ResourceHandler;
@@ -60,10 +61,10 @@ import tamaized.melongolem.network.client.ClientPacketMelonAmbientSound;
 import tamaized.melongolem.registry.ModBlocks;
 import tamaized.melongolem.registry.ModEntities;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Configurable
@@ -86,12 +87,10 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 	private static final EntityDataAccessor<Float> PITCH = SynchedEntityData.defineId(EntityMelonGolem.class, EntityDataSerializers.FLOAT);
 	public static BlockState SIGN_TILE_BLOCKSTATE = Blocks.OAK_WALL_SIGN.defaultBlockState();
 	public static final SignBlockEntity te = new SignBlockEntity(BlockPos.ZERO, SIGN_TILE_BLOCKSTATE) {
-		@Nonnull
 		@Override
 		public BlockState getBlockState() {
 			return SIGN_TILE_BLOCKSTATE;
 		}
-		@Nonnull
 		@Override
 		public BlockPos getBlockPos() {
 			return FMLEnvironment.getDist() == Dist.CLIENT && Minecraft.getInstance().getCameraEntity() != null ?
@@ -168,7 +167,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 	}
 
 	@Override
-	public void performRangedAttack(@Nonnull LivingEntity target, float distanceFactor) {
+	public void performRangedAttack(LivingEntity target, float distanceFactor) {
 		EntityMelonSlice slice = new EntityMelonSlice(this.level(), this);
 		double d0 = target.getY() + (double) target.getEyeHeight() - 1.100000023841858D;
 		double d1 = target.getX() - this.getX();
@@ -219,10 +218,12 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 			PacketDistributor.sendToPlayersTrackingEntity(this, new ClientPacketMelonAmbientSound(this));
 	}
 
-	@Nonnull
 	@Override
 	public InteractionResult interact(Player player, InteractionHand hand, Vec3 vec) {
-		if (!config.hats.get() || player.getMainHandItem().getItem() instanceof ShearsItem || player.getOffhandItem().getItem() instanceof ShearsItem)
+		if (config.getHats().map(ModConfigSpec.BooleanValue::isFalse).orElse(true)
+			|| player.getMainHandItem().getItem() instanceof ShearsItem
+			|| player.getOffhandItem().getItem() instanceof ShearsItem
+		)
 			return InteractionResult.FAIL;
 		ItemStack stack = player.getItemInHand(hand);
 		if (!stack.isEmpty() && getHead().isEmpty()) {
@@ -244,7 +245,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 				if (!player.isCreative())
 					player.getItemInHand(hand).shrink(1);
 			} else if (stack.has(DataComponents.DYE) && getTextColor() != stack.get(DataComponents.DYE)) {
-				getEntityData().set(TEXT_COLOR, stack.get(DataComponents.DYE).getId());
+				getEntityData().set(TEXT_COLOR, Objects.requireNonNull(stack.get(DataComponents.DYE)).getId());
 				playSound(SoundEvents.DYE_USE);
 				if (!player.isCreative())
 					player.getItemInHand(hand).shrink(1);
@@ -274,13 +275,13 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 
 	@Override
 	public List<ItemStack> onSheared(@org.jetbrains.annotations.Nullable Player player, ItemStack item, Level level, BlockPos pos) {
-		List<ItemStack> list = Lists.newArrayList(config.shear.get() ? getHead() : ItemStack.EMPTY);
+		List<ItemStack> list = Lists.newArrayList(config.getShear().map(ModConfigSpec.BooleanValue::isTrue).orElse(false) ? getHead() : ItemStack.EMPTY);
 		setHead(ItemStack.EMPTY);
 		return list;
 	}
 
 	@Override
-	public void die(@Nonnull DamageSource cause) {
+	public void die(DamageSource cause) {
 		super.die(cause);
 		ItemStack stack = getHead();
 		if (!level().isClientSide() && !stack.isEmpty()) {
@@ -354,7 +355,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 
 		@Override
 		public boolean canUse() {
-			return config.eats.get() && parent.getHealth() < parent.getMaxHealth();
+			return config.getEats().map(ModConfigSpec.BooleanValue::isTrue).orElse(false) && parent.getHealth() < parent.getMaxHealth();
 		}
 
 		@Override
@@ -376,8 +377,6 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 
 		@Override
 		public void tick() {
-			if (parent == null)
-				return;
 			if (cooldown > 0)
 				cooldown--;
 			final int radius = 25;
@@ -392,7 +391,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 					boolean flag = item.getItem().getItem() == melonblock.asItem();
 					item.getItem().shrink(1);
 					parent.playSound(SoundEvents.PLAYER_BURP, 1F, 1F);
-					parent.heal(config.heal.get().floatValue() * (flag ? 9 : 1));
+					parent.heal(config.getHeal().map(v -> v.get().floatValue()).orElse(1F) * (flag ? 9 : 1));
 					cooldown = 30 + parent.getRandom().nextInt(40);
 				}
 			}
@@ -454,7 +453,7 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 						boolean flag = handler.getResource(i).getItem() == melonblock.asItem();
 						handler.getResource(i).toStack().shrink(1);
 						parent.playSound(SoundEvents.PLAYER_BURP, 1F, 1F);
-						parent.heal(config.heal.get().floatValue() * (flag ? 9 : 1));
+						parent.heal(config.getHeal().map(v -> v.get().floatValue()).orElse(1F) * (flag ? 9 : 1));
 						cooldown = 10 + parent.getRandom().nextInt(40);
 					}
 				} else {
