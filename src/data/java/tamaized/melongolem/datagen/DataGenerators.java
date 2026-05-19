@@ -19,8 +19,10 @@ public class DataGenerators {
 
 	@PostConstruct
 	private void register(IEventBus bus) {
-		bus.addListener(GatherDataEvent.Client.class, event -> assetsGenerator.generate(event));
-		bus.addListener(GatherDataEvent.Server.class, event -> dataGenerator.generate(event));
+		bus.addListener(GatherDataEvent.Client.class, event -> {
+			assetsGenerator.generate(event);
+			dataGenerator.generate(event);
+		});
 	}
 
 }

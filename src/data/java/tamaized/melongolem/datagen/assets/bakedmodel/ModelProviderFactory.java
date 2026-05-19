@@ -12,7 +12,7 @@ import tamaized.melongolem.MelonMod;
 public class ModelProviderFactory {
 
 	@Autowired
-	private BlockModelProviderFactory blockModelProviderFactory;
+	private BlockModelProviderFactoryWrapper blockModelProviderFactory;
 
 	@Autowired
 	private ItemModelProviderFactory itemModelProviderFactory;

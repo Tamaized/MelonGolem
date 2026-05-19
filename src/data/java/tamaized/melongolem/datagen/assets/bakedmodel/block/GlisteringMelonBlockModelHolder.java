@@ -1,36 +1,74 @@
 package tamaized.melongolem.datagen.assets.bakedmodel.block;
 
 import net.minecraft.client.data.models.BlockModelGenerators;
-import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.client.data.models.model.TextureSlot;
 import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplateBuilder;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import org.jetbrains.annotations.Nullable;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
+import tamaized.datagenutil.assets.bakedmodel.BlockModelHolder;
+import tamaized.datagenutil.assets.bakedmodel.ExtendedTextureMapping;
+import tamaized.datagenutil.assets.bakedmodel.FurtherExtendedModelTemplateBuilder;
+import tamaized.datagenutil.assets.bakedmodel.ModelHolder;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.datagen.assets.bakedmodel.block.overlay.OverlaySideBlockModelHolder;
 import tamaized.melongolem.datagen.util.ModTextureSlots;
+import tamaized.melongolem.registry.ModBlocks;
+
+import java.util.Optional;
 
 @Component
 public class GlisteringMelonBlockModelHolder extends BlockModelHolder {
 
 	@Autowired
+	private ModBlocks blocks;
+
+	@Autowired
 	private OverlaySideBlockModelHolder overlaySideBlockModelHolder;
 
-	public void build(BlockModelGenerators provider) {
-		TextureMapping mapping = new TextureMapping()
-			.put(TextureSlot.END, new Material(modLoc("block/glistening_melon_top")))
-			.put(TextureSlot.SIDE, new Material(modLoc("block/glistening_melon_side")))
-			.put(ModTextureSlots.OVERLAY_END, new Material(modLoc("block/glistening_melon_top_overlay")))
-			.put(ModTextureSlots.OVERLAY_SIDE, new Material(modLoc("block/glistening_melon_side_overlay")));
+	@Override
+	protected @Nullable DeferredHolder<Block, ? extends Block> blockForName() {
+		return blocks.GLISTERING_MELON;
+	}
 
-		overlaySideBlockModelHolder.get().ifPresent(parent -> set(
-			new ExtendedModelTemplateBuilder()
-				.parent(parent)
-				.build()
-				.create(modLoc("block/glistering_melon"), mapping, provider.modelOutput)
-		));
+	@Override
+	public boolean hasStandardBlockItem() {
+		return true;
+	}
+
+	@Override
+	public Optional<ModelHolder<BlockModelGenerators>> parent() {
+		return Optional.of(overlaySideBlockModelHolder);
+	}
+
+	@Override
+	public Identifier finalize(BlockModelGenerators provider, FurtherExtendedModelTemplateBuilder model) {
+		return model
+			.buildExtended()
+			.create(modLoc(name()), textures(), provider.modelOutput);
+	}
+
+	@Override
+	protected void defineTextureSlots(ExtendedTextureMapping mapping) {
+		mapping
+			.putForced(TextureSlot.END, new Material(modLoc(name("top"))))
+			.putForced(TextureSlot.SIDE, new Material(modLoc(name("side"))))
+			.putForced(ModTextureSlots.OVERLAY_END, new Material(modLoc(name("top_overlay"))))
+			.putForced(ModTextureSlots.OVERLAY_SIDE, new Material(modLoc(name("side_overlay"))));
+	}
+
+	@Override
+	public boolean hasBlockState() {
+		return true;
+	}
+
+	@Override
+	public Optional<String> lang() {
+		return Optional.of("Glistering Melon");
 	}
 
 	private Identifier modLoc(String path) {

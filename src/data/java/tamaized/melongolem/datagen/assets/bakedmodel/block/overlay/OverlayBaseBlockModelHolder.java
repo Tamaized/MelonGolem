@@ -1,24 +1,23 @@
 package tamaized.melongolem.datagen.assets.bakedmodel.block.overlay;
 
 import net.minecraft.client.data.models.BlockModelGenerators;
-import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.client.data.models.model.TextureSlot;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
-import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplateBuilder;
 import tamaized.beanification.Component;
+import tamaized.datagenutil.assets.bakedmodel.BlockModelHolder;
+import tamaized.datagenutil.assets.bakedmodel.ExtendedTextureMapping;
+import tamaized.datagenutil.assets.bakedmodel.FurtherExtendedModelTemplateBuilder;
 import tamaized.melongolem.MelonMod;
-import tamaized.melongolem.datagen.assets.bakedmodel.block.BlockModelHolder;
 import tamaized.melongolem.datagen.util.ModTextureSlots;
 
 @Component
 public class OverlayBaseBlockModelHolder extends BlockModelHolder {
 
-	public void build(BlockModelGenerators provider) {
-		TextureMapping mapping = new TextureMapping();
-
-		set(
-			new ExtendedModelTemplateBuilder()
+	@Override
+	public Identifier finalize(BlockModelGenerators provider, FurtherExtendedModelTemplateBuilder model) {
+		return model
+			.buildExtended(m -> m
 				.parent(Identifier.withDefaultNamespace("block/block"))
 				.element(elementBuilder -> elementBuilder
 					.from(0, 0, 0).to(16, 16, 16)
@@ -36,9 +35,12 @@ public class OverlayBaseBlockModelHolder extends BlockModelHolder {
 					.face(Direction.SOUTH, fb -> fb.texture(ModTextureSlots.OVERLAY_SOUTH).cullface(Direction.SOUTH).lightEmission(15))
 					.face(Direction.WEST, fb -> fb.texture(ModTextureSlots.OVERLAY_WEST).cullface(Direction.WEST).lightEmission(15))
 					.face(Direction.EAST, fb -> fb.texture(ModTextureSlots.OVERLAY_EAST).cullface(Direction.EAST).lightEmission(15)))
-				.build()
-				.create(Identifier.fromNamespaceAndPath(MelonMod.MODID, "block/overlay/base"), mapping, provider.modelOutput)
-		);
+			)
+			.create(Identifier.fromNamespaceAndPath(MelonMod.MODID, "block/overlay/base"), textures(), provider.modelOutput);
 	}
 
+	@Override
+	protected void defineTextureSlots(ExtendedTextureMapping mapping) {
+
+	}
 }

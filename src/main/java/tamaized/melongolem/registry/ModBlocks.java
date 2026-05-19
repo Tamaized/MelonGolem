@@ -34,6 +34,7 @@ public class ModBlocks {
 		GLISTERING_MELON.getId().getPath(),
 		(id) -> new BlockItem(GLISTERING_MELON.get(), new Item.Properties()
 			.setId(ResourceKey.create(Registries.ITEM, id))
+			.useBlockDescriptionPrefix()
 		)
 	);
 

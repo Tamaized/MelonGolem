@@ -1,15 +1,19 @@
 package tamaized.melongolem.datagen.assets.bakedmodel.block.overlay;
 
 import net.minecraft.client.data.models.BlockModelGenerators;
-import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.client.data.models.model.TextureSlot;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplateBuilder;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
+import tamaized.datagenutil.assets.bakedmodel.BlockModelHolder;
+import tamaized.datagenutil.assets.bakedmodel.ExtendedTextureMapping;
+import tamaized.datagenutil.assets.bakedmodel.FurtherExtendedModelTemplateBuilder;
+import tamaized.datagenutil.assets.bakedmodel.ModelHolder;
 import tamaized.melongolem.MelonMod;
-import tamaized.melongolem.datagen.assets.bakedmodel.block.BlockModelHolder;
 import tamaized.melongolem.datagen.util.ModTextureSlots;
+
+import java.util.Optional;
 
 @Component
 public class OverlaySideBlockModelHolder extends BlockModelHolder {
@@ -17,28 +21,32 @@ public class OverlaySideBlockModelHolder extends BlockModelHolder {
 	@Autowired
 	private OverlayBaseBlockModelHolder overlayBaseBlockModelHolder;
 
-	public void build(BlockModelGenerators provider) {
-		TextureMapping mapping = new TextureMapping()
-			.copySlot(TextureSlot.PARTICLE, TextureSlot.SIDE)
-			.copySlot(TextureSlot.DOWN, TextureSlot.END)
-			.copySlot(TextureSlot.UP, TextureSlot.END)
-			.copySlot(TextureSlot.NORTH, TextureSlot.SIDE)
-			.copySlot(TextureSlot.EAST, TextureSlot.SIDE)
-			.copySlot(TextureSlot.SOUTH, TextureSlot.SIDE)
-			.copySlot(TextureSlot.WEST, TextureSlot.SIDE)
-			.copySlot(ModTextureSlots.OVERLAY_DOWN, ModTextureSlots.OVERLAY_END)
-			.copySlot(ModTextureSlots.OVERLAY_UP, ModTextureSlots.OVERLAY_END)
-			.copySlot(ModTextureSlots.OVERLAY_NORTH, ModTextureSlots.OVERLAY_SIDE)
-			.copySlot(ModTextureSlots.OVERLAY_EAST, ModTextureSlots.OVERLAY_SIDE)
-			.copySlot(ModTextureSlots.OVERLAY_SOUTH, ModTextureSlots.OVERLAY_SIDE)
-			.copySlot(ModTextureSlots.OVERLAY_WEST, ModTextureSlots.OVERLAY_WEST);
-
-		overlayBaseBlockModelHolder.get().ifPresent(parent -> set(
-			new ExtendedModelTemplateBuilder()
-				.parent(parent)
-				.build()
-				.create(Identifier.fromNamespaceAndPath(MelonMod.MODID, "block/overlay/side"), mapping, provider.modelOutput)
-		));
+	@Override
+	public Optional<ModelHolder<BlockModelGenerators>> parent() {
+		return Optional.of(overlayBaseBlockModelHolder);
 	}
 
+	@Override
+	public Identifier finalize(BlockModelGenerators provider, FurtherExtendedModelTemplateBuilder model) {
+		return model
+			.buildExtended()
+			.create(Identifier.fromNamespaceAndPath(MelonMod.MODID, "block/overlay/side"), textures(), provider.modelOutput);
+	}
+
+	@Override
+	protected void defineTextureSlots(ExtendedTextureMapping mapping) {
+		mapping
+			.putRef(TextureSlot.DOWN, TextureSlot.END)
+			.putRef(TextureSlot.UP, TextureSlot.END)
+			.putRef(TextureSlot.NORTH, TextureSlot.SIDE)
+			.putRef(TextureSlot.EAST, TextureSlot.SIDE)
+			.putRef(TextureSlot.SOUTH, TextureSlot.SIDE)
+			.putRef(TextureSlot.WEST, TextureSlot.SIDE)
+			.putRef(ModTextureSlots.OVERLAY_DOWN, ModTextureSlots.OVERLAY_END)
+			.putRef(ModTextureSlots.OVERLAY_UP, ModTextureSlots.OVERLAY_END)
+			.putRef(ModTextureSlots.OVERLAY_NORTH, ModTextureSlots.OVERLAY_SIDE)
+			.putRef(ModTextureSlots.OVERLAY_EAST, ModTextureSlots.OVERLAY_SIDE)
+			.putRef(ModTextureSlots.OVERLAY_SOUTH, ModTextureSlots.OVERLAY_SIDE)
+			.putRef(ModTextureSlots.OVERLAY_WEST, ModTextureSlots.OVERLAY_SIDE);
+	}
 }

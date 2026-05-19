@@ -20,7 +20,7 @@ public class RecipeProviderFactory {
 	@Autowired
 	private MelonStickRecipeFactory melonStickRecipeFactory;
 
-	public RecipeProvider.Runner make(GatherDataEvent.Server event) {
+	public RecipeProvider.Runner make(GatherDataEvent.Client event) {
 		return new RecipeProvider.Runner(
 			event.getGenerator().getPackOutput(),
 			event.getLookupProvider()

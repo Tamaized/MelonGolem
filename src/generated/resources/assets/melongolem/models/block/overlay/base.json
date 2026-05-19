@@ -1,0 +1,99 @@
+{
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "faces": {
+        "down": {
+          "cullface": "down",
+          "texture": "#down"
+        },
+        "east": {
+          "cullface": "east",
+          "texture": "#east"
+        },
+        "north": {
+          "cullface": "north",
+          "texture": "#north"
+        },
+        "south": {
+          "cullface": "south",
+          "texture": "#south"
+        },
+        "up": {
+          "cullface": "up",
+          "texture": "#up"
+        },
+        "west": {
+          "cullface": "west",
+          "texture": "#west"
+        }
+      },
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "cullface": "down",
+          "neoforge_data": {
+            "light_emission": 5
+          },
+          "texture": "#overlay-down"
+        },
+        "east": {
+          "cullface": "east",
+          "neoforge_data": {
+            "light_emission": 15
+          },
+          "texture": "#overlay-east"
+        },
+        "north": {
+          "cullface": "north",
+          "neoforge_data": {
+            "light_emission": 15
+          },
+          "texture": "#overlay-north"
+        },
+        "south": {
+          "cullface": "south",
+          "neoforge_data": {
+            "light_emission": 15
+          },
+          "texture": "#overlay-south"
+        },
+        "up": {
+          "cullface": "up",
+          "neoforge_data": {
+            "light_emission": 15
+          },
+          "texture": "#overlay-up"
+        },
+        "west": {
+          "cullface": "west",
+          "neoforge_data": {
+            "light_emission": 15
+          },
+          "texture": "#overlay-west"
+        }
+      },
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ]
+    }
+  ]
+}

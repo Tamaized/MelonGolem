@@ -22,7 +22,7 @@ public class BlockTagProviderFactory {
 	@Autowired
 	private GlisteringMelonBlockTagFactory glisteringMelonBlockTagFactory;
 
-	public TagsProvider<Block> make(GatherDataEvent.Server event) {
+	public TagsProvider<Block> make(GatherDataEvent.Client event) {
 		return new KeyTagProvider<>(
 			event.getGenerator().getPackOutput(),
 			Registries.BLOCK,

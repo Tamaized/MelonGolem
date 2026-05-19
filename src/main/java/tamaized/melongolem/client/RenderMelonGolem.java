@@ -22,8 +22,8 @@ import tamaized.melongolem.common.EntityTinyMelonGolem;
 public class RenderMelonGolem<T extends Mob & ISignHolder> extends MobRenderer<T, MelonGolemRenderState, SnowGolemModel> {
 	private static final Identifier TEXTURES = Identifier.fromNamespaceAndPath(MelonMod.MODID, "textures/entity/golem.png");
 	private static final Identifier TEXTURES_GREY = Identifier.fromNamespaceAndPath(MelonMod.MODID, "textures/entity/greygolem.png");
-	private static final Identifier TEXTURES_GLISTER = Identifier.fromNamespaceAndPath(MelonMod.MODID, "textures/entity/glistening_melon_golem.png");
-	private static final Identifier TEXTURES_GLISTER_OVERLAY = Identifier.fromNamespaceAndPath(MelonMod.MODID, "textures/entity/glistening_melon_golem_overlay.png");
+	private static final Identifier TEXTURES_GLISTER = Identifier.fromNamespaceAndPath(MelonMod.MODID, "textures/entity/glistering_melon_golem.png");
+	private static final Identifier TEXTURES_GLISTER_OVERLAY = Identifier.fromNamespaceAndPath(MelonMod.MODID, "textures/entity/glistering_melon_golem_overlay.png");
 	private final ItemModelResolver itemModelResolver;
 	private final Type type;
 

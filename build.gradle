@@ -1,5 +1,6 @@
 buildscript {
 	repositories {
+		mavenLocal()
 		maven {
 			name 'Beanification'
 			url 'https://maven.tamaized.com/releases/'
@@ -31,6 +32,8 @@ shadowJar {
 	archiveClassifier.set('')
 	configurations = [project.configurations.shade]
 	relocate 'tamaized.beanification', 'tamaized.melongolem.beanification'
+	relocate 'tamaized.datagenutil', 'tamaized.melongolem.datagenutil'
+	relocate 'tamaized.pkginfoutil', 'tamaized.melongolem.pkginfoutil'
 	relocate 'tamaized.regutil', 'tamaized.melongolem.regutil'
 }
 
@@ -145,16 +148,8 @@ neoForge {
 			programArgument '--nogui'
 		}
 
-		clientData {
+		data {
 			clientData()
-			gameDirectory = project.file('run-data')
-			programArguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
-			sourceSet = this.sourceSets.data
-			loadedMods = [dataMod]
-		}
-
-		serverData {
-			serverData()
 			gameDirectory = project.file('run-data')
 			programArguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
 			sourceSet = this.sourceSets.data
@@ -164,8 +159,9 @@ neoForge {
 }
 
 repositories {
+	mavenLocal()
 	maven {
-		name 'Tama\'s Maven' // Beanification, RegUtil
+		name 'Tama\'s Maven'
 		url 'https://maven.tamaized.com/releases/'
 	}
 	maven {
@@ -182,6 +178,14 @@ dependencies {
 	shade beanification
 	testImplementation "${beanification}:tests"
 	testCompileOnly "${beanification}:test-sources"
+
+	def dataGenUtil = "tamaized:datagenutil:${project.datagenutil_version}"
+	implementation dataGenUtil
+	shade dataGenUtil
+
+	def pkgInfoUtil = "tamaized:pkginfoutil:${project.pkginfoutil_version}"
+	implementation pkgInfoUtil
+	shade pkgInfoUtil
 
 	def reg = "tamaized:regutil:26.1-snapshot-1-${project.regutil_version}"
 	implementation reg

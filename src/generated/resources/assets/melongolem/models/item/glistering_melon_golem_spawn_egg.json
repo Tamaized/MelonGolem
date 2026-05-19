@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "melongolem:item/glistering_melon_golem_spawn_egg"
+  }
+}
