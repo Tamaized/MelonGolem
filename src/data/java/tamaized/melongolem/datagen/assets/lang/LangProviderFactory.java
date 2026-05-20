@@ -11,9 +11,8 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
+import tamaized.datagenutil.assets.bakedmodel.BlockModelProviderFactory;
 import tamaized.melongolem.MelonMod;
-import tamaized.melongolem.datagen.assets.bakedmodel.BlockModelProviderFactoryWrapper;
-import tamaized.melongolem.registry.ModBlocks;
 import tamaized.melongolem.registry.ModEntities;
 import tamaized.melongolem.registry.ModItems;
 
@@ -29,7 +28,7 @@ public class LangProviderFactory {
 	private ModItems items;
 
 	@Autowired
-	private BlockModelProviderFactoryWrapper blocks;
+	private BlockModelProviderFactory blocks;
 
 	public LanguageProvider make(GatherDataEvent event) {
 		return new LanguageProvider(
@@ -48,7 +47,7 @@ public class LangProviderFactory {
 
 				addItem(items.MELON_STICK, "Melon on a Stick");
 
-				blocks.lang(this);
+				blocks.addLangEntries(this);
 
 				addCommonConfig("health", "Melon Golem Base Health");
 				addCommonConfig("glister_damage_amp", "Glistering Melon Slice Projectile Damage Multiplier");
