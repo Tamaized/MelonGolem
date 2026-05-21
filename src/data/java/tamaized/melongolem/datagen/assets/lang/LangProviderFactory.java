@@ -1,22 +1,17 @@
 package tamaized.melongolem.datagen.assets.lang;
 
 import net.minecraft.locale.Language;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.damagesource.DamageType;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
-import tamaized.datagenutil.assets.bakedmodel.BlockModelProviderFactory;
+import tamaized.beanification.Directory;
+import tamaized.datagenutil.assets.lang.ExtendedLangProvider;
+import tamaized.datagenutil.assets.lang.LangProvider;
 import tamaized.melongolem.MelonMod;
 import tamaized.melongolem.registry.ModEntities;
-import tamaized.melongolem.registry.ModItems;
 
-import java.util.function.Supplier;
+import java.util.List;
 
 @Component
 public class LangProviderFactory {
@@ -24,30 +19,24 @@ public class LangProviderFactory {
 	@Autowired
 	private ModEntities entities;
 
-	@Autowired
-	private ModItems items;
-
-	@Autowired
-	private BlockModelProviderFactory blocks;
+	@Directory(value = LangProvider.class)
+	private List<LangProvider> langProviders;
 
 	public LanguageProvider make(GatherDataEvent event) {
-		return new LanguageProvider(
+		return new ExtendedLangProvider(
 			event.getGenerator().getPackOutput(),
 			MelonMod.MODID,
-			Language.DEFAULT
+			Language.DEFAULT,
+			langProviders
 		) {
 			@Override
-			protected void addTranslations() {
+			protected void addAdditionalTranslations() {
 				addCreativeTab("Melon Golem");
 
 				addEntityTypeWithSpawnEgg(entities.MELON_GOLEM, entities.SPAWN_EGG_MELON_GOLEM, "Melon Golem");
 				addEntityType(entities.MELON_SLICE, "Melon Slice");
 				addEntityType(entities.TINY_MELON_GOLEM, "Tiny Melon Golem");
 				addEntityTypeWithSpawnEgg(entities.GLISTERING_MELON_GOLEM, entities.SPAWN_EGG_GLISTERING_MELON_GOLEM, "Glistering Melon Golem");
-
-				addItem(items.MELON_STICK, "Melon on a Stick");
-
-				blocks.addLangEntries(this);
 
 				addCommonConfig("health", "Melon Golem Base Health");
 				addCommonConfig("glister_damage_amp", "Glistering Melon Slice Projectile Damage Multiplier");
@@ -63,39 +52,6 @@ public class LangProviderFactory {
 				addConfiguration("donatorSettings", "Donor Settings");
 				addClientConfig("donatorSettings.color", "Color");
 				addClientConfig("donatorSettings.enable", "Enabled");
-			}
-
-			private void addCreativeTab(String translation) {
-				add(MelonMod.MODID + ".item_group", translation);
-			}
-
-			private void addEntityTypeWithSpawnEgg(Supplier<? extends EntityType<? extends Entity>> entity, Supplier<Item> spawnEgg, String translation) {
-				addEntityType(entity, translation);
-				addItem(spawnEgg, translation.concat(" Spawn Egg"));
-			}
-
-			private void addDeathMessage(ResourceKey<DamageType> key, String translation) {
-				add(key.identifier().toLanguageKey("death.attack"), translation);
-			}
-
-			private void addSubtitle(SoundEvent key, String translation) {
-				add(key.location().toLanguageKey("subtitles"), translation);
-			}
-
-			private void addConfiguration(String configuration, String translation) {
-				add(MelonMod.MODID + ".configuration." + configuration, translation);
-			}
-
-			private void addConfig(String config, String translation) {
-				add(MelonMod.MODID + ".config." + config, translation);
-			}
-
-			private void addCommonConfig(String config, String translation) {
-				addConfig("common." + config, translation);
-			}
-
-			private void addClientConfig(String config, String translation) {
-				addConfig("client." + config, translation);
 			}
 		};
 	}

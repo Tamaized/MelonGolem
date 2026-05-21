@@ -4,32 +4,34 @@ import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
-import tamaized.melongolem.datagen.util.RecipeProviderUtil;
+import tamaized.datagenutil.data.recipe.RecipeHolder;
+import tamaized.datagenutil.data.recipe.RecipeProviderUtil;
 import tamaized.melongolem.registry.ModBlocks;
 
 @Component
-public class GlisteringMelonBlockRecipeFactory {
-
-	@Autowired
-	private RecipeProviderUtil recipeProviderUtil;
+public class GlisteringMelonBlockRecipeFactory extends RecipeHolder {
 
 	@Autowired
 	private ModBlocks blocks;
 
-	public void make(HolderLookup.Provider recipeOutput) {
-		HolderGetter<Item> registry = recipeOutput.lookupOrThrow(Registries.ITEM);
+	@Override
+	public void make(HolderLookup.Provider provider, RecipeOutput output) {
+		HolderGetter<Item> registry = provider.lookupOrThrow(Registries.ITEM);
 		ShapedRecipeBuilder.shaped(registry, RecipeCategory.BUILDING_BLOCKS, blocks.GLISTERING_MELON.get())
 			.pattern("MMM")
 			.pattern("MMM")
 			.pattern("MMM")
 			.define('M', Items.GLISTERING_MELON_SLICE)
-			.unlockedBy("has_M", recipeProviderUtil.has(registry, Items.GLISTERING_MELON_SLICE))
-			.showNotification(true);
+			.unlockedBy("has_M", RecipeProviderUtil.has(registry, Items.GLISTERING_MELON_SLICE))
+			.showNotification(true)
+			.save(output);
+
 	}
 
 }

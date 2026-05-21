@@ -14,6 +14,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import tamaized.beanification.Component;
 import tamaized.beanification.PostConstruct;
@@ -37,7 +38,7 @@ public class ModEntities {
 		"melon_golem",
 		() -> make(Identifier.fromNamespaceAndPath(MelonMod.MODID, "melon_golem"), EntityMelonGolem::new, MobCategory.CREATURE, 0.7F, 1.9F, 1.7F)
 	);
-	public final Supplier<Item> SPAWN_EGG_MELON_GOLEM = ITEM_REGISTRY.register(
+	public final DeferredHolder<Item, SpawnEggItem> SPAWN_EGG_MELON_GOLEM = ITEM_REGISTRY.register(
 		"melon_golem_spawn_egg",
 		(id) -> new SpawnEggItem(/*0x00FF00, 0x000000, */new Item.Properties()
 			.setId(ResourceKey.create(Registries.ITEM, id))
@@ -49,7 +50,7 @@ public class ModEntities {
 		"glistering_melon_golem",
 		() -> make(Identifier.fromNamespaceAndPath(MelonMod.MODID, "glistering_melon_golem"), EntityGlisteringMelonGolem::new, MobCategory.CREATURE, 0.7F, 1.9F, 1.7F)
 	);
-	public final Supplier<Item> SPAWN_EGG_GLISTERING_MELON_GOLEM = ITEM_REGISTRY.register(
+	public final DeferredHolder<Item, SpawnEggItem> SPAWN_EGG_GLISTERING_MELON_GOLEM = ITEM_REGISTRY.register(
 		"glistering_melon_golem_spawn_egg",
 		(id) -> new SpawnEggItem(/*0xAAFF00, 0xFFCC00, */new Item.Properties()
 			.setId(ResourceKey.create(Registries.ITEM, id))

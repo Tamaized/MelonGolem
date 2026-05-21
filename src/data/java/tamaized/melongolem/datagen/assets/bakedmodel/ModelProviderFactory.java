@@ -6,7 +6,8 @@ import net.minecraft.client.data.models.ModelProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
-import tamaized.datagenutil.assets.bakedmodel.BlockModelProviderFactory;
+import tamaized.datagenutil.assets.bakedmodel.block.BlockModelProviderFactory;
+import tamaized.datagenutil.assets.bakedmodel.item.ItemModelProviderFactory;
 import tamaized.melongolem.MelonMod;
 
 @Component

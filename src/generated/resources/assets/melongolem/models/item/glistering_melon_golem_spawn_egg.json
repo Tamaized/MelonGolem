@@ -1,5 +1,5 @@
 {
-  "parent": "minecraft:item/handheld",
+  "parent": "minecraft:item/generated",
   "textures": {
     "layer0": "melongolem:item/glistering_melon_golem_spawn_egg"
   }

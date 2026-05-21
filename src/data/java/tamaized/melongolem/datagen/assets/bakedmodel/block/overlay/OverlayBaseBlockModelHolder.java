@@ -5,7 +5,7 @@ import net.minecraft.client.data.models.model.TextureSlot;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import tamaized.beanification.Component;
-import tamaized.datagenutil.assets.bakedmodel.BlockModelHolder;
+import tamaized.datagenutil.assets.bakedmodel.block.BlockModelHolder;
 import tamaized.datagenutil.assets.bakedmodel.ExtendedTextureMapping;
 import tamaized.datagenutil.assets.bakedmodel.FurtherExtendedModelTemplateBuilder;
 import tamaized.melongolem.MelonMod;
