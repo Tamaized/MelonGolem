@@ -51,6 +51,7 @@ import net.neoforged.neoforge.common.util.Lazy;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.BeanContext;
 import tamaized.beanification.Configurable;
@@ -466,10 +467,13 @@ public class EntityMelonGolem extends AbstractGolem implements RangedAttackMob, 
 
 					if (cooldown <= 0 && parent.distanceToSqr(mutableBlockPos.getX(), mutableBlockPos.getY(), mutableBlockPos.getZ()) < 4) {
 						boolean flag = handler.getResource(i).getItem() == melonblock.asItem();
-						handler.getResource(i).toStack().shrink(1);
-						parent.playSound(SoundEvents.PLAYER_BURP, 1F, 1F);
-						parent.heal(config.getHeal().map(v -> v.get().floatValue()).orElse(1F) * (flag ? 9 : 1));
-						cooldown = 10 + parent.getRandom().nextInt(40);
+						try (Transaction transaction = Transaction.openRoot()) {
+							handler.extract(i, handler.getResource(i), 1, transaction);
+							parent.playSound(SoundEvents.PLAYER_BURP, 1F, 1F);
+							parent.heal(config.getHeal().map(v -> v.get().floatValue()).orElse(1F) * (flag ? 9 : 1));
+							cooldown = 10 + parent.getRandom().nextInt(40);
+							transaction.commit();
+						}
 					}
 				} else {
 					parent.getNavigation().stop();
