@@ -16,6 +16,6 @@ license="All Rights Reserved"
 [[dependencies.melongolem]]
     modId="neoforge"
     type="required"
-    versionRange="[21,)"
+    versionRange="[26,)"
     ordering="NONE"
     side="BOTH"
