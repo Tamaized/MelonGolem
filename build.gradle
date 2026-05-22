@@ -7,7 +7,7 @@ buildscript {
 		}
 	}
 	dependencies {
-		 classpath "tamaized:beanification:${beanification_version}:gradle"
+		classpath "tamaized:beanification:${beanification_version}:gradle"
 	}
 }
 
@@ -19,16 +19,30 @@ plugins {
 	// Version List: https://projects.neoforged.net/neoforged/ModDevGradle
 	id 'net.neoforged.moddev' version "${mdg_version}"
 	id "com.dorongold.task-tree" version "4.0.0"
-	id 'com.gradleup.shadow' version '9.4.1'
+	id 'com.gradleup.shadow' version "${shadowjar_version}"
 }
 
 apply plugin: 'tamaized.beanification'
+
+repositories {
+	gradlePluginPortal()
+}
+
+dependencies { // Forces intellij to grab sources for the gradle build script
+	compileOnly "com.gradleup.shadow:shadow-gradle-plugin:${shadowjar_version}"
+}
+
+wrapper {
+	gradleVersion = '9.1.0'
+	distributionType = Wrapper.DistributionType.ALL
+}
 
 configurations {
 	shade
 }
 
 shadowJar {
+	mustRunAfter jar
 	archiveClassifier.set('')
 	configurations = [project.configurations.shade]
 	relocate 'tamaized.beanification', 'tamaized.melongolem.beanification'
@@ -191,11 +205,11 @@ dependencies {
 	implementation reg
 	shade reg
 
-	testImplementation group: 'net.neoforged', name: 'testframework', version: project.neoforge_version
-	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '6.0.1'
-	testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '6.0.1'
-	testRuntimeOnly group: 'org.junit.platform', name: 'junit-platform-launcher', version: '6.0.1'
-	testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '5.21.0'
+	testImplementation "net.neoforged:testframework:${project.neoforge_version}"
+	testImplementation "org.junit.jupiter:junit-jupiter:6.0.1"
+	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:6.0.1"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher:6.0.1"
+	testImplementation "org.mockito:mockito-junit-jupiter:5.21.0"
 }
 
 test {
@@ -212,13 +226,16 @@ test {
 	}
 }
 
-sourceSets.main.resources { srcDir 'src/generated/resources' }
+sourceSets.main.resources {
+	srcDir 'src/generated/resources'
+	exclude '.cache'
+}
 
 processResources {
 	def ver = project.version
 	filesMatching("META-INF/neoforge.mods.toml") {
 		expand([
-			'file'           : [
+			'file': [
 				'jarVersion': ver
 			]
 		])
