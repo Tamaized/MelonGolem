@@ -263,7 +263,7 @@ publishing {
 	publications {
 		create('mavenJava', MavenPublication) {
 			afterEvaluate {
-				artifact this.project.jar
+				artifact this.project.shadowJar
 				artifact this.project.sourceJar
 				artifact this.project.dataJar
 				artifact this.project.dataSourceJar
