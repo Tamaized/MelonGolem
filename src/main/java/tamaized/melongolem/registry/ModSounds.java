@@ -12,11 +12,8 @@ import tamaized.regutil.RegUtil;
 @Component
 public class ModSounds {
 
-	private final DeferredRegister<SoundEvent> REGISTRY = RegUtil.create(Registries.SOUND_EVENT);
-
-	public final DeferredHolder<SoundEvent, SoundEvent> DADDY = REGISTRY.register(
-		"melon_me_daddy",
-		() -> SoundEvent.createVariableRangeEvent(Identifier.fromNamespaceAndPath(MelonMod.MODID, "melon_me_daddy"))
+	public final DeferredHolder<SoundEvent, SoundEvent> DADDY = RegUtil.register(Registries.SOUND_EVENT, "melon_me_daddy",
+		SoundEvent::createVariableRangeEvent
 	);
 
 }

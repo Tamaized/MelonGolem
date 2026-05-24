@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.relocation.SimpleRelocator
+
 buildscript {
 	repositories {
 		mavenLocal()
@@ -45,10 +47,9 @@ shadowJar {
 	mustRunAfter jar
 	archiveClassifier.set('')
 	configurations = [project.configurations.shade]
-	relocate 'tamaized.beanification', 'tamaized.melongolem.beanification'
-	relocate 'tamaized.datagenutil', 'tamaized.melongolem.datagenutil'
-	relocate 'tamaized.pkginfoutil', 'tamaized.melongolem.pkginfoutil'
-	relocate 'tamaized.regutil', 'tamaized.melongolem.regutil'
+	relocate(new SimpleRelocator('tamaized', 'tamaized.melongolem')) {
+		exclude 'tamaized.melongolem.**'
+	}
 }
 
 def secrets = new Properties()
@@ -187,17 +188,13 @@ repositories {
 dependencies {
 	//runtimeOnly "mezz.jei:jei-${project.base_minecraft_version}-neoforge:${project.jei_version}"
 
-	def dataGenUtil = "tamaized:datagenutil:${project.datagenutil_version}"
-	implementation dataGenUtil
-	shade dataGenUtil
+	def regUtil = "tamaized:regutil:${project.regutil_version}"
+	implementation regUtil
+	shade regUtil
 
 	def beanification = "tamaized:beanification:"
 	testImplementation "${beanification}:tests"
 	testCompileOnly "${beanification}:test-sources"
-
-	def reg = "tamaized:regutil:26.1-snapshot-1-${project.regutil_version}"
-	implementation reg
-	shade reg
 
 	testImplementation "net.neoforged:testframework:${project.neoforge_version}"
 	testImplementation "org.junit.jupiter:junit-jupiter:6.0.1"
@@ -264,6 +261,28 @@ publishing {
 			}
 			groupId 'tamaized'
 			artifactId this.project.mod_id
+
+			def depsProvider = this.project.provider {
+				[
+					regutil_version: this.project.regutil_version
+				]
+			}
+
+			pom.withXml {
+				def dependenciesNode = asNode().appendNode('dependencies')
+
+				def addDep = { String group, String name, String version ->
+					def depNode = dependenciesNode.appendNode('dependency')
+					depNode.appendNode('groupId', group)
+					depNode.appendNode('artifactId', name)
+					depNode.appendNode('version', version)
+					depNode.appendNode('scope', 'compile')
+				}
+
+				def deps = depsProvider.get()
+
+				addDep('tamaized', 'regutil', deps.regutil_version)
+			}
 		}
 	}
 	repositories {

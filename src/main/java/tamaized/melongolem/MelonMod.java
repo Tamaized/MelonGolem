@@ -15,10 +15,10 @@ public class MelonMod {
 	public static final Logger LOGGER = LogManager.getLogger(MODID);
 
 	static {
-		BeanContext.configure().scanSettings()
-			.addAdditionalComponentScanModuleName(DataGenUtilConstants.MODULE_NAME);
+		BeanContext.configure()
+			.scanSettings().addAdditionalComponentScanModuleName(RegUtil.MODULE_NAME)
+			.scanSettings().addAdditionalComponentScanModuleName(DataGenUtilConstants.MODULE_NAME);
 		BeanContext.init(MODID);
-		RegUtil.setup();
 	}
 
 }

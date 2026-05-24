@@ -20,7 +20,6 @@ import tamaized.melongolem.config.common.CommonConfig;
 import tamaized.melongolem.registry.ModBlocks;
 
 import java.util.Set;
-import java.util.stream.StreamSupport;
 
 @Component
 public class ModEventListener {

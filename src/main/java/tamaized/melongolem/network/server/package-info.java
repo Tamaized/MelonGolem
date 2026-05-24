@@ -1,7 +1,11 @@
-@MethodsReturnNonnullByDefault @ParametersAreNonnullByDefault @TypeUseAreNonnullByDefault
+@FieldsAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+@TypeUseAreNonnullByDefault
 package tamaized.melongolem.network.server;
 
+import com.mojang.logging.annotations.FieldsAreNonnullByDefault;
 import com.mojang.logging.annotations.MethodsReturnNonnullByDefault;
-import tamaized.regutil.TypeUseAreNonnullByDefault;
+import tamaized.pkginfoutil.TypeUseAreNonnullByDefault;
 
 import javax.annotation.ParametersAreNonnullByDefault;
