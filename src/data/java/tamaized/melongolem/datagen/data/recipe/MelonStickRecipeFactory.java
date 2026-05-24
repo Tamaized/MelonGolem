@@ -18,6 +18,9 @@ import tamaized.melongolem.registry.ModItems;
 public class MelonStickRecipeFactory extends RecipeHolder {
 
 	@Autowired
+	private RecipeProviderUtil recipeProviderUtil;
+
+	@Autowired
 	private ModItems items;
 
 	@Override
@@ -28,8 +31,8 @@ public class MelonStickRecipeFactory extends RecipeHolder {
 			.pattern("S ")
 			.define('M', Items.GLISTERING_MELON_SLICE)
 			.define('S', Items.STICK)
-			.unlockedBy("has_M", RecipeProviderUtil.has(registry, Items.GLISTERING_MELON_SLICE))
-			.unlockedBy("has_S", RecipeProviderUtil.has(registry, Items.STICK))
+			.unlockedBy("has_M", recipeProviderUtil.has(registry, Items.GLISTERING_MELON_SLICE))
+			.unlockedBy("has_S", recipeProviderUtil.has(registry, Items.STICK))
 			.showNotification(true)
 			.save(output);
 	}

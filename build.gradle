@@ -7,7 +7,7 @@ buildscript {
 		}
 	}
 	dependencies {
-		classpath "tamaized:beanification:${beanification_version}:gradle"
+		classpath "tamaized:beanification:${beanification_gradle_plugin_version}:gradle"
 	}
 }
 
@@ -187,19 +187,13 @@ repositories {
 dependencies {
 	//runtimeOnly "mezz.jei:jei-${project.base_minecraft_version}-neoforge:${project.jei_version}"
 
-	def beanification = "tamaized:beanification:${project.beanification_version}"
-	implementation beanification
-	shade beanification
-	testImplementation "${beanification}:tests"
-	testCompileOnly "${beanification}:test-sources"
-
 	def dataGenUtil = "tamaized:datagenutil:${project.datagenutil_version}"
 	implementation dataGenUtil
 	shade dataGenUtil
 
-	def pkgInfoUtil = "tamaized:pkginfoutil:${project.pkginfoutil_version}"
-	implementation pkgInfoUtil
-	shade pkgInfoUtil
+	def beanification = "tamaized:beanification:"
+	testImplementation "${beanification}:tests"
+	testCompileOnly "${beanification}:test-sources"
 
 	def reg = "tamaized:regutil:26.1-snapshot-1-${project.regutil_version}"
 	implementation reg

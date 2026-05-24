@@ -18,6 +18,9 @@ import tamaized.melongolem.registry.ModBlocks;
 public class GlisteringMelonBlockRecipeFactory extends RecipeHolder {
 
 	@Autowired
+	private RecipeProviderUtil recipeProviderUtil;
+
+	@Autowired
 	private ModBlocks blocks;
 
 	@Override
@@ -28,7 +31,7 @@ public class GlisteringMelonBlockRecipeFactory extends RecipeHolder {
 			.pattern("MMM")
 			.pattern("MMM")
 			.define('M', Items.GLISTERING_MELON_SLICE)
-			.unlockedBy("has_M", RecipeProviderUtil.has(registry, Items.GLISTERING_MELON_SLICE))
+			.unlockedBy("has_M", recipeProviderUtil.has(registry, Items.GLISTERING_MELON_SLICE))
 			.showNotification(true)
 			.save(output);
 
